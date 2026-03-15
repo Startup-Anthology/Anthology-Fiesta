@@ -262,12 +262,13 @@ Tables: leads, contacts, activities, email_templates, drip_sequences, drip_seque
 
 ## Design
 
-- **Colors**: Black primary (#000000), Gold accent (#BB935B), White background (#FFFFFF), textSecondary (#666666), textTertiary (#767676) — all WCAG AA compliant
-- **Typography**: Multi-font brand system — Lato (titles), League Spartan (headings/buttons), Montserrat (subtitles/captions), Space Grotesk (body text)
+- **Colors**: Black primary (#000000), Gold accent (#BB935B), White background (#FFFFFF), textSecondary (#666666), textTertiary (#8E8E8E, WCAG AA on dark) — all WCAG AA compliant
+- **Typography**: SpaceGrotesk only — Regular/Medium/SemiBold/Bold weights (`@expo-google-fonts/space-grotesk`). Lato, Montserrat, League Spartan fully removed.
 - **Brand Voice**: Founder-to-founder, direct, no fluff. Earned empathy, clarity over polish, functional optimism. NOT corporate, NOT startup-bro hype.
 - **Navigation**: NativeTabs with liquid glass on iOS 26+, classic blur tabs fallback. 5-tab limit enforced.
 - **Icons**: SF Symbols on iOS, Feather icons on web/Android
 - **Tab bar**: Dashboard, Funnel, Contacts, Calendar, Files (+ hidden: AI, Comms)
+- **Skeleton loaders**: `components/Skeleton.tsx` — animated pulse placeholder; applied to Dashboard, Contacts, Funnel screens while data loads
 
 ## Expo Go
 
@@ -277,6 +278,8 @@ The app is optimized for testing via Expo Go (no TestFlight / Apple Dev Program 
 - Hot reload enabled (no `CI=1` in dev script)
 - Dev server exposes Metro at `exp://` URL for QR code scanning
 - Static build + landing page system (`scripts/build.js` + `server/serve.js`) for production Expo Go distribution
+- **Web PWA**: `expo export --platform web --output-dir dist/web` added to build script; `server/serve.js` auto-detects `dist/web/index.html` and switches to SPA mode with cache headers (`_expo/**` → 1-year immutable, `index.html` → no-cache)
+- `app.json` web section: `bundler: "metro"`, name/shortName/description/themeColor/backgroundColor metadata for PWA manifest
 
 ## API Endpoints
 
