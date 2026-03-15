@@ -1,0 +1,1676 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Anthology CRM API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: leads
+  - name: contacts
+  - name: activities
+  - name: templates
+  - name: sequences
+  - name: broadcasts
+  - name: triggers
+  - name: settings
+  - name: dashboard
+  - name: email
+  - name: calendar
+  - name: Auth
+    description: Browser and mobile authentication endpoints.
+  - name: webhooks
+    description: Inbound webhook endpoints for external integrations.
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [dashboard]
+      summary: Get dashboard stats
+      responses:
+        "200":
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardData"
+
+  /leads:
+    get:
+      operationId: getLeads
+      tags: [leads]
+      summary: List all leads
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: isBeta
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: List of leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lead"
+    post:
+      operationId: createLead
+      tags: [leads]
+      summary: Create a lead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLead"
+      responses:
+        "201":
+          description: Created lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /leads/{id}:
+    get:
+      operationId: getLead
+      tags: [leads]
+      summary: Get a lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lead detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+    put:
+      operationId: updateLead
+      tags: [leads]
+      summary: Update a lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLead"
+      responses:
+        "200":
+          description: Updated lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+    delete:
+      operationId: deleteLead
+      tags: [leads]
+      summary: Delete a lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /leads/{id}/status:
+    patch:
+      operationId: updateLeadStatus
+      tags: [leads]
+      summary: Update lead status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+      responses:
+        "200":
+          description: Updated lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lead"
+
+  /contacts:
+    get:
+      operationId: getContacts
+      tags: [contacts]
+      summary: List all contacts
+      parameters:
+        - name: relationshipType
+          in: query
+          schema:
+            type: string
+        - name: priority
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of contacts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contact"
+    post:
+      operationId: createContact
+      tags: [contacts]
+      summary: Create a contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContact"
+      responses:
+        "201":
+          description: Created contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+
+  /contacts/{id}:
+    get:
+      operationId: getContact
+      tags: [contacts]
+      summary: Get a contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Contact detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+    put:
+      operationId: updateContact
+      tags: [contacts]
+      summary: Update a contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateContact"
+      responses:
+        "200":
+          description: Updated contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+    delete:
+      operationId: deleteContact
+      tags: [contacts]
+      summary: Delete a contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /contacts/{id}/mark-contacted:
+    post:
+      operationId: markContacted
+      tags: [contacts]
+      summary: Mark contact as contacted
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated contact
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contact"
+
+  /contacts/follow-ups:
+    get:
+      operationId: getFollowUps
+      tags: [contacts]
+      summary: Get follow-up queue
+      responses:
+        "200":
+          description: Follow-ups due
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contact"
+
+  /activities:
+    get:
+      operationId: getActivities
+      tags: [activities]
+      summary: List activities
+      parameters:
+        - name: leadId
+          in: query
+          schema:
+            type: integer
+        - name: contactId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Activities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Activity"
+    post:
+      operationId: createActivity
+      tags: [activities]
+      summary: Log an activity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateActivity"
+      responses:
+        "201":
+          description: Created activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Activity"
+
+  /templates:
+    get:
+      operationId: getTemplates
+      tags: [templates]
+      summary: List email templates
+      parameters:
+        - name: audience
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EmailTemplate"
+    post:
+      operationId: createTemplate
+      tags: [templates]
+      summary: Create a template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmailTemplate"
+      responses:
+        "201":
+          description: Created template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailTemplate"
+
+  /templates/{id}:
+    get:
+      operationId: getTemplate
+      tags: [templates]
+      summary: Get a template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Template detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailTemplate"
+    put:
+      operationId: updateTemplate
+      tags: [templates]
+      summary: Update a template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEmailTemplate"
+      responses:
+        "200":
+          description: Updated template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailTemplate"
+    delete:
+      operationId: deleteTemplate
+      tags: [templates]
+      summary: Delete a template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /sequences:
+    get:
+      operationId: getSequences
+      tags: [sequences]
+      summary: List drip sequences
+      responses:
+        "200":
+          description: Sequences
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DripSequence"
+    post:
+      operationId: createSequence
+      tags: [sequences]
+      summary: Create a sequence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDripSequence"
+      responses:
+        "201":
+          description: Created sequence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DripSequence"
+
+  /sequences/{id}:
+    get:
+      operationId: getSequence
+      tags: [sequences]
+      summary: Get a sequence with steps
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sequence detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DripSequenceDetail"
+    put:
+      operationId: updateSequence
+      tags: [sequences]
+      summary: Update a sequence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDripSequence"
+      responses:
+        "200":
+          description: Updated sequence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DripSequence"
+    delete:
+      operationId: deleteSequence
+      tags: [sequences]
+      summary: Delete a sequence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /sequences/{id}/steps:
+    post:
+      operationId: addSequenceStep
+      tags: [sequences]
+      summary: Add a step to a sequence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDripStep"
+      responses:
+        "201":
+          description: Created step
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DripStep"
+
+  /sequences/{id}/enroll:
+    post:
+      operationId: enrollInSequence
+      tags: [sequences]
+      summary: Enroll a lead or contact in a sequence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                leadId:
+                  type: integer
+                contactId:
+                  type: integer
+      responses:
+        "201":
+          description: Enrolled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DripEnrollment"
+
+  /broadcasts:
+    get:
+      operationId: getBroadcasts
+      tags: [broadcasts]
+      summary: List broadcasts
+      responses:
+        "200":
+          description: Broadcasts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Broadcast"
+    post:
+      operationId: createBroadcast
+      tags: [broadcasts]
+      summary: Create and send a broadcast
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBroadcast"
+      responses:
+        "201":
+          description: Broadcast sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Broadcast"
+
+  /broadcasts/{id}/preview:
+    get:
+      operationId: previewBroadcast
+      tags: [broadcasts]
+      summary: Preview broadcast recipients
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Preview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recipients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        email:
+                          type: string
+
+  /broadcast-preview:
+    get:
+      operationId: previewBroadcastRecipients
+      tags: [broadcasts]
+      summary: Preview recipients for a segment
+      parameters:
+        - name: segmentType
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: segmentValue
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recipients
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recipients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        email:
+                          type: string
+                  count:
+                    type: integer
+
+  /triggers:
+    get:
+      operationId: getTriggerRules
+      tags: [triggers]
+      summary: List trigger rules
+      responses:
+        "200":
+          description: Trigger rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TriggerRule"
+    post:
+      operationId: createTriggerRule
+      tags: [triggers]
+      summary: Create a trigger rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTriggerRule"
+      responses:
+        "201":
+          description: Created rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TriggerRule"
+
+  /triggers/{id}:
+    delete:
+      operationId: deleteTriggerRule
+      tags: [triggers]
+      summary: Delete a trigger rule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get all settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        "200":
+          description: Updated settings
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+
+  /email/send:
+    post:
+      operationId: sendEmail
+      tags: [email]
+      summary: Send an email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendEmail"
+      responses:
+        "200":
+          description: Email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  messageId:
+                    type: string
+
+  /calendar/events:
+    get:
+      operationId: getCalendarEvents
+      tags: [calendar]
+      summary: List calendar events
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: leadId
+          in: query
+          schema:
+            type: integer
+        - name: contactId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Calendar events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CalendarEvent"
+    post:
+      operationId: createCalendarEvent
+      tags: [calendar]
+      summary: Create a calendar event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCalendarEvent"
+      responses:
+        "201":
+          description: Created calendar event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarEvent"
+
+  /calendar/events/{id}:
+    delete:
+      operationId: deleteCalendarEvent
+      tags: [calendar]
+      summary: Delete a calendar event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /auth/user:
+    get:
+      tags: [Auth]
+      operationId: getCurrentAuthUser
+      summary: Get the currently authenticated user
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '200':
+          description: Auth status resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserEnvelope'
+  /auth/login:
+    post:
+      tags: [Auth]
+      operationId: emailLogin
+      summary: Log in with an email address (creates user if needed)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailLoginRequest'
+      responses:
+        '200':
+          description: Session created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailLoginSuccess'
+        '400':
+          description: Missing or invalid email.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Login failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /mobile-auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logoutMobileSession
+      summary: Delete a mobile session token
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+      responses:
+        '200':
+          description: Logout processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutSuccess'
+
+  /webhooks/horizon/lead:
+    post:
+      operationId: horizonLeadWebhook
+      tags: [webhooks]
+      summary: Receive a lead from Horizon
+      description: Creates or updates a lead from Horizon. Secured with x-api-key header.
+      parameters:
+        - name: x-api-key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HorizonLeadPayload"
+      responses:
+        "201":
+          description: Lead created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HorizonLeadResponse"
+        "200":
+          description: Lead updated (duplicate email)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HorizonLeadResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: Webhook not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+  /webhooks/horizon/contact:
+    post:
+      operationId: horizonContactWebhook
+      tags: [webhooks]
+      summary: Receive a contact form submission from Horizon
+      description: Creates or updates a contact from Horizon. Secured with x-api-key header.
+      parameters:
+        - name: x-api-key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HorizonContactPayload"
+      responses:
+        "201":
+          description: Contact created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HorizonContactResponse"
+        "200":
+          description: Contact updated (duplicate email)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HorizonContactResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: Webhook not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+
+components:
+  parameters:
+    AuthorizationSessionHeader:
+      name: Authorization
+      in: header
+      required: false
+      description: Opaque session token — `Bearer <sid>`.
+      schema:
+        type: string
+    SessionCookie:
+      name: sid
+      in: cookie
+      required: false
+      description: Browser session cookie.
+      schema:
+        type: string
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    DashboardData:
+      type: object
+      required:
+        - totalLeads
+        - leadsThisWeek
+        - betaSlotsFilled
+        - betaSlotsTotal
+        - followUpsDueToday
+        - totalContacts
+        - emailsSentThisWeek
+        - followUps
+      properties:
+        totalLeads:
+          type: integer
+        leadsThisWeek:
+          type: integer
+        betaSlotsFilled:
+          type: integer
+        betaSlotsTotal:
+          type: integer
+        followUpsDueToday:
+          type: integer
+        totalContacts:
+          type: integer
+        emailsSentThisWeek:
+          type: integer
+        followUps:
+          type: array
+          items:
+            $ref: "#/components/schemas/Contact"
+
+    Lead:
+      type: object
+      required: [id, name, email, source, status, isBeta, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        isBeta:
+          type: boolean
+        notionPageId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateLead:
+      type: object
+      required: [name, email, source]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        source:
+          type: string
+        notes:
+          type: string
+        isBeta:
+          type: boolean
+        status:
+          type: string
+
+    UpdateLead:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+        notes:
+          type: string
+        isBeta:
+          type: boolean
+
+    Contact:
+      type: object
+      required: [id, name, relationshipType, priority, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        company:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        relationshipType:
+          type: string
+        priority:
+          type: string
+        linkedinUrl:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        lastContactedAt:
+          type: string
+          format: date-time
+          nullable: true
+        nextFollowUpAt:
+          type: string
+          format: date-time
+          nullable: true
+        notionPageId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateContact:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+        title:
+          type: string
+        relationshipType:
+          type: string
+        priority:
+          type: string
+        linkedinUrl:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        notes:
+          type: string
+        nextFollowUpAt:
+          type: string
+          format: date-time
+
+    UpdateContact:
+      type: object
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+        title:
+          type: string
+        relationshipType:
+          type: string
+        priority:
+          type: string
+        linkedinUrl:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        notes:
+          type: string
+        nextFollowUpAt:
+          type: string
+          format: date-time
+
+    Activity:
+      type: object
+      required: [id, type, createdAt]
+      properties:
+        id:
+          type: integer
+        leadId:
+          type: integer
+          nullable: true
+        contactId:
+          type: integer
+          nullable: true
+        type:
+          type: string
+        direction:
+          type: string
+          nullable: true
+        subject:
+          type: string
+          nullable: true
+        body:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        notionPageId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateActivity:
+      type: object
+      required: [type]
+      properties:
+        leadId:
+          type: integer
+        contactId:
+          type: integer
+        type:
+          type: string
+        direction:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+        note:
+          type: string
+
+    EmailTemplate:
+      type: object
+      required: [id, name, audience, subject, body, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        audience:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateEmailTemplate:
+      type: object
+      required: [name, audience, subject, body]
+      properties:
+        name:
+          type: string
+        audience:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+
+    DripSequence:
+      type: object
+      required: [id, name, targetAudience, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        targetAudience:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DripSequenceDetail:
+      type: object
+      required: [id, name, targetAudience, steps, enrollments, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        targetAudience:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/DripStep"
+        enrollments:
+          type: array
+          items:
+            $ref: "#/components/schemas/DripEnrollment"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateDripSequence:
+      type: object
+      required: [name, targetAudience]
+      properties:
+        name:
+          type: string
+        targetAudience:
+          type: string
+
+    DripStep:
+      type: object
+      required: [id, sequenceId, stepOrder, delayDays, templateId, createdAt]
+      properties:
+        id:
+          type: integer
+        sequenceId:
+          type: integer
+        stepOrder:
+          type: integer
+        delayDays:
+          type: integer
+        templateId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateDripStep:
+      type: object
+      required: [stepOrder, delayDays, templateId]
+      properties:
+        stepOrder:
+          type: integer
+        delayDays:
+          type: integer
+        templateId:
+          type: integer
+
+    DripEnrollment:
+      type: object
+      required: [id, sequenceId, currentStep, status, enrolledAt]
+      properties:
+        id:
+          type: integer
+        sequenceId:
+          type: integer
+        leadId:
+          type: integer
+          nullable: true
+        contactId:
+          type: integer
+          nullable: true
+        currentStep:
+          type: integer
+        status:
+          type: string
+        enrolledAt:
+          type: string
+          format: date-time
+        nextSendAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Broadcast:
+      type: object
+      required: [id, subject, segmentType, segmentValue, recipientCount, status, createdAt]
+      properties:
+        id:
+          type: integer
+        subject:
+          type: string
+        templateId:
+          type: integer
+          nullable: true
+        segmentType:
+          type: string
+        segmentValue:
+          type: string
+        recipientCount:
+          type: integer
+        status:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateBroadcast:
+      type: object
+      required: [subject, segmentType, segmentValue, templateId]
+      properties:
+        subject:
+          type: string
+        segmentType:
+          type: string
+        segmentValue:
+          type: string
+        templateId:
+          type: integer
+
+    TriggerRule:
+      type: object
+      required: [id, triggerStatus, actionType, createdAt]
+      properties:
+        id:
+          type: integer
+        triggerStatus:
+          type: string
+        actionType:
+          type: string
+        sequenceId:
+          type: integer
+          nullable: true
+        followUpDays:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateTriggerRule:
+      type: object
+      required: [triggerStatus, actionType]
+      properties:
+        triggerStatus:
+          type: string
+        actionType:
+          type: string
+        sequenceId:
+          type: integer
+        followUpDays:
+          type: integer
+
+    SendEmail:
+      type: object
+      required: [to, subject, body]
+      properties:
+        to:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+        leadId:
+          type: integer
+        contactId:
+          type: integer
+        addToCalendar:
+          type: boolean
+
+    CalendarEvent:
+      type: object
+      required: [id, title, eventType, startTime, endTime, createdAt]
+      properties:
+        id:
+          type: integer
+        googleEventId:
+          type: string
+          nullable: true
+        leadId:
+          type: integer
+          nullable: true
+        contactId:
+          type: integer
+          nullable: true
+        eventType:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        leadName:
+          type: string
+          nullable: true
+        contactName:
+          type: string
+          nullable: true
+
+    CreateCalendarEvent:
+      type: object
+      required: [title, startTime, endTime]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        leadId:
+          type: integer
+        contactId:
+          type: integer
+        eventType:
+          type: string
+
+    AuthUser:
+      type: object
+      required: [id, email, firstName, lastName, profileImageUrl]
+      properties:
+        id:
+          type: string
+        email:
+          type: [string, 'null']
+          format: email
+        firstName:
+          type: [string, 'null']
+        lastName:
+          type: [string, 'null']
+        profileImageUrl:
+          type: [string, 'null']
+    AuthUserEnvelope:
+      type: object
+      required: [user]
+      properties:
+        user:
+          oneOf:
+            - $ref: '#/components/schemas/AuthUser'
+            - type: 'null'
+    EmailLoginRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+    EmailLoginSuccess:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+    LogoutSuccess:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          const: true
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    HorizonLeadPayload:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        status:
+          type: string
+        notes:
+          type: [string, "null"]
+        linkedinUrl:
+          type: [string, "null"]
+        profilePictureUrl:
+          type: [string, "null"]
+        isBeta:
+          type: boolean
+    HorizonLeadResponse:
+      type: object
+      required: [action, lead]
+      properties:
+        action:
+          type: string
+          enum: [created, updated]
+        lead:
+          type: object
+    HorizonContactPayload:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        email:
+          type: string
+          format: email
+        phone:
+          type: [string, "null"]
+        company:
+          type: [string, "null"]
+        message:
+          type: [string, "null"]
+        notes:
+          type: [string, "null"]
+    HorizonContactResponse:
+      type: object
+      required: [action, contact]
+      properties:
+        action:
+          type: string
+          enum: [created, updated]
+        contact:
+          type: object

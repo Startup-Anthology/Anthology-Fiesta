@@ -1,0 +1,29 @@
+Based on the live site (which redirects to Horizon) and what I know from our work together, here’s a brand voice breakdown for Startup Anthology:
+
+Startup Anthology Brand Voice
+Core Identity: The Founder’s Ally
+The voice is that of a founder talking to other founders — not a vendor, not a consultant, not a marketer. It assumes the reader is smart, scrappy, and probably doing five jobs at once. There’s no hand-holding and no condescension.
+
+Key Characteristics
+1. Earned Empathy, Not Performed Sympathy
+The copy acknowledges the real grind without wallowing in it. “Unsung heroes” is the clearest expression of this — it’s a genuine nod to the people building real businesses outside the VC spotlight, without being sappy about it.
+2. Clarity Over Polish
+No buzzword stacking. Sentences are short, direct, and declarative. “Model growth with confidence.” not “Leverage AI-powered insights to optimize your financial modeling workflow.” The brand speaks plainly because founders don’t have time for fluff.
+3. Confidence Without Arrogance
+The tone is assured — “we’re here to help you see it clearly” — but it doesn’t oversell or hype. It makes a specific promise and stops there. No superlatives, no “revolutionary,” no “game-changing.”
+4. Functional Optimism
+There’s a forward-looking energy that isn’t naive. Scenario planning framing (“optimistic, base, pessimistic”) is a good example — it acknowledges uncertainty while projecting capability. It says you can handle whatever comes rather than everything will be great.
+5. Founder-to-Founder Peer Register
+First person (“we”) and second person (“you”) are used like a peer addressing another peer, not a company addressing a customer. The relationship is collaborative, not transactional.
+
+What It’s NOT
+	∙	Not corporate or formal
+	∙	Not startup-bro hype culture
+	∙	Not patronizing or tutorial-y
+	∙	Not jargon-heavy (even the financial terms are explained plainly)
+	∙	Not overly casual or try-hard colloquial
+
+The One-Line Summary
+Straight-talking, founder-built confidence — for the people doing the actual work.
+
+One thing worth noting: the current site is fully redirected to Horizon, so Startup Anthology’s brand identity is essentially being expressed through Horizon right now. If/when you build out a proper SA marketing site separate from the product, you’d want to flesh out the parent brand story — the anthology idea itself (multiple tools, one mission) has a lot of untapped voice potential.​​​​​​​​​​​​​​​​

@@ -1,0 +1,51 @@
+REPLIT BUILD PROMPT — Anthology CRM
+
+Build a mobile-first CRM web app called Anthology CRM for a solo founder who runs it primarily from their phone. Every feature must be fully usable on mobile. Desktop is a bonus, not the priority.
+The app has three modules: a marketing funnel tracker, a business relationships manager, and a communications hub.
+
+THE EXPERIENCE
+This app is used on the go — between meetings, in a cab, waiting in line. Every interaction needs to be fast, thumb-friendly, and require as few taps as possible. Forms should be minimal and quick to fill. Lists should be scannable cards, not dense tables. Actions should be one tap away from wherever the user already is.
+
+MODULE 1 — HORIZON FUNNEL
+Track leads moving toward the Horizon beta signup page.
+Every lead has a name, email, where they came from (Twitter, LinkedIn, referral, cold outreach, or other), a status, and notes. Statuses move in order: New → Contacted → Interested → Beta Signup → Converted.
+The main view is a Kanban board where each column is a funnel stage. On mobile, the board scrolls horizontally. Swiping a card right advances it to the next stage; swiping left moves it back. Tapping a card opens the full lead detail.
+There’s also a list view showing leads as stacked cards — name, status badge, source, and last updated. The user can switch between Kanban and list view.
+A floating button in the bottom corner opens a quick-add form to capture a new lead fast — just name, email, and source. That’s it.
+At the top of the funnel view, show a live count of how many of the 100 paid beta slots have been filled. This number is manually editable for now but should be built to accept a number from an external API later.
+
+MODULE 2 — BUSINESS CONNECTIONS
+Manage everyone important to building the company — investors, partners, advisors, vendors, press, and anyone else.
+Every contact has a name, company, title, relationship type, a priority level (High, Medium, Low), LinkedIn URL, email, phone, last contacted date, a next follow-up date, and notes.
+The contact list shows stacked cards on mobile — name, company, relationship type badge, and a priority indicator. Tapping a card opens the full contact profile.
+The contact detail page has everything stacked vertically: profile info at the top, then action buttons (tap to call, tap to email, tap to open LinkedIn), then a full activity history showing every email sent, LinkedIn message logged, and note added in chronological order.
+There’s a dedicated Follow-Up Queue view that surfaces every contact where the follow-up date is today or overdue, sorted by priority. Each card in the queue has a one-tap “Mark Contacted” button that logs the touchpoint and clears the follow-up, and a shortcut to log a LinkedIn message.
+A floating button on the contacts list opens a quick-add contact form.
+
+MODULE 3 — COMMUNICATIONS & WORKFLOWS
+Sending emails
+The user connects their Google Workspace account once via Google sign-in. After that, they can compose and send emails directly from any lead or contact record. The composer opens full-screen on mobile with the recipient pre-filled. Every email sent is automatically added to that person’s activity history.
+Templates
+The user can build a library of reusable email templates — each with a name, an audience tag (Horizon Lead, Investor, Partner, Advisor, or General), a subject, and a body. Templates support merge tags like first name, company name, and founder name that auto-fill when used. When composing an email, the user can pick a template to pre-fill the composer.
+Drip sequences
+The user can build automated multi-step email sequences — for example, a 3-email flow for new Horizon beta leads. Each sequence has a name, a target audience, and a series of steps. Each step has a delay (send immediately, after 2 days, after 5 days, etc.) and a template to use. A lead or contact can be manually enrolled into a sequence from their record with one tap. The app sends each step automatically when it’s due and logs it to their activity history. Each enrollee shows a status — Active, Paused, or Completed.
+Triggered actions
+The user can set rules so that when a lead moves to a specific status, the app automatically enrolls them in a sequence and/or schedules a follow-up. These rules are configured in Settings — simple dropdowns, no complexity.
+Broadcast emails
+The user can send a one-time email to a filtered group — for example, all leads with status Interested, or all contacts tagged as Investor. The flow is a simple step-by-step wizard on mobile: pick a segment, pick a template, preview the recipient list, then send. Past broadcasts are logged with the date, subject, recipient count, and status.
+LinkedIn message tracking
+From any contact or lead record, the user can log a LinkedIn message manually — just the date (defaults to today), direction (Sent or Received), and a short note. These appear in the activity history alongside emails so there’s a single unified view of every touchpoint with that person.
+
+NAVIGATION
+On mobile, navigation lives in a bottom tab bar — always visible, always thumb-reachable. Tabs: Dashboard, Funnel, Contacts, Comms.
+On desktop, navigation moves to a left sidebar with labels.
+All forms open as full-screen modals on mobile. Every list screen has a floating action button in the bottom corner for quick-add.
+
+DASHBOARD
+The home screen shows at a glance: total leads, leads added this week, beta slots filled, follow-ups due today, total contacts, and emails sent this week. Below the stats is a live list of follow-ups due today — tap any item to go straight to that contact. The beta slot count is shown as a progress bar.
+
+SETTINGS
+Google Workspace account connection and disconnect. Trigger rules configuration. Beta slot total (editable). Merge tag reference. App display name.
+
+SAVE TO HOME SCREEN
+The app should be installable as a Progressive Web App so the founder can add it to their phone’s home screen and open it like a native app.

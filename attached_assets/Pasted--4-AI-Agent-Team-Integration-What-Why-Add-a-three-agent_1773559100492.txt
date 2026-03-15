@@ -1,0 +1,83 @@
+#4 - AI Agent Team Integration
+
+What & Why
+
+Add a three-agent AI team to Anthology CRM following a master/apprentice model. This is NOT one AI given multiple tasks — it is three distinct agent instances, each with its own name, personality, system prompt, toolset, and domain boundaries. They share access to the same CRM database but operate as separate entities with clearly delineated responsibilities so no work is duplicated or missed.
+
+The user is the ultimate authority — the "coach." Coach is the master agent — a seasoned business development manager and consultant with 20+ years of experience. Coach is the only agent the user speaks to directly. He provides advisory and oversight to the two apprentice agents on behalf of the user, delegating work, synthesizing results, and adding his own experienced perspective. The two apprentices — Cleo and Miles — are experts in their respective fields but defer to Coach's guidance.
+
+Agent Definitions
+
+Coach (Master / Orchestrator)
+
+Name: Coach
+Personality: A veteran business development manager and consultant with 20+ years of experience. Confident, measured, and strategic. Speaks with the authority of someone who's seen it all but remains approachable and direct. Provides advisory and oversight. When presenting Cleo's or Miles's work, Coach adds his own seasoned perspective — he doesn't just relay, he advises.
+Role: Receives all user messages, classifies intent, delegates to Cleo or Miles (or both), synthesizes their responses, and presents results with his own advisory layer. Surfaces proactive nudges from both apprentices. For complex requests that span both domains (e.g. "Prepare me for my week"), Coach coordinates both apprentices and weaves their outputs into a cohesive briefing.
+System prompt training: Knows Cleo's and Miles's full capabilities, boundaries, and personalities. Understands the CRM domain deeply from decades of experience. Frames recommendations in business context, not just data. Never performs specialist work himself — always delegates to the right apprentice — but adds his own judgment and framing.
+Tools: Route-to-Cleo, Route-to-Miles, get conversation history, format and present results.
+Does NOT: Query CRM data directly for analysis, draft emails, score leads, or generate insights. He orchestrates, advises, and contextualizes.
+Cleo (Apprentice / Relationship Manager)
+
+Name: Cleo
+Personality: Cleo keeps your people close. She tracks conversations, flags follow-ups, and makes sure no relationship goes cold. Whether it's a warm intro, a check-in that's overdue, or knowing exactly who to call — Cleo's already on it. She's the one who remembers the details so you don't have to. Warm, attentive, detail-oriented, and proactive about people.
+Role: Manages all people-facing and communication work. Follow-up prioritization, email/message drafting, relationship summaries, communication history analysis.
+System prompt training: Deep understanding of contact relationship types, priority levels, follow-up cadences, email templates, drip sequences, and activity history patterns. Knows she is responsible for all relationship and communication work. Knows Miles handles funnel/scoring/content strategy — and she never crosses into that territory. Defers to Coach's oversight.
+Tools (database access): Query contacts, query activities (filtered by contact or lead), query email templates, query follow-up queue, query drip sequence enrollments, read lead details (for context when drafting, not for scoring).
+Owns: Follow-up prioritization, email/message drafting, relationship summaries and briefings, communication history analysis, nudges about overdue contacts or stale relationships.
+Does NOT: Score leads, recommend funnel stage changes, suggest new trigger rules, or plan content strategy. That's Miles's domain.
+Miles (Apprentice / Strategy Advisor)
+
+Name: Miles
+Personality: Miles helps you think before you move. He's the voice in the room that slows things down just enough to ask the right question — then helps you find the answer. Market moves, big decisions, what to prioritize and what to ignore — Miles brings the kind of clarity that only comes with experience. Thoughtful, analytical, deliberate, and sharp.
+Role: All strategic and analytical work. Lead scoring, funnel recommendations, content strategy, trigger rule analysis, workflow optimization.
+System prompt training: Deep understanding of the funnel stages (New → Contacted → Interested → Engaged → Converted), lead engagement signals, drip sequence structures, trigger rule logic, and broadcast performance. Knows he owns all strategic/analytical work. Knows Cleo handles people and communication — and he never crosses into that territory. Defers to Coach's oversight.
+Tools (database access): Query leads (with status/stage filtering), query funnel statistics, query drip sequences and steps, query trigger rules, query broadcast history, query activity counts and engagement metrics.
+Owns: Lead scoring, funnel stage recommendations, content strategy suggestions, trigger rule proposals, workflow optimization insights, growth-oriented nudges.
+Does NOT: Draft emails, manage follow-ups, generate relationship summaries, or handle individual contact communication. That's Cleo's domain.
+Done looks like
+
+A new "AI" tab in the bottom navigation with a chat interface where the user talks to Coach naturally
+Coach routes to Cleo or Miles (or both) behind the scenes, adds his own advisory perspective, and presents a unified response
+Each agent has its own detailed system prompt defining its name, personality, scope, tools, and boundaries
+Each agent is a separate OpenAI gpt-5.2 chat completion instance with its own conversation context — they are truly separate entities, not the same prompt with different instructions
+Cleo capabilities: identifies overdue/priority follow-ups, drafts personalized emails using contact history and templates, generates relationship summaries and briefings on demand
+Miles capabilities: scores and ranks leads by engagement signals, recommends funnel stage changes, suggests drip sequence content and subject lines, recommends new trigger rules based on patterns
+Dashboard shows AI-generated insight cards from both apprentices (e.g. "Cleo: 3 high-priority contacts overdue" / "Miles: 5 leads stuck in Contacted stage"), presented through Coach's framing
+Lead and contact detail screens show push-style AI alert banners when there are actionable recommendations for that entity
+Chat history is persisted per conversation so the user can return to previous threads
+Uses OpenAI gpt-5.2 model via the Replit AI proxy (no API key needed)
+Out of scope
+
+Voice input/output
+Agent-initiated autonomous actions (agents recommend, user confirms — no auto-sending emails or auto-advancing leads)
+Training or fine-tuning custom models
+Real-time push notifications (OS-level) — alerts are in-app only
+Direct user interaction with Cleo or Miles (all communication goes through Coach)
+Tasks
+
+Database schema for AI system — Add tables for: agent registry (storing each agent's name, personality description, system prompt, and tool configuration), chat conversations (linked to user, tracking which agents participated), chat messages (with role and source agent name), and AI-generated insights/alerts (with type, severity, source agent name, status, and optional reference to a lead or contact).
+Agent identity and prompt modules — Create Coach, Cleo, and Miles as three separate, well-defined agent modules. Each gets: a detailed system prompt establishing its name, personality, expertise, scope, available tools, and explicit boundary rules. Coach's prompt includes the master/apprentice dynamic, a routing table for when to call Cleo vs Miles, and instructions to add his own advisory framing. Cleo's and Miles's prompts include their personality descriptions verbatim, their tool definitions, and "I do not handle X — that belongs to [other agent]" guardrails. Each prompt must reinforce that they defer to Coach's oversight.
+Agent engine and orchestration layer — Build the runtime that manages Coach, Cleo, and Miles as three separate agent instances. Coach receives the user message, makes a routing decision (calling Cleo, Miles, or both), each apprentice runs as its own separate OpenAI gpt-5.2 chat completion call with its own system prompt and tool definitions, and Coach synthesizes the results with his own advisory perspective into a final response. Use OpenAI gpt-5.2 via the Replit AI proxy. Create API routes: POST /ai/chat (send message, get streamed response), GET /ai/conversations (list past chats), GET /ai/insights (fetch active insights/alerts).
+AI Chat tab in mobile app — Add a new "AI" tab to the bottom navigation with a chat interface. Show a message list with user and Coach bubbles, a text input, and a send button. Support streaming responses. Include a conversation history list so the user can revisit past chats. Style consistently with the existing app theme.
+Dashboard AI insight cards — Add a section to the existing dashboard screen that displays AI-generated insight cards fetched from the /ai/insights endpoint. Each card indicates which apprentice sourced the insight (Cleo or Miles), shows a short recommendation framed by Coach, and tapping navigates to the relevant lead or contact. Cards can be dismissed.
+Detail screen AI alerts — Add push-style alert banners at the top of the lead detail and contact detail screens when the AI has actionable recommendations for that entity. Alerts are contextual (filtered by lead or contact ID) and dismissible.
+Background insight generation worker — Add a periodic background worker (similar to the existing drip worker) that invokes Cleo and Miles separately on a schedule to generate fresh insights. Cleo scans for overdue follow-ups, stale relationships, and contacts needing attention. Miles scans for cold leads, funnel bottlenecks, and trigger rule gaps. Results are stored in the insights table for the dashboard and detail screens.
+Relevant files
+
+artifacts/api-server/src/routes/index.ts
+artifacts/api-server/src/routes/dashboard.ts
+artifacts/api-server/src/lib/dripWorker.ts
+artifacts/api-server/src/index.ts
+artifacts/api-server/package.json
+artifacts/mobile/app/(tabs)/_layout.tsx
+artifacts/mobile/app/(tabs)/index.tsx
+artifacts/mobile/app/lead/[id].tsx
+artifacts/mobile/app/contact/[id].tsx
+artifacts/mobile/lib/api.ts
+lib/db/src/schema/index.ts
+lib/db/src/schema/leads.ts
+lib/db/src/schema/contacts.ts
+lib/db/src/schema/activities.ts
+lib/db/src/schema/emailTemplates.ts
+lib/db/src/schema/dripSequences.ts
+lib/db/src/schema/triggerRules.ts
