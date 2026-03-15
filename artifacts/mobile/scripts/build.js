@@ -505,6 +505,31 @@ function updateManifests(manifests, timestamp, baseUrl, assetsByHash) {
   console.log("Manifests updated");
 }
 
+async function buildWeb() {
+  console.log("Building web PWA (expo export --platform web)...");
+  const distWeb = path.join(projectRoot, "dist", "web");
+  if (fs.existsSync(distWeb)) {
+    fs.rmSync(distWeb, { recursive: true });
+  }
+
+  return new Promise((resolve, reject) => {
+    const webProcess = spawn(
+      "pnpm",
+      ["exec", "expo", "export", "--platform", "web", "--output-dir", "dist/web"],
+      { stdio: "inherit", cwd: projectRoot, env: { ...process.env } },
+    );
+    webProcess.on("close", (code) => {
+      if (code === 0) {
+        console.log("Web PWA build complete → dist/web/");
+        resolve();
+      } else {
+        reject(new Error(`expo export web failed with exit code ${code}`));
+      }
+    });
+    webProcess.on("error", reject);
+  });
+}
+
 async function main() {
   console.log("Building static Expo Go deployment...");
 
@@ -556,11 +581,14 @@ async function main() {
   console.log("Updating manifests and creating landing page...");
   updateManifests(manifests, timestamp, baseUrl, assetsByHash);
 
-  console.log("Build complete! Deploy to:", baseUrl);
-
   if (metroProcess) {
     metroProcess.kill();
+    metroProcess = null;
   }
+
+  await buildWeb();
+
+  console.log("Build complete! Deploy to:", baseUrl);
   process.exit(0);
 }
 
