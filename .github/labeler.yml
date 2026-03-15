@@ -1,0 +1,33 @@
+api:
+  - changed-files:
+    - any-glob-to-any-file: 'artifacts/api-server/**'
+
+mobile:
+  - changed-files:
+    - any-glob-to-any-file: 'artifacts/mobile/**'
+
+database:
+  - changed-files:
+    - any-glob-to-any-file: 'lib/db/**'
+
+ci:
+  - changed-files:
+    - any-glob-to-any-file: '.github/**'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: '**/package.json'
+    - any-glob-to-any-file: 'pnpm-lock.yaml'
+
+config:
+  - changed-files:
+    - any-glob-to-any-file: '*.json'
+    - any-glob-to-any-file: '*.toml'
+    - any-glob-to-any-file: '*.yaml'
+    - any-glob-to-any-file: '*.yml'
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.md'
+    - any-glob-to-any-file: 'replit.md'
+    - any-glob-to-any-file: 'README.md'

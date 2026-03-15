@@ -1,0 +1,84 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    name: Auto-label PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+
+  size-check:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+            const total = additions + deletions;
+            let label = '';
+            let comment = '';
+            if (total < 50) {
+              label = 'size: XS';
+            } else if (total < 200) {
+              label = 'size: S';
+            } else if (total < 500) {
+              label = 'size: M';
+            } else if (total < 1000) {
+              label = 'size: L';
+            } else {
+              label = 'size: XL';
+              comment = '⚠️ This PR is quite large (+' + additions + ' / -' + deletions + ' lines). Consider splitting it into smaller PRs for easier review.';
+            }
+            const labels = ['size: XS', 'size: S', 'size: M', 'size: L', 'size: XL'];
+            const existing = pr.labels.map(l => l.name).filter(n => labels.includes(n));
+            for (const l of existing) {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name: l,
+              }).catch(() => {});
+            }
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [label],
+            });
+            if (comment) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }
