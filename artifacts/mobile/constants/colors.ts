@@ -72,10 +72,10 @@ export const darkColors: ThemeColors = {
   surfaceSecondary: "#2A2A2A",
   text: "#F0F0F0",
   textSecondary: "#A0A0A0",
-  textTertiary: "#707070",
+  textTertiary: "#8E8E8E",
   border: "#333333",
   borderLight: "#2A2A2A",
-  tabIconDefault: "#707070",
+  tabIconDefault: "#8E8E8E",
   tabIconSelected: "#FFFFFF",
 };
 

@@ -95,7 +95,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   content: { flex: 1 },
   type: {
     fontSize: 13,
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
     color: colors.text,
     textTransform: "capitalize",
   },

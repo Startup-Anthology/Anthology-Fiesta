@@ -543,7 +543,7 @@ export default function SettingsScreen() {
           <View key={t.id} style={styles.triggerCard}>
             <View style={styles.triggerInfo}>
               <Text style={styles.triggerText}>
-                When lead → <Text style={{ fontFamily: "LeagueSpartan_600SemiBold" }}>{t.triggerStatus}</Text>
+                When lead → <Text style={{ fontFamily: "SpaceGrotesk_600SemiBold" }}>{t.triggerStatus}</Text>
               </Text>
               <Text style={styles.triggerAction}>
                 {t.actionType === "enroll_sequence" ? `Start sequence #${t.sequenceId}` : `Follow up in ${t.followUpDays} days`}
@@ -797,7 +797,7 @@ export default function SettingsScreen() {
                     {recentData.recentAuditLog?.slice(0, 15).map((a: any, i: number) => (
                       <View key={i} style={styles.diagAuditRow}>
                         <View style={[styles.diagAuditAction, { backgroundColor: a.action === "create" ? colors.success + "20" : a.action === "delete" ? colors.error + "20" : colors.accent + "20" }]}>
-                          <Text style={{ fontSize: 10, fontFamily: "LeagueSpartan_600SemiBold", color: a.action === "create" ? colors.success : a.action === "delete" ? colors.error : colors.accent }}>
+                          <Text style={{ fontSize: 10, fontFamily: "SpaceGrotesk_600SemiBold", color: a.action === "create" ? colors.success : a.action === "delete" ? colors.error : colors.accent }}>
                             {a.action.toUpperCase()}
                           </Text>
                         </View>
@@ -929,7 +929,7 @@ function DiagRow({ label, value, latency, colors }: { label: string; value?: str
         )}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
           <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: statusColor(value, colors) }} />
-          <Text style={{ fontSize: 12, fontFamily: "LeagueSpartan_600SemiBold", color: statusColor(value, colors) }}>
+          <Text style={{ fontSize: 12, fontFamily: "SpaceGrotesk_600SemiBold", color: statusColor(value, colors) }}>
             {value || "unknown"}
           </Text>
         </View>
@@ -942,29 +942,29 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: Layout.screenPadding },
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Layout.sectionSpacing },
-  title: { fontSize: 20, fontFamily: "Lato_700Bold", color: colors.text },
+  title: { fontSize: 20, fontFamily: "SpaceGrotesk_700Bold", color: colors.text },
   section: { marginBottom: Layout.sectionSpacing },
-  sectionTitle: { fontSize: 16, fontFamily: "LeagueSpartan_600SemiBold", color: colors.text, marginBottom: 6 },
-  sectionSubtitle: { fontSize: 13, fontFamily: "Montserrat_400Regular", color: colors.textTertiary, marginBottom: 14 },
+  sectionTitle: { fontSize: 16, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.text, marginBottom: 6 },
+  sectionSubtitle: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular", color: colors.textTertiary, marginBottom: 14 },
   settingRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", backgroundColor: colors.surface, borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginTop: Layout.cardGap },
   settingLabel: { fontSize: 14, fontFamily: "SpaceGrotesk_500Medium", color: colors.text },
   settingInput: { fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", color: colors.text, backgroundColor: colors.surfaceSecondary, borderRadius: Layout.badgeRadius, paddingHorizontal: 10, paddingVertical: 6, minWidth: 120 },
   integrationRow: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: colors.surface, borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginTop: Layout.cardGap },
   integrationIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.surfaceSecondary, justifyContent: "center", alignItems: "center" },
   integrationInfo: { flex: 1 },
-  integrationName: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: colors.text },
+  integrationName: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.text },
   integrationStatus: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular", color: colors.success },
   connectedDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.success },
   horizonSyncBtn: { backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, minWidth: 80, alignItems: "center" as const },
-  horizonSyncBtnText: { fontSize: 12, fontFamily: "LeagueSpartan_600SemiBold", color: colors.onPrimary },
+  horizonSyncBtnText: { fontSize: 12, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.onPrimary },
   triggerCard: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surface, borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginTop: Layout.cardGap },
   triggerInfo: { flex: 1 },
   triggerText: { fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", color: colors.text },
   triggerAction: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular", color: colors.textSecondary, marginTop: 2 },
   addTrigger: { backgroundColor: colors.surfaceSecondary, borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginTop: 14 },
-  addTriggerTitle: { fontSize: 15, fontFamily: "LeagueSpartan_600SemiBold", color: colors.text, marginBottom: 14 },
+  addTriggerTitle: { fontSize: 15, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.text, marginBottom: 14 },
   formGroup: { marginBottom: 16 },
-  label: { fontSize: 12, fontFamily: "Montserrat_600SemiBold", color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase" },
+  label: { fontSize: 12, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase" },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
   chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
@@ -973,18 +973,18 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   seqOption: { paddingHorizontal: 14, paddingVertical: 12, borderRadius: Layout.cardRadius, backgroundColor: colors.surface, marginBottom: 8 },
   seqOptionText: { fontSize: 14, fontFamily: "SpaceGrotesk_500Medium", color: colors.text },
   addBtn: { backgroundColor: colors.primary, borderRadius: Layout.inputRadius, paddingVertical: 12, alignItems: "center" },
-  addBtnText: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: colors.onPrimary },
+  addBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.onPrimary },
   saveBtn: { backgroundColor: colors.accent, borderRadius: 12, paddingVertical: 12, alignItems: "center", marginTop: 12 },
-  saveBtnText: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: colors.onPrimary },
+  saveBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.onPrimary },
   mergeTagCard: { backgroundColor: colors.surface, borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginTop: Layout.cardGap, gap: 10 },
   mergeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  mergeTag: { fontSize: 13, fontFamily: "LeagueSpartan_600SemiBold", color: colors.info, backgroundColor: colors.info + "10", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, overflow: "hidden" },
+  mergeTag: { fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.info, backgroundColor: colors.info + "10", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, overflow: "hidden" },
   mergeDesc: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular", color: colors.textSecondary },
   customLinkRow: { flexDirection: "row", gap: 8, marginTop: Layout.cardGap },
   customLinkLabel: { flex: 1, fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", color: colors.text, backgroundColor: colors.surface, borderRadius: Layout.cardRadius, paddingHorizontal: 10, paddingVertical: 10 },
   customLinkUrl: { flex: 2, fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", color: colors.text, backgroundColor: colors.surface, borderRadius: Layout.cardRadius, paddingHorizontal: 10, paddingVertical: 10 },
   notionDbRow: { backgroundColor: colors.surface, borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginTop: Layout.cardGap },
-  notionDbLabel: { fontSize: 12, fontFamily: "Montserrat_600SemiBold", color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase" },
+  notionDbLabel: { fontSize: 12, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase" },
   notionDbInput: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular", color: colors.text, backgroundColor: colors.surfaceSecondary, borderRadius: Layout.badgeRadius, paddingHorizontal: 10, paddingVertical: 8 },
   roleBadge: { backgroundColor: colors.surfaceSecondary, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
   roleBadgeAdmin: { backgroundColor: colors.accent + "20" },
@@ -992,12 +992,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   roleBadgeTextAdmin: { color: colors.accent },
   adminHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
   addUserBtn: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6 },
-  addUserBtnText: { fontSize: 12, fontFamily: "LeagueSpartan_600SemiBold", color: colors.onPrimary },
+  addUserBtnText: { fontSize: 12, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.onPrimary },
   userCard: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginTop: 8 },
   userAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: "center", alignItems: "center" },
-  userAvatarText: { color: colors.accent, fontFamily: "Lato_700Bold", fontSize: 16 },
+  userAvatarText: { color: colors.accent, fontFamily: "SpaceGrotesk_700Bold", fontSize: 16 },
   userInfo: { flex: 1 },
-  userName: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: colors.text },
+  userName: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.text },
   userEmail: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular", color: colors.textSecondary },
   userMeta: { flexDirection: "row", gap: 6, marginTop: 4 },
   roleBadgeSmall: { backgroundColor: colors.surfaceSecondary, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
@@ -1011,11 +1011,11 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
   modalContent: { backgroundColor: colors.background, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  modalTitle: { fontSize: 18, fontFamily: "Lato_700Bold", color: colors.text },
+  modalTitle: { fontSize: 18, fontFamily: "SpaceGrotesk_700Bold", color: colors.text },
   modalInput: { backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", color: colors.text, marginBottom: 12 },
   modalNameRow: { flexDirection: "row", gap: 10 },
   diagToggle: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  diagSectionLabel: { fontSize: 13, fontFamily: "LeagueSpartan_600SemiBold", marginTop: 12, marginBottom: 6 },
+  diagSectionLabel: { fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold", marginTop: 12, marginBottom: 6 },
   diagCard: { borderRadius: 10, borderWidth: 1, padding: 12, marginBottom: 4 },
   diagConvRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 5 },
   diagConvTitle: { fontSize: 13, fontFamily: "SpaceGrotesk_500Medium" },

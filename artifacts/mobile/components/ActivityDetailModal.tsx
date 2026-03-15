@@ -248,7 +248,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 20,
   },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 16 },
-  title: { fontSize: 20, fontFamily: "Lato_700Bold", color: colors.text },
+  title: { fontSize: 20, fontFamily: "SpaceGrotesk_700Bold", color: colors.text },
   scroll: { flex: 1 },
   metaRow: {
     flexDirection: "row",
@@ -257,7 +257,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 20,
   },
   typeBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  typeBadgeText: { fontSize: 13, fontFamily: "LeagueSpartan_600SemiBold", textTransform: "capitalize" },
+  typeBadgeText: { fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold", textTransform: "capitalize" },
   date: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular", color: colors.textTertiary },
   details: { gap: 16 },
   detailSection: {
@@ -267,7 +267,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   detailLabel: {
     fontSize: 11,
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
     color: colors.textTertiary,
     textTransform: "uppercase",
     marginBottom: 6,
@@ -289,11 +289,11 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     paddingHorizontal: 16,
     marginTop: 4,
   },
-  gmailBtnText: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: colors.info },
+  gmailBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.info },
   form: { gap: 12 },
   label: {
     fontSize: 12,
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
     color: colors.textSecondary,
     textTransform: "uppercase",
     marginTop: 4,
@@ -325,7 +325,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: 10,
     backgroundColor: colors.surface,
   },
-  cancelBtnText: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: colors.textSecondary },
+  cancelBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.textSecondary },
   saveBtn: {
     flex: 1,
     flexDirection: "row",
@@ -336,5 +336,5 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: 10,
     backgroundColor: colors.primary,
   },
-  saveBtnText: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: colors.onPrimary },
+  saveBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.onPrimary },
 });

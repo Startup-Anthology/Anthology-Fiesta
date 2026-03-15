@@ -262,7 +262,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 20,
   },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 16 },
-  headerTitle: { fontSize: 20, fontFamily: "Lato_700Bold", color: colors.text },
+  headerTitle: { fontSize: 20, fontFamily: "SpaceGrotesk_700Bold", color: colors.text },
   scroll: { flex: 1 },
   titleRow: {
     flexDirection: "row",
@@ -270,8 +270,8 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 10,
   },
   typeBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  typeBadgeText: { fontSize: 13, fontFamily: "LeagueSpartan_600SemiBold", textTransform: "capitalize" },
-  eventTitle: { fontSize: 22, fontFamily: "Lato_700Bold", color: colors.text, marginBottom: 20 },
+  typeBadgeText: { fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold", textTransform: "capitalize" },
+  eventTitle: { fontSize: 22, fontFamily: "SpaceGrotesk_700Bold", color: colors.text, marginBottom: 20 },
   timeCard: {
     backgroundColor: colors.surface,
     borderRadius: 12,
@@ -279,7 +279,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 16,
   },
   timeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  timeLabel: { fontSize: 11, fontFamily: "LeagueSpartan_600SemiBold", color: colors.textTertiary, textTransform: "uppercase" },
+  timeLabel: { fontSize: 11, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.textTertiary, textTransform: "uppercase" },
   timeValue: { fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", color: colors.text },
   timeDivider: { height: 1, backgroundColor: colors.border, marginVertical: 12 },
   durationBadge: {
@@ -290,7 +290,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: 8,
     marginTop: 10,
   },
-  durationText: { fontSize: 12, fontFamily: "LeagueSpartan_600SemiBold", color: colors.accent },
+  durationText: { fontSize: 12, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.accent },
   details: { gap: 0 },
   detailSection: {
     backgroundColor: colors.surface,
@@ -300,7 +300,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   detailLabel: {
     fontSize: 11,
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
     color: colors.textTertiary,
     textTransform: "uppercase",
     marginBottom: 8,
@@ -316,7 +316,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   form: { gap: 12 },
   label: {
     fontSize: 12,
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
     color: colors.textSecondary,
     textTransform: "uppercase",
     marginTop: 4,
@@ -348,7 +348,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: 10,
     backgroundColor: colors.surface,
   },
-  cancelBtnText: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: colors.textSecondary },
+  cancelBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.textSecondary },
   saveBtn: {
     flex: 1,
     flexDirection: "row",
@@ -359,5 +359,5 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: 10,
     backgroundColor: colors.primary,
   },
-  saveBtnText: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: colors.onPrimary },
+  saveBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.onPrimary },
 });

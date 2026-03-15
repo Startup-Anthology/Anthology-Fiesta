@@ -4,6 +4,7 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState, useRef } from "react";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
+import { SkeletonCard } from "@/components/Skeleton";
 import {
   ActivityIndicator,
   Alert,
@@ -150,8 +151,10 @@ export default function FunnelScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.center, { paddingTop: topPad, backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
+      <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
+        <View style={{ padding: 16 }}>
+          {[1, 2, 3, 4, 5].map((i) => <SkeletonCard key={i} />)}
+        </View>
       </View>
     );
   }
@@ -388,28 +391,28 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: Layout.screenPadding, paddingVertical: 14 },
-  title: { fontSize: 24, fontFamily: "Lato_700Bold" },
+  title: { fontSize: 24, fontFamily: "SpaceGrotesk_700Bold" },
   headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   syncBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
-  syncBtnText: { fontSize: 12, fontFamily: "LeagueSpartan_600SemiBold", color: "#fff" },
+  syncBtnText: { fontSize: 12, fontFamily: "SpaceGrotesk_600SemiBold", color: "#fff" },
   betaCounter: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: Layout.inputRadius },
-  betaCountText: { fontSize: 13, fontFamily: "LeagueSpartan_600SemiBold" },
+  betaCountText: { fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold" },
   viewToggle: { padding: 6, borderRadius: Layout.badgeRadius },
   kanbanContainer: { paddingHorizontal: 14, gap: 14, paddingBottom: 100 },
   kanbanColumn: { width: COLUMN_WIDTH, borderRadius: Layout.cardRadius, padding: Layout.cardPadding },
   columnHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
   columnDot: { width: 8, height: 8, borderRadius: 4 },
-  columnTitle: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", flex: 1 },
+  columnTitle: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", flex: 1 },
   columnCount: { fontSize: 13, fontFamily: "SpaceGrotesk_500Medium", paddingHorizontal: 8, paddingVertical: 2, borderRadius: Layout.badgeRadius },
   leadCard: { borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginBottom: Layout.cardGap },
   leadCardHeader: { flexDirection: "row", alignItems: "center", gap: 6 },
-  leadName: { fontSize: 15, fontFamily: "LeagueSpartan_600SemiBold", flex: 1 },
+  leadName: { fontSize: 15, fontFamily: "SpaceGrotesk_600SemiBold", flex: 1 },
   leadEmail: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular", marginTop: 2 },
   leadMeta: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 10 },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-  statusText: { fontSize: 11, fontFamily: "LeagueSpartan_600SemiBold", textTransform: "uppercase" },
+  statusText: { fontSize: 11, fontFamily: "SpaceGrotesk_600SemiBold", textTransform: "uppercase" },
   betaBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  betaBadgeText: { fontSize: 10, fontFamily: "Lato_700Bold" },
+  betaBadgeText: { fontSize: 10, fontFamily: "SpaceGrotesk_700Bold" },
   sourceText: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular" },
   emptyCol: { padding: Layout.screenPadding, alignItems: "center" },
   emptyText: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular" },
@@ -419,7 +422,7 @@ const styles = StyleSheet.create({
   listCardLeft: { flex: 1, marginRight: 12 },
   listCardRight: { alignItems: "flex-end", gap: 4 },
   emptyState: { alignItems: "center", paddingTop: 80, gap: 12 },
-  emptyTitle: { fontSize: 18, fontFamily: "LeagueSpartan_600SemiBold" },
+  emptyTitle: { fontSize: 18, fontFamily: "SpaceGrotesk_600SemiBold" },
   emptySubtitle: { fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", textAlign: "center", paddingHorizontal: 32 },
   fab: {
     position: "absolute",
@@ -438,12 +441,12 @@ const styles = StyleSheet.create({
   },
   modalContent: { flex: 1, padding: Layout.screenPadding },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Layout.sectionSpacing },
-  modalTitle: { fontSize: 17, fontFamily: "LeagueSpartan_600SemiBold" },
+  modalTitle: { fontSize: 17, fontFamily: "SpaceGrotesk_600SemiBold" },
   cancelBtn: { fontSize: 16, fontFamily: "SpaceGrotesk_400Regular" },
-  saveBtn: { fontSize: 16, fontFamily: "LeagueSpartan_600SemiBold" },
+  saveBtn: { fontSize: 16, fontFamily: "SpaceGrotesk_600SemiBold" },
   saveBtnDisabled: { opacity: 0.4 },
   formGroup: { marginBottom: 22 },
-  formLabel: { fontSize: 13, fontFamily: "LeagueSpartan_600SemiBold", marginBottom: 8, textTransform: "uppercase" },
+  formLabel: { fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold", marginBottom: 8, textTransform: "uppercase" },
   input: {
     borderRadius: Layout.inputRadius,
     padding: Layout.cardPadding,
@@ -457,5 +460,5 @@ const styles = StyleSheet.create({
   swipeHint: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 10, opacity: 0.5 },
   swipeHintText: { fontSize: 10, fontFamily: "SpaceGrotesk_400Regular" },
   emptyBtn: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: Layout.inputRadius, paddingVertical: 12, paddingHorizontal: 20, marginTop: 16 },
-  emptyBtnText: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: "#fff" },
+  emptyBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: "#fff" },
 });

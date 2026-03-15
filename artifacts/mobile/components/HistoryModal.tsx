@@ -179,7 +179,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  title: { fontSize: 20, fontFamily: "Lato_700Bold", color: colors.text },
+  title: { fontSize: 20, fontFamily: "SpaceGrotesk_700Bold", color: colors.text },
   scroll: { flex: 1 },
   empty: { fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", color: colors.textTertiary },
   entry: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 10 },
@@ -188,7 +188,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   actionBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   actionBadgeText: {
     fontSize: 11,
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
     textTransform: "uppercase",
   },
   meta: {
@@ -201,7 +201,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   snapshotBox: { backgroundColor: colors.background, borderRadius: 8, padding: 10 },
   snapshotLabel: {
     fontSize: 11,
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
     color: colors.textTertiary,
     marginBottom: 4,
     textTransform: "uppercase",
@@ -221,5 +221,5 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     paddingVertical: 10,
     marginTop: 4,
   },
-  rollbackBtnText: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: "#fff" },
+  rollbackBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: "#fff" },
 });

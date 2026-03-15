@@ -1,17 +1,4 @@
 import {
-  Lato_400Regular,
-  Lato_700Bold,
-} from "@expo-google-fonts/lato";
-import {
-  Montserrat_400Regular,
-  Montserrat_500Medium,
-  Montserrat_600SemiBold,
-} from "@expo-google-fonts/montserrat";
-import {
-  LeagueSpartan_600SemiBold,
-  LeagueSpartan_700Bold,
-} from "@expo-google-fonts/league-spartan";
-import {
   SpaceGrotesk_400Regular,
   SpaceGrotesk_500Medium,
   SpaceGrotesk_600SemiBold,
@@ -66,13 +53,6 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    Lato_400Regular,
-    Lato_700Bold,
-    Montserrat_400Regular,
-    Montserrat_500Medium,
-    Montserrat_600SemiBold,
-    LeagueSpartan_600SemiBold,
-    LeagueSpartan_700Bold,
     SpaceGrotesk_400Regular,
     SpaceGrotesk_500Medium,
     SpaceGrotesk_600SemiBold,

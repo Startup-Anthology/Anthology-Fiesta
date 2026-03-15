@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 24 },
   headerLogo: { width: 36, height: 36, borderRadius: 10, justifyContent: "center", alignItems: "center" },
   headerLogoImage: { width: 20, height: 20 },
-  title: { fontSize: 22, fontFamily: "LeagueSpartan_700Bold" },
+  title: { fontSize: 22, fontFamily: "SpaceGrotesk_700Bold" },
   subtitle: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular", marginTop: 2 },
   menuCard: { borderRadius: Layout.cardRadius, overflow: "hidden" },
   menuItem: { flexDirection: "row", alignItems: "center", padding: 16, gap: 14 },

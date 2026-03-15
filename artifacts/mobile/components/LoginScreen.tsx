@@ -54,6 +54,9 @@ export function LoginScreen() {
           onPress={handleLogin}
           disabled={isSubmitting || isLoading}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Log in to Fiesta"
+          accessibilityState={{ disabled: isSubmitting || isLoading, busy: isSubmitting || isLoading }}
         >
           {isSubmitting || isLoading ? (
             <ActivityIndicator color="#FFFFFF" />
@@ -119,13 +122,13 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     color: colors.primary,
-    fontFamily: "Lato_700Bold",
+    fontFamily: "SpaceGrotesk_700Bold",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     color: colors.textSecondary,
-    fontFamily: "Montserrat_500Medium",
+    fontFamily: "SpaceGrotesk_500Medium",
     textAlign: "center",
   },
   features: {
@@ -147,12 +150,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 17,
     fontWeight: "600",
     color: "#FFFFFF",
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
   },
   footerText: {
     marginTop: 16,
     fontSize: 13,
     color: colors.textTertiary,
-    fontFamily: "Montserrat_400Regular",
+    fontFamily: "SpaceGrotesk_400Regular",
   },
 });

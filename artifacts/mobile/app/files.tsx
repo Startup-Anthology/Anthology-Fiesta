@@ -129,11 +129,11 @@ export default function FilesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, gap: 12 },
-  title: { fontSize: 22, fontFamily: "LeagueSpartan_700Bold" },
+  title: { fontSize: 22, fontFamily: "SpaceGrotesk_700Bold" },
   uploadBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
   uploadText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: "#fff" },
   center: { flex: 1, justifyContent: "center", alignItems: "center", gap: 8 },
-  emptyText: { fontSize: 16, fontFamily: "LeagueSpartan_600SemiBold" },
+  emptyText: { fontSize: 16, fontFamily: "SpaceGrotesk_600SemiBold" },
   emptySubtext: { fontSize: 14, fontFamily: "SpaceGrotesk_400Regular" },
   list: { padding: 16 },
   fileCard: { flexDirection: "row", alignItems: "center", borderRadius: 12, padding: 14, marginBottom: 8, gap: 12 },

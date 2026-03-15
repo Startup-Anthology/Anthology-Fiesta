@@ -146,7 +146,7 @@ export default function FriendlyDateTimePicker({ value, onChange, label }: Frien
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   label: {
     fontSize: 12,
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
     color: colors.textSecondary,
     textTransform: "uppercase",
     marginBottom: 6,
@@ -177,7 +177,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   pickerSection: {},
   pickerLabel: {
     fontSize: 11,
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
     color: colors.textTertiary,
     textTransform: "uppercase",
     marginBottom: 6,

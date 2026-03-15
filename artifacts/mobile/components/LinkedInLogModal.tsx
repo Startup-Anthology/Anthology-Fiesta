@@ -105,7 +105,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontFamily: "LeagueSpartan_700Bold",
+    fontFamily: "SpaceGrotesk_700Bold",
     color: colors.text,
     marginBottom: 16,
   },

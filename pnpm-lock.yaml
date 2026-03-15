@@ -276,15 +276,6 @@ importers:
       '@babel/core':
         specifier: ^7.25.2
         version: 7.29.0
-      '@expo-google-fonts/lato':
-        specifier: ^0.4.1
-        version: 0.4.1
-      '@expo-google-fonts/league-spartan':
-        specifier: ^0.4.2
-        version: 0.4.2
-      '@expo-google-fonts/montserrat':
-        specifier: ^0.4.2
-        version: 0.4.2
       '@expo-google-fonts/space-grotesk':
         specifier: ^0.4.1
         version: 0.4.1
@@ -1274,15 +1265,6 @@ packages:
   '@eslint/plugin-kit@0.6.1':
     resolution: {integrity: sha512-iH1B076HoAshH1mLpHMgwdGeTs0CYwL0SPMkGuSebZrwBp16v415e9NZXg2jtrqPVQjf6IANe2Vtlr5KswtcZQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
-
-  '@expo-google-fonts/lato@0.4.1':
-    resolution: {integrity: sha512-U2g1sOBFSNgmxhh/Ywgyi7Hx6T3UielX2nmZuP55wqndrIEyNX3HeUQIhhQDe2vZ+nvZI0Z2vTcVjmOn/BM9ow==}
-
-  '@expo-google-fonts/league-spartan@0.4.2':
-    resolution: {integrity: sha512-ab+9zpXBOz09ymJIKTxlun7d3G7twGNg9Yo7mBC3vGxH047wz1uMevTmbqGk9/RF76wJvgzwA+MOGtEtqsxwZw==}
-
-  '@expo-google-fonts/montserrat@0.4.2':
-    resolution: {integrity: sha512-Xyq7rKJhhZOE1Xk4wKSSVoUeOkFmQEMhtZ3pdFrgYckGZMs115Apmld1AI8Ju+yrl5GzDdfRCCqRr33dvEDYUA==}
 
   '@expo-google-fonts/space-grotesk@0.4.1':
     resolution: {integrity: sha512-ZVQYw4Ok/pgcSJiufP8oRZE3AVxS9xtmKEUfsurbHkHNdMc/GA1gDXP9G4Cr7KL4KqSc0haexR2TuMigotCn4Q==}
@@ -7714,12 +7696,6 @@ snapshots:
     dependencies:
       '@eslint/core': 1.1.1
       levn: 0.4.1
-
-  '@expo-google-fonts/lato@0.4.1': {}
-
-  '@expo-google-fonts/league-spartan@0.4.2': {}
-
-  '@expo-google-fonts/montserrat@0.4.2': {}
 
   '@expo-google-fonts/space-grotesk@0.4.1': {}
 

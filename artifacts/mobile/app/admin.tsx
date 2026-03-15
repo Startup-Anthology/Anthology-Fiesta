@@ -549,7 +549,7 @@ const createStyles = (colors: ThemeColors): AdminStyles => StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: colors.text,
-    fontFamily: "LeagueSpartan_700Bold",
+    fontFamily: "SpaceGrotesk_700Bold",
   },
   tabBar: {
     flexDirection: "row",
@@ -729,7 +729,7 @@ const createStyles = (colors: ThemeColors): AdminStyles => StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#fff",
-    fontFamily: "LeagueSpartan_600SemiBold",
+    fontFamily: "SpaceGrotesk_600SemiBold",
   },
   filePickerButton: {
     flexDirection: "row",

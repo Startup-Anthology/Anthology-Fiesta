@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
+import { SkeletonCard, SkeletonStatCard } from "@/components/Skeleton";
 import {
-  ActivityIndicator,
   Image,
   Platform,
   Pressable,
@@ -47,9 +47,21 @@ export default function DashboardScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.center, { paddingTop: topPad, backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
+      <ScrollView
+        style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}
+        contentContainerStyle={styles.content}
+        scrollEnabled={false}
+      >
+        <View style={styles.statsGrid}>
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+          <SkeletonStatCard />
+        </View>
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </ScrollView>
     );
   }
 
@@ -142,12 +154,12 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: Layout.sectionSpacing },
   headerLogo: { width: 44, height: 44, borderRadius: Layout.cardRadius, justifyContent: "center", alignItems: "center" },
   headerLogoImage: { width: 28, height: 28 },
-  greeting: { fontSize: 24, fontFamily: "Lato_700Bold" },
-  subtitle: { fontSize: 14, fontFamily: "Montserrat_500Medium", marginTop: 2 },
+  greeting: { fontSize: 24, fontFamily: "SpaceGrotesk_700Bold" },
+  subtitle: { fontSize: 14, fontFamily: "SpaceGrotesk_500Medium", marginTop: 2 },
   betaCard: { borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginBottom: Layout.sectionSpacing },
   betaHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
-  betaTitle: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", color: "#fff", flex: 1 },
-  betaCount: { fontSize: 16, fontFamily: "Lato_700Bold" },
+  betaTitle: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: "#fff", flex: 1 },
+  betaCount: { fontSize: 16, fontFamily: "SpaceGrotesk_700Bold" },
   progressBg: { height: 6, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 3 },
   progressFill: { height: 6, borderRadius: 3 },
   statsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 14, marginBottom: Layout.sectionSpacing },
@@ -159,10 +171,10 @@ const styles = StyleSheet.create({
     minWidth: 140,
   },
   statIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: "center", alignItems: "center", marginBottom: 10 },
-  statValue: { fontSize: 24, fontFamily: "Lato_700Bold" },
-  statLabel: { fontSize: 12, fontFamily: "Montserrat_400Regular", marginTop: 2 },
+  statValue: { fontSize: 24, fontFamily: "SpaceGrotesk_700Bold" },
+  statLabel: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular", marginTop: 2 },
   section: { marginBottom: Layout.sectionSpacing },
-  sectionTitle: { fontSize: 18, fontFamily: "LeagueSpartan_600SemiBold", marginBottom: 14 },
+  sectionTitle: { fontSize: 18, fontFamily: "SpaceGrotesk_600SemiBold", marginBottom: 14 },
   followUpCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -179,9 +191,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
-  avatarText: { fontSize: 16, fontFamily: "LeagueSpartan_600SemiBold", color: "#fff" },
+  avatarText: { fontSize: 16, fontFamily: "SpaceGrotesk_600SemiBold", color: "#fff" },
   followUpInfo: { flex: 1 },
-  followUpName: { fontSize: 15, fontFamily: "LeagueSpartan_600SemiBold" },
+  followUpName: { fontSize: 15, fontFamily: "SpaceGrotesk_600SemiBold" },
   followUpCompany: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular" },
   priorityDot: { width: 10, height: 10, borderRadius: 5 },
   allClear: { fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", paddingVertical: 12 },

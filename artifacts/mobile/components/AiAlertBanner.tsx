@@ -94,8 +94,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   bannerContent: { flex: 1 },
-  bannerAgent: { fontSize: 11, fontFamily: "LeagueSpartan_600SemiBold", marginBottom: 2 },
-  bannerTitle: { fontSize: 14, fontFamily: "LeagueSpartan_600SemiBold", marginBottom: 2 },
+  bannerAgent: { fontSize: 11, fontFamily: "SpaceGrotesk_600SemiBold", marginBottom: 2 },
+  bannerTitle: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", marginBottom: 2 },
   bannerDesc: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular", lineHeight: 16 },
   dismissBtn: { padding: 4 },
 });
