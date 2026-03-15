@@ -61,6 +61,11 @@
       "sourceType": "github",
       "computedHash": "4946473a374cc2caf51871e51e40051025703517bb578ce9b01b6cadf72a0c0e"
     },
+    "deployment-pipeline-design": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "c7dddefd50c9904a883b7471fb64b7b129e976d5d3c6066b3545cac13a324d16"
+    },
     "e2e-testing-patterns": {
       "source": "wshobson/agents",
       "sourceType": "github",
