@@ -13,10 +13,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/lib/theme";
 import { useAuth } from "@/lib/auth";
 
-const BASE_MENU_ITEMS = [
-  { label: "Workflows", icon: "git-branch" as const, route: "/comms" },
-  { label: "Files", icon: "folder" as const, route: "/files" },
-  { label: "Settings", icon: "settings" as const, route: "/settings" },
+const BASE_MENU_ITEMS: { label: string; icon: string; route: string }[] = [
+  { label: "Workflows", icon: "git-branch", route: "/comms" },
+  { label: "Files", icon: "folder", route: "/files" },
+  { label: "Settings", icon: "settings", route: "/settings" },
 ];
 
 export function HamburgerMenu() {
@@ -78,7 +78,7 @@ export function HamburgerMenu() {
                 accessibilityRole="button"
                 accessibilityLabel={item.label}
               >
-                <Feather name={item.icon} size={18} color={colors.accent} />
+                <Feather name={item.icon as any} size={18} color={colors.accent} />
                 <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
               </Pressable>
             ))}

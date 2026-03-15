@@ -157,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             code_verifier: request.codeVerifier,
             redirect_uri: request.redirectUri,
             state,
-            nonce: request.nonce,
+            nonce: (request as any).nonce,
             ...(iss ? { iss } : {}),
           }),
         });

@@ -531,7 +531,7 @@ function ImportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
   );
 }
 
-const createStyles = (colors: ThemeColors): AdminStyles => StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
