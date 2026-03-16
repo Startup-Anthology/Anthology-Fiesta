@@ -9,7 +9,7 @@ id = "artifacts/mockup-sandbox"
 [deployment]
 router = "application"
 deploymentTarget = "autoscale"
-build = ["sh", "-c", "pnpm run check:all && pnpm --filter db push && pnpm -r --filter '!@workspace/mockup-sandbox' --if-present run build"]
+build = ["sh", "-c", "pnpm run check:all && pnpm --filter @workspace/db run predeploy && pnpm --filter @workspace/db run push && pnpm -r --filter '!@workspace/mockup-sandbox' --if-present run build"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
