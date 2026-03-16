@@ -8,24 +8,22 @@ import { getGmailHistory, getGmailMessage, setupGmailWatch, getGmailProfile } fr
 const router = Router();
 const googleAuthClient = new OAuth2Client();
 
-function getWebhookAudience(req: Request): string {
+function getWebhookAudience(): string {
   if (process.env.GMAIL_WEBHOOK_AUDIENCE) return process.env.GMAIL_WEBHOOK_AUDIENCE;
-  const proto = req.headers["x-forwarded-proto"] || "https";
-  const host = req.headers["x-forwarded-host"] || req.headers["host"];
-  if (host) return `${proto}://${host}/api/gmail/webhook`;
   const domains = process.env.REPLIT_DOMAINS;
   if (domains) return `https://${domains.split(",")[0].trim()}/api/gmail/webhook`;
   return "";
 }
 
+const WEBHOOK_AUDIENCE = getWebhookAudience();
+
 async function verifyPubSubToken(req: Request): Promise<boolean> {
+  if (!WEBHOOK_AUDIENCE) return false;
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) return false;
   const token = authHeader.slice(7);
-  const audience = getWebhookAudience(req);
-  if (!audience) return false;
   try {
-    await googleAuthClient.verifyIdToken({ idToken: token, audience });
+    await googleAuthClient.verifyIdToken({ idToken: token, audience: WEBHOOK_AUDIENCE });
     return true;
   } catch {
     return false;
