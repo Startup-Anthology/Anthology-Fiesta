@@ -8,8 +8,9 @@ Fiesta is a mobile CRM built for solo founders — manage your leads, contacts, 
 - **Business connections** — Contact management with relationship types, follow-up queue, priority levels, and LinkedIn logging
 - **Communications** — Email templates, drip sequences, and broadcast campaigns via Gmail
 - **AI assistant** — Three-agent team (Coach, Cleo, Miles) for CRM queries and founder coaching
-- **Calendar** — Event management synced to Google Calendar
+- **Calendar** — Event management synced two-ways with Google Calendar (auto-syncs on tab open)
 - **File library** — Pitch decks, one-pagers attached to leads/contacts and sent as email attachments
+- **Audit trail** — Every create/update/delete is logged with full before/after snapshots; one-tap rollback to any revision
 
 ## Running locally
 
@@ -32,6 +33,16 @@ No TestFlight or Apple Developer Program needed.
 3. In Expo Go, tap **Enter URL manually** and paste it
 
 The app connects directly to the Replit dev server. Hot reload is enabled — changes reflect instantly.
+
+## Installing as a PWA (web)
+
+When deployed, the app is a fully installable Progressive Web App:
+
+1. Open the deployed URL in Safari (iOS) or Chrome (desktop/Android)
+2. Tap **Share → Add to Home Screen** (iOS) or the install icon in the address bar (Chrome)
+3. The app installs with its own icon, runs full-screen, and caches assets for fast load times
+
+Hashed JS/CSS assets are cached for one year. HTML is never cached so updates are picked up immediately on next open.
 
 ## Authentication
 
@@ -87,8 +98,11 @@ The admin panel (accessible from the hamburger menu) includes user management, d
 ## Tech stack
 
 - **Mobile**: Expo SDK 54, React Native, Expo Router, TanStack React Query
+- **Web/PWA**: Metro web bundler, SPA serving with long-lived asset cache, installable on iOS/Android/desktop
 - **API**: Express 5, TypeScript, Drizzle ORM
 - **Database**: PostgreSQL
 - **Auth**: Replit OAuth (OIDC/PKCE), expo-auth-session, expo-secure-store
 - **AI**: OpenAI via Replit AI proxy (gpt-5.2 / gpt-5-mini / gpt-5-nano)
+- **Integrations**: Gmail, Google Calendar, Notion (all via Replit Integrations OAuth), Horizon CRM (API key)
+- **Typography**: Space Grotesk (Regular / Medium / SemiBold / Bold)
 - **Monorepo**: pnpm workspaces
