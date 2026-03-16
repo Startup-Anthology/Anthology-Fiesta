@@ -4,6 +4,8 @@ import { startDripWorker } from "./lib/dripWorker";
 import { startInsightWorker } from "./lib/ai/insightWorker";
 import { seedAgentRegistry } from "./lib/ai/agentDefinitions";
 import { verifyModelAvailability } from "./lib/ai/orchestrator";
+import { db } from "@workspace/db";
+import { sql } from "drizzle-orm";
 
 const rawPort = process.env["PORT"];
 
@@ -21,6 +23,18 @@ if (Number.isNaN(port) || port <= 0) {
 
 app.listen(port, async () => {
   console.log(`Server listening on port ${port}`);
+  // Phase 1 cleanup: remove orphaned app_settings rows with NULL user_id
+  // so Phase 2 can safely add NOT NULL constraint. Remove this block in Phase 2.
+  try {
+    const result = await db.execute(sql`DELETE FROM app_settings WHERE user_id IS NULL`);
+    const count = Array.isArray(result) ? result.length : (result as any).rowCount ?? 0;
+    if (count > 0) {
+      console.log(`Cleaned up ${count} app_settings rows with NULL user_id`);
+    }
+  } catch (err) {
+    console.error("app_settings NULL cleanup error:", err);
+  }
+
   try {
     await seedDefaults();
   } catch (err) {
