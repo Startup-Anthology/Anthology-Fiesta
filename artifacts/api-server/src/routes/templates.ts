@@ -68,7 +68,7 @@ router.delete("/templates/:id", async (req: Request, res: Response, next: NextFu
     const [before] = await db.select().from(emailTemplatesTable).where(and(eq(emailTemplatesTable.id, templateId), eq(emailTemplatesTable.userId, userId)));
     if (!before) throw notFound();
 
-    await db.delete(emailTemplatesTable).where(eq(emailTemplatesTable.id, templateId));
+    await db.delete(emailTemplatesTable).where(and(eq(emailTemplatesTable.id, templateId), eq(emailTemplatesTable.userId, userId)));
     logAudit("template", templateId, "delete", userId, before as Record<string, unknown>, null);
     res.status(204).send();
   } catch (err) {

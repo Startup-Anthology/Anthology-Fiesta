@@ -42,7 +42,7 @@ router.delete("/triggers/:id", async (req: Request, res: Response, next: NextFun
     const [before] = await db.select().from(triggerRulesTable).where(and(eq(triggerRulesTable.id, triggerId), eq(triggerRulesTable.userId, userId)));
     if (!before) throw notFound();
 
-    await db.delete(triggerRulesTable).where(eq(triggerRulesTable.id, triggerId));
+    await db.delete(triggerRulesTable).where(and(eq(triggerRulesTable.id, triggerId), eq(triggerRulesTable.userId, userId)));
     logAudit("trigger", triggerId, "delete", userId, before as Record<string, unknown>, null);
     res.status(204).send();
   } catch (err) {

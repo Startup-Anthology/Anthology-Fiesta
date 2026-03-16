@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
 import { db } from "@workspace/db";
 import { dripSequencesTable, dripSequenceStepsTable, dripEnrollmentsTable, calendarEventsTable, leadsTable, contactsTable } from "@workspace/db";
-import { eq, sql, and } from "drizzle-orm";
+import { eq, sql, and, isNull } from "drizzle-orm";
 import { createCalendarEvent } from "../lib/calendar";
 import { logAudit } from "../lib/audit";
 import { parseIntParam, notFound } from "../lib/errors";
@@ -74,7 +74,7 @@ router.delete("/sequences/:id", async (req: Request, res: Response, next: NextFu
     }
     await db.delete(dripSequenceStepsTable).where(eq(dripSequenceStepsTable.sequenceId, id));
     await db.delete(dripEnrollmentsTable).where(eq(dripEnrollmentsTable.sequenceId, id));
-    await db.delete(dripSequencesTable).where(eq(dripSequencesTable.id, id));
+    await db.delete(dripSequencesTable).where(and(eq(dripSequencesTable.id, id), eq(dripSequencesTable.userId, userId)));
     logAudit("sequence", id, "delete", userId, before as Record<string, unknown>, null);
     res.status(204).send();
   } catch (err) {
@@ -107,25 +107,52 @@ router.post("/sequences/:id/enroll", async (req: Request, res: Response, next: N
     const [sequence] = await db.select().from(dripSequencesTable).where(and(eq(dripSequencesTable.id, seqId), eq(dripSequencesTable.userId, userId)));
     if (!sequence) throw notFound("Sequence not found");
 
-    if (req.body.leadId) {
-      const leadId = parseIntParam(String(req.body.leadId), "leadId");
-      const [lead] = await db.select().from(leadsTable).where(and(eq(leadsTable.id, leadId), eq(leadsTable.userId, userId)));
+    const parsedLeadId = req.body.leadId ? parseIntParam(String(req.body.leadId), "leadId") : null;
+    const parsedContactId = req.body.contactId ? parseIntParam(String(req.body.contactId), "contactId") : null;
+
+    if (parsedLeadId) {
+      const [lead] = await db.select().from(leadsTable).where(and(eq(leadsTable.id, parsedLeadId), eq(leadsTable.userId, userId)));
       if (!lead) throw notFound("Lead not found");
     }
-    if (req.body.contactId) {
-      const contactId = parseIntParam(String(req.body.contactId), "contactId");
-      const [contact] = await db.select().from(contactsTable).where(and(eq(contactsTable.id, contactId), eq(contactsTable.userId, userId)));
+    if (parsedContactId) {
+      const [contact] = await db.select().from(contactsTable).where(and(eq(contactsTable.id, parsedContactId), eq(contactsTable.userId, userId)));
       if (!contact) throw notFound("Contact not found");
     }
 
-    const [enrollment] = await db.insert(dripEnrollmentsTable).values({
-      sequenceId: seqId,
-      leadId: req.body.leadId || null,
-      contactId: req.body.contactId || null,
-      currentStep: 0,
-      status: "active",
-      nextSendAt: new Date(),
-    }).returning();
+    const existingEnrollment = await db.select().from(dripEnrollmentsTable).where(
+      and(
+        eq(dripEnrollmentsTable.sequenceId, seqId),
+        parsedLeadId
+          ? eq(dripEnrollmentsTable.leadId, parsedLeadId)
+          : isNull(dripEnrollmentsTable.leadId),
+        parsedContactId
+          ? eq(dripEnrollmentsTable.contactId, parsedContactId)
+          : isNull(dripEnrollmentsTable.contactId),
+      )
+    );
+    if (existingEnrollment.length > 0) {
+      res.status(409).json({ error: "Already enrolled", enrollment: existingEnrollment[0] });
+      return;
+    }
+
+    let enrollment;
+    try {
+      const [row] = await db.insert(dripEnrollmentsTable).values({
+        sequenceId: seqId,
+        leadId: parsedLeadId,
+        contactId: parsedContactId,
+        currentStep: 0,
+        status: "active",
+        nextSendAt: new Date(),
+      }).returning();
+      enrollment = row;
+    } catch (insertErr: any) {
+      if (insertErr?.code === "23505") {
+        res.status(409).json({ error: "Already enrolled" });
+        return;
+      }
+      throw insertErr;
+    }
 
     if (req.body.addToCalendar && sequence) {
       const now = new Date();
@@ -147,8 +174,8 @@ router.post("/sequences/:id/enroll", async (req: Request, res: Response, next: N
         description: `Enrolled in drip sequence "${sequence.name}"`,
         startTime: now,
         endTime: endTime,
-        leadId: req.body.leadId || null,
-        contactId: req.body.contactId || null,
+        leadId: parsedLeadId,
+        contactId: parsedContactId,
         eventType: "follow-up",
         userId,
       }).returning();

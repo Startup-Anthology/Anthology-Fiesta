@@ -43,7 +43,7 @@ router.patch("/activities/:id", async (req: Request, res: Response, next: NextFu
     const [existing] = await db.select().from(activitiesTable).where(and(eq(activitiesTable.id, id), eq(activitiesTable.userId, userId)));
     if (!existing) throw notFound("Activity not found");
 
-    const [updated] = await db.update(activitiesTable).set(data).where(eq(activitiesTable.id, id)).returning();
+    const [updated] = await db.update(activitiesTable).set(data).where(and(eq(activitiesTable.id, id), eq(activitiesTable.userId, userId))).returning();
     res.json(updated);
   } catch (err) {
     next(err);

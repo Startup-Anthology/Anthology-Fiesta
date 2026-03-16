@@ -139,7 +139,7 @@ router.patch("/calendar/events/:id", async (req: Request, res: Response, next: N
     if (data.endTime !== undefined) updatePayload.endTime = new Date(data.endTime);
     if (data.eventType !== undefined) updatePayload.eventType = data.eventType;
 
-    const [updated] = await db.update(calendarEventsTable).set(updatePayload).where(eq(calendarEventsTable.id, id)).returning();
+    const [updated] = await db.update(calendarEventsTable).set(updatePayload).where(and(eq(calendarEventsTable.id, id), eq(calendarEventsTable.userId, userId))).returning();
 
     if (existing.googleEventId) {
       try {
@@ -178,7 +178,7 @@ router.delete("/calendar/events/:id", async (req: Request, res: Response, next: 
       }
     }
 
-    await db.delete(calendarEventsTable).where(eq(calendarEventsTable.id, id));
+    await db.delete(calendarEventsTable).where(and(eq(calendarEventsTable.id, id), eq(calendarEventsTable.userId, userId)));
     logAudit("calendar_event", id, "delete", userId, event as Record<string, unknown>, null);
     res.status(204).send();
   } catch (err) {

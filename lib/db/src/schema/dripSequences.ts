@@ -10,7 +10,7 @@ export const dripSequencesTable = pgTable("drip_sequences", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   targetAudience: text("target_audience").notNull().default("general"),
-  userId: varchar("user_id").references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [

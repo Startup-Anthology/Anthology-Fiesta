@@ -9,7 +9,7 @@ export const emailTemplatesTable = pgTable("email_templates", {
   audience: text("audience").notNull().default("general"),
   subject: text("subject").notNull(),
   body: text("body").notNull(),
-  userId: varchar("user_id").references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [

@@ -7,7 +7,7 @@ export const settingsTable = pgTable("app_settings", {
   id: serial("id").primaryKey(),
   key: text("key").notNull(),
   value: text("value").notNull(),
-  userId: varchar("user_id").references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("idx_settings_user_id").on(table.userId),

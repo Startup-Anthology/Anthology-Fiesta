@@ -79,7 +79,7 @@ router.delete("/contacts/:id", async (req: Request, res: Response, next: NextFun
     const userId = req.user!.id;
     const contactId = parseIntParam(req.params.id);
     const before = await findOwned(contactsTable, contactId, userId);
-    await db.delete(contactsTable).where(eq(contactsTable.id, contactId));
+    await db.delete(contactsTable).where(and(eq(contactsTable.id, contactId), eq(contactsTable.userId, userId)));
     logAudit("contact", contactId, "delete", userId, before as Record<string, unknown>, null);
     res.status(204).send();
   } catch (err) {

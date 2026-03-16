@@ -68,7 +68,7 @@ router.delete("/leads/:id", async (req: Request, res: Response, next: NextFuncti
     const userId = req.user!.id;
     const leadId = parseIntParam(req.params.id);
     const before = await findOwned(leadsTable, leadId, userId);
-    await db.delete(leadsTable).where(eq(leadsTable.id, leadId));
+    await db.delete(leadsTable).where(and(eq(leadsTable.id, leadId), eq(leadsTable.userId, userId)));
     logAudit("lead", leadId, "delete", userId, before as Record<string, unknown>, null);
     res.status(204).send();
   } catch (err) {

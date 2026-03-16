@@ -9,7 +9,7 @@ export const triggerRulesTable = pgTable("trigger_rules", {
   actionType: text("action_type").notNull(),
   sequenceId: integer("sequence_id"),
   followUpDays: integer("follow_up_days"),
-  userId: varchar("user_id").references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("idx_trigger_rules_user_id").on(table.userId),

@@ -14,7 +14,7 @@ export const leadsTable = pgTable("leads", {
   profilePictureUrl: text("profile_picture_url"),
   isBeta: boolean("is_beta").notNull().default(false),
   notionPageId: text("notion_page_id"),
-  userId: varchar("user_id").references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [

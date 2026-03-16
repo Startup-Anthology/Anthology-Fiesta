@@ -11,7 +11,7 @@ export const filesTable = pgTable("files", {
   mimeType: text("mime_type").notNull(),
   size: integer("size").notNull(),
   storageKey: text("storage_key").notNull(),
-  userId: varchar("user_id").references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("idx_files_user_id").on(table.userId),

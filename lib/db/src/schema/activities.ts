@@ -16,7 +16,7 @@ export const activitiesTable = pgTable("activities", {
   gmailThreadId: text("gmail_thread_id"),
   gmailLink: text("gmail_link"),
   notionPageId: text("notion_page_id"),
-  userId: varchar("user_id").references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("idx_activities_user_id").on(table.userId),

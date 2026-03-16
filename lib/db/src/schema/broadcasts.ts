@@ -12,7 +12,7 @@ export const broadcastsTable = pgTable("broadcasts", {
   recipientCount: integer("recipient_count").notNull().default(0),
   status: text("status").notNull().default("draft"),
   sentAt: timestamp("sent_at", { withTimezone: true }),
-  userId: varchar("user_id").references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("idx_broadcasts_user_id").on(table.userId),

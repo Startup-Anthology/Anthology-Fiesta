@@ -156,7 +156,7 @@ router.delete("/ai/conversations/:id", async (req: Request, res: Response, next:
       return;
     }
 
-    await db.delete(conversations).where(eq(conversations.id, convId));
+    await db.delete(conversations).where(and(eq(conversations.id, convId), eq(conversations.userId, userId)));
     res.status(204).send();
   } catch (err) {
     next(err);
