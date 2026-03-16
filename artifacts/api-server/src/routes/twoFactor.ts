@@ -186,12 +186,12 @@ router.post("/2fa/email/send", async (req: Request, res: Response, next: NextFun
     }
 
     try {
-      const { sendEmail } = await import("../lib/gmail");
-      await sendEmail({
-        to: req.user!.email,
-        subject: "Fiesta - Your verification code",
-        body: `Your Fiesta admin verification code is: ${code}\n\nThis code expires in 10 minutes.`,
-      });
+      const { sendGmailEmail } = await import("../lib/gmail");
+      await sendGmailEmail(
+        req.user!.email,
+        "Fiesta - Your verification code",
+        `Your Fiesta admin verification code is: ${code}\n\nThis code expires in 10 minutes.`,
+      );
       res.json({ sent: true });
     } catch (emailErr) {
       console.error("Failed to send 2FA email:", emailErr);

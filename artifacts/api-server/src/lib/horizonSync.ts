@@ -49,7 +49,7 @@ export async function fetchHorizonUsers(): Promise<HorizonUser[]> {
     if (res.status === 429) throw new Error("Horizon API rate limited (429). Try again later.");
     throw new Error(`Horizon users API error ${res.status}: ${text || "Unknown error"}`);
   }
-  return res.json();
+  return res.json() as Promise<HorizonUser[]>;
 }
 
 export async function fetchHorizonContacts(): Promise<HorizonContact[]> {
@@ -63,7 +63,7 @@ export async function fetchHorizonContacts(): Promise<HorizonContact[]> {
     if (res.status === 429) throw new Error("Horizon API rate limited (429). Try again later.");
     throw new Error(`Horizon contacts API error ${res.status}: ${text || "Unknown error"}`);
   }
-  return res.json();
+  return res.json() as Promise<HorizonContact[]>;
 }
 
 async function getDefaultUserId(): Promise<string | null> {

@@ -242,6 +242,9 @@ importers:
       eslint:
         specifier: ^10.0.3
         version: 10.0.3(jiti@2.6.1)
+      openai:
+        specifier: ^6.27.0
+        version: 6.29.0(ws@8.19.0)(zod@3.25.76)
       tsx:
         specifier: 'catalog:'
         version: 4.21.0
@@ -13079,6 +13082,11 @@ snapshots:
       define-lazy-prop: 2.0.0
       is-docker: 2.2.1
       is-wsl: 2.2.0
+
+  openai@6.29.0(ws@8.19.0)(zod@3.25.76):
+    optionalDependencies:
+      ws: 8.19.0
+      zod: 3.25.76
 
   openai@6.29.0(ws@8.19.0)(zod@4.3.6):
     optionalDependencies:

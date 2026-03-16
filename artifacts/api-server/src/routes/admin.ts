@@ -77,7 +77,7 @@ router.put("/admin/users/:id", requireAdmin, async (req: Request, res: Response,
 
     const [updated] = await db.update(usersTable)
       .set(updates)
-      .where(eq(usersTable.id, req.params.id))
+      .where(eq(usersTable.id, String(req.params.id)))
       .returning();
 
     if (!updated) throw notFound("User not found");
@@ -101,7 +101,7 @@ router.delete("/admin/users/:id", requireAdmin, async (req: Request, res: Respon
     if (req.params.id === req.user!.id) throw badRequest("You cannot delete your own account");
 
     const [deleted] = await db.delete(usersTable)
-      .where(eq(usersTable.id, req.params.id))
+      .where(eq(usersTable.id, String(req.params.id)))
       .returning();
 
     if (!deleted) throw notFound("User not found");
@@ -184,9 +184,6 @@ router.post("/admin/import/:type", requireAdmin, async (req: Request, res: Respo
           await db.insert(leadsTable).values({
             name: row.name || "Unnamed",
             email: row.email || "",
-            company: row.company || null,
-            title: row.title || null,
-            phone: row.phone || null,
             status: row.status || "new",
             source: row.source || null,
             notes: row.notes || null,

@@ -88,7 +88,8 @@ router.post("/gmail/watch", async (req: Request, res: Response) => {
   try {
     const { topicName } = req.body;
     if (!topicName) {
-      return res.status(400).json({ error: "topicName is required" });
+      res.status(400).json({ error: "topicName is required" });
+      return;
     }
     const result = await setupGmailWatch(topicName);
     lastHistoryId = String(result.historyId || "");

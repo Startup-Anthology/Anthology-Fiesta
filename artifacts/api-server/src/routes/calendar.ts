@@ -146,7 +146,7 @@ router.patch("/calendar/events/:id", async (req: Request, res: Response, next: N
         await updateCalendarEvent({
           googleEventId: existing.googleEventId,
           title: data.title,
-          description: data.description,
+          description: data.description ?? undefined,
           startTime: data.startTime,
           endTime: data.endTime,
         });

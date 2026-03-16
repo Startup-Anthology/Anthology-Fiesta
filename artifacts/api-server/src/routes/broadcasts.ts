@@ -47,7 +47,7 @@ router.get("/broadcast-preview", async (req: Request, res: Response, next: NextF
 router.post("/broadcasts", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
-    const { subject, templateId, leadStatuses, contactTypes } = validate(createBroadcastSchema, req.body);
+    const { subject, templateId, leadStatuses = [], contactTypes = [] } = validate(createBroadcastSchema, req.body);
 
     let recipients: { name: string; email: string; id: number; isLead: boolean; company?: string | null }[] = [];
     if (leadStatuses.length > 0) {

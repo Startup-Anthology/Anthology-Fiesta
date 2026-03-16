@@ -20,8 +20,9 @@ export function badRequest(message: string) {
   return new AppError(400, message);
 }
 
-export function parseIntParam(value: string, paramName = "id"): number {
-  const n = Number(value);
+export function parseIntParam(value: string | string[], paramName = "id"): number {
+  const str = Array.isArray(value) ? value[0] : value;
+  const n = Number(str);
   if (!Number.isFinite(n) || n <= 0 || !Number.isInteger(n)) {
     throw new AppError(400, `Invalid ${paramName}: must be a positive integer`);
   }

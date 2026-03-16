@@ -1,6 +1,6 @@
 async function notionProxy(path: string, method: string = "GET", body?: any) {
   try {
-    const connectors = (await import("@replit/connectors-sdk")).default;
+    const connectors = (await import("@replit/connectors-sdk")).default as any;
     const options: any = { method };
     if (body) {
       options.body = JSON.stringify(body);

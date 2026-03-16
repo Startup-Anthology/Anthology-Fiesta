@@ -165,8 +165,9 @@ async function runAgentWithToolsInternal(
     agentMessages.push(msg as ChatCompletionMessage);
 
     for (const toolCall of msg.tool_calls) {
-      const args = parseToolArgs(toolCall.function.arguments);
-      const result = await executeToolCall(toolCall.function.name, args, userId);
+      const tc = toolCall as { id: string; function: { name: string; arguments: string } };
+      const args = parseToolArgs(tc.function.arguments);
+      const result = await executeToolCall(tc.function.name, args, userId);
       agentMessages.push({
         role: "tool" as const,
         tool_call_id: toolCall.id,
@@ -276,8 +277,9 @@ export async function handleSingleAgent(
     agentMessages.push(msg as ChatCompletionMessage);
 
     for (const toolCall of msg.tool_calls) {
-      const args = parseToolArgs(toolCall.function.arguments);
-      const result = await executeToolCall(toolCall.function.name, args, userId);
+      const tc = toolCall as { id: string; function: { name: string; arguments: string } };
+      const args = parseToolArgs(tc.function.arguments);
+      const result = await executeToolCall(tc.function.name, args, userId);
       agentMessages.push({
         role: "tool" as const,
         tool_call_id: toolCall.id,

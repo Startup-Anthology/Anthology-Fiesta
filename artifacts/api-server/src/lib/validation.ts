@@ -35,8 +35,8 @@ export const createContactSchema = z.object({
   email: z.string().email().nullish(),
   phone: z.string().nullish(),
   notes: z.string().nullish(),
-  lastContactedAt: z.string().nullish(),
-  nextFollowUpAt: z.string().nullish(),
+  lastContactedAt: z.coerce.date().nullish(),
+  nextFollowUpAt: z.coerce.date().nullish(),
   notionPageId: z.string().nullish(),
 });
 
@@ -51,8 +51,8 @@ export const updateContactSchema = z.object({
   email: z.string().email().nullish(),
   phone: z.string().nullish(),
   notes: z.string().nullish(),
-  lastContactedAt: z.string().nullish(),
-  nextFollowUpAt: z.string().nullish(),
+  lastContactedAt: z.coerce.date().nullish(),
+  nextFollowUpAt: z.coerce.date().nullish(),
   notionPageId: z.string().nullish(),
 });
 
@@ -135,8 +135,8 @@ export const sendEmailSchema = z.object({
 export const createBroadcastSchema = z.object({
   subject: z.string().min(1),
   templateId: z.number().int().positive().nullish(),
-  leadStatuses: z.array(z.string().min(1)).optional().default([]),
-  contactTypes: z.array(z.string().min(1)).optional().default([]),
+  leadStatuses: z.array(z.string().min(1)).default([]),
+  contactTypes: z.array(z.string().min(1)).default([]),
 }).refine(
   (data) => data.leadStatuses.length > 0 || data.contactTypes.length > 0,
   { message: "At least one lead status or contact type must be selected" }

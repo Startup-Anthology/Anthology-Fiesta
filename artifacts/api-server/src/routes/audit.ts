@@ -88,7 +88,7 @@ function resolveEntityType(raw: string): string | null {
 async function handleHistory(req: Request, res: Response, next: NextFunction) {
   try {
     const userId = req.user!.id;
-    const rawEntityType = req.params.entityType;
+    const rawEntityType = String(req.params.entityType);
     const entityId = req.params.entityId || req.params.id;
     const limit = Math.min(Number(req.query.limit) || 50, 100);
     const offset = Number(req.query.offset) || 0;
@@ -165,7 +165,7 @@ async function handleHistory(req: Request, res: Response, next: NextFunction) {
 async function handleRollback(req: Request, res: Response, next: NextFunction) {
   try {
     const userId = req.user!.id;
-    const rawEntityType = req.params.entityType;
+    const rawEntityType = String(req.params.entityType);
     const entityId = req.params.entityId || req.params.id;
     const { revisionId } = req.params;
 

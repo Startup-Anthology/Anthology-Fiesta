@@ -231,8 +231,8 @@ Frame insights with Coach's advisory tone — not just data, but guidance. Group
             : `${item.count} of ${item.total} leads stuck`,
       type: category,
       severity: category === "overdue_followups" && item.priority === "high" ? "high" : "medium",
-      leadId: item.id && category === "idle_leads" ? item.id : null,
-      contactId: item.id && (category === "overdue_followups" || category === "stale_relationships") ? item.id : null,
+      leadId: item.id && category === "idle_leads" ? item.id : undefined,
+      contactId: item.id && (category === "overdue_followups" || category === "stale_relationships") ? item.id : undefined,
     }));
   }
 }
