@@ -150,7 +150,7 @@ export default function AIChatScreen() {
         {!isUser && (
           <View style={styles.agentLabel}>
             <View style={[styles.agentDot, { backgroundColor: colors.accent }]} />
-            <Text style={[styles.agentName, { color: colors.accent }]}>Coach</Text>
+            <Text style={[styles.agentName, { color: colors.accent }]}>Forecaster Pro</Text>
           </View>
         )}
         <Text style={[
@@ -211,7 +211,7 @@ export default function AIChatScreen() {
             </Pressable>
           )}
           ListEmptyComponent={
-            <Text style={[styles.emptyText, { color: colors.textTertiary }]}>No conversations yet. Start chatting with Coach!</Text>
+            <Text style={[styles.emptyText, { color: colors.textTertiary }]}>No conversations yet. Start chatting with Forecaster Pro!</Text>
           }
         />
       </View>
@@ -229,10 +229,10 @@ export default function AIChatScreen() {
           <Feather name="clock" size={22} color={colors.text} />
         </Pressable>
         <View style={styles.headerCenter}>
-          <View style={[styles.coachAvatar, { backgroundColor: colors.accent }]}>
-            <Text style={styles.coachAvatarText}>C</Text>
+          <View style={[styles.forecasterAvatar, { backgroundColor: colors.accent }]}>
+            <Text style={styles.forecasterAvatarText}>F</Text>
           </View>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>Coach</Text>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Forecaster Pro</Text>
         </View>
         <Pressable onPress={startNewChat} style={styles.headerBtn} accessibilityRole="button" accessibilityLabel="New conversation">
           <Feather name="edit" size={20} color={colors.text} />
@@ -253,7 +253,7 @@ export default function AIChatScreen() {
             <View style={[styles.emptyIcon, { backgroundColor: colors.accent + "15" }]}>
               <Feather name="message-circle" size={32} color={colors.accent} />
             </View>
-            <Text style={[styles.emptyChatTitle, { color: colors.text }]}>Talk to Coach</Text>
+            <Text style={[styles.emptyChatTitle, { color: colors.text }]}>Talk to Forecaster Pro</Text>
             <Text style={[styles.emptyChatSub, { color: colors.textSecondary }]}>
               Ask about your pipeline, contacts, follow-ups, or anything about the app.
             </Text>
@@ -264,7 +264,7 @@ export default function AIChatScreen() {
       <View style={[styles.inputBar, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
         <TextInput
           style={[styles.input, { color: colors.text, backgroundColor: colors.background }]}
-          placeholder="Message Coach..."
+          placeholder="Message Forecaster Pro..."
           placeholderTextColor={colors.textTertiary}
           value={inputText}
           onChangeText={setInputText}
@@ -272,7 +272,7 @@ export default function AIChatScreen() {
           maxLength={2000}
           returnKeyType="default"
           editable={!isSending}
-          accessibilityLabel="Message to Coach"
+          accessibilityLabel="Message to Forecaster Pro"
         />
         <Pressable
           onPress={sendMessage}
@@ -308,8 +308,8 @@ const styles = StyleSheet.create({
   },
   headerBtn: { padding: 8 },
   headerCenter: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  coachAvatar: { width: 28, height: 28, borderRadius: 14, justifyContent: "center", alignItems: "center" },
-  coachAvatarText: { fontSize: 14, fontFamily: "SpaceGrotesk_700Bold", color: "#fff" },
+  forecasterAvatar: { width: 28, height: 28, borderRadius: 14, justifyContent: "center", alignItems: "center" },
+  forecasterAvatarText: { fontSize: 14, fontFamily: "SpaceGrotesk_700Bold", color: "#fff" },
   headerTitle: { fontSize: 18, fontFamily: "SpaceGrotesk_600SemiBold" },
   messageList: { padding: Layout.screenPadding, paddingBottom: 20, flexGrow: 1 },
   messageBubble: { borderRadius: 16, padding: 14, marginBottom: 10, maxWidth: "85%" },

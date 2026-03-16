@@ -183,7 +183,7 @@ async function frameInsightsWithAgent(
   const agentDef = AGENT_DEFINITIONS[agent];
   const coachDef = AGENT_DEFINITIONS.coach;
 
-  const prompt = `You are Coach, presenting ${agentDef.displayName}'s findings as actionable insight cards for the CRM dashboard.
+  const prompt = `You are Forecaster Pro, presenting ${agentDef.displayName}'s findings as actionable insight cards for the CRM dashboard.
 
 ${agentDef.displayName}'s domain: ${agentDef.personality}
 
@@ -191,14 +191,14 @@ Category: ${category}
 Data: ${JSON.stringify(items)}
 
 Generate concise insight cards. For each actionable insight, respond with a JSON array of objects with these fields:
-- title: Short, action-oriented title from Coach's perspective (max 60 chars)
+- title: Short, action-oriented title from Forecaster Pro's perspective (max 60 chars)
 - description: Brief explanation with specific details (max 200 chars)
 - type: "${category}"
 - severity: "high", "medium", or "low" based on urgency
 - leadId: (number or null) if this is about a specific lead
 - contactId: (number or null) if this is about a specific contact
 
-Frame insights with Coach's advisory tone — not just data, but guidance. Group related items when possible. Max 5 insights per category. Respond with ONLY the JSON array.`;
+Frame insights with Forecaster Pro's advisory tone — not just data, but guidance. Group related items when possible. Max 5 insights per category. Respond with ONLY the JSON array.`;
 
   try {
     const response = await openai.chat.completions.create({

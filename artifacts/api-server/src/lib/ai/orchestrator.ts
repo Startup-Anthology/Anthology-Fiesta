@@ -64,7 +64,7 @@ Categories:
   }
 }
 
-async function getCoachHistory(conversationId: number, limit: number = 20): Promise<ChatCompletionMessage[]> {
+async function getForecasterProHistory(conversationId: number, limit: number = 20): Promise<ChatCompletionMessage[]> {
   const msgs = await db.select().from(messages)
     .where(and(
       eq(messages.conversationId, conversationId),
@@ -191,7 +191,7 @@ async function runAgentWithToolsInternal(
   return { output, tokens: totalTokens || null };
 }
 
-export async function handleCoachDirect(
+export async function handleForecasterProDirect(
   userMessage: string,
   conversationHistory: ChatCompletionMessage[],
   conversationId: number,
@@ -250,10 +250,10 @@ export async function handleSingleAgent(
   const coachDef = AGENT_DEFINITIONS.coach;
   const agentContext = await buildAgentContext(conversationId, agentName);
 
-  const coachFraming = `You are responding as Coach, drawing on ${agent.displayName}'s (${agentName === "cleo" ? "Relationship Manager" : "Strategy Advisor"}) expertise. Use ${agent.displayName}'s tools to pull real CRM data, then present your findings with Coach's experienced advisory perspective. Don't just present data — coach the user with actionable guidance.`;
+  const agentFraming = `You are responding as Forecaster Pro, drawing on ${agent.displayName}'s (${agentName === "cleo" ? "Relationship Manager" : "Strategy Advisor"}) expertise. Use ${agent.displayName}'s tools to pull real CRM data, then present your findings with Forecaster Pro's experienced advisory perspective. Don't just present data — guide the user with actionable advice.`;
 
   const agentMessages: ChatCompletionMessage[] = [
-    { role: "system", content: `${coachDef.systemPrompt}\n\n${coachFraming}\n\n${agent.displayName}'s domain and tools:\n${agent.systemPrompt}` },
+    { role: "system", content: `${coachDef.systemPrompt}\n\n${agentFraming}\n\n${agent.displayName}'s domain and tools:\n${agent.systemPrompt}` },
     ...agentContext.slice(-10),
     { role: "user", content: userMessage },
   ];
@@ -414,7 +414,7 @@ export async function processChat(
   try {
     await persistMessage(conversationId, "user", userMessage, null);
 
-    const history = await getCoachHistory(conversationId);
+    const history = await getForecasterProHistory(conversationId);
     const { route, isOnboarding } = await classifyIntent(userMessage);
 
     let fullResponse = "";
@@ -422,7 +422,7 @@ export async function processChat(
     let totalTokens: number | null = null;
 
     if (isOnboarding || route.includes("coach")) {
-      const result = await handleCoachDirect(userMessage, history, conversationId, userId, res);
+      const result = await handleForecasterProDirect(userMessage, history, conversationId, userId, res);
       fullResponse = result.response;
       totalTokens = result.tokens;
       agentsUsed = ["coach"];
@@ -471,7 +471,7 @@ export async function processChatSync(
   try {
     await persistMessage(conversationId, "user", userMessage, null);
 
-    const history = await getCoachHistory(conversationId);
+    const history = await getForecasterProHistory(conversationId);
     const { route, isOnboarding } = await classifyIntent(userMessage);
 
     let fullResponse = "";
@@ -510,10 +510,10 @@ export async function processChatSync(
 
       const agent = AGENT_DEFINITIONS[agentName];
       const coachDef = AGENT_DEFINITIONS.coach;
-      const coachFraming = `You are responding as Coach, drawing on ${agent.displayName}'s expertise. Present the findings with Coach's experienced advisory perspective.`;
+      const agentFraming = `You are responding as Forecaster Pro, drawing on ${agent.displayName}'s expertise. Present the findings with Forecaster Pro's experienced advisory perspective.`;
 
       const coachMessages: ChatCompletionMessage[] = [
-        { role: "system", content: `${coachDef.systemPrompt}\n\n${coachFraming}` },
+        { role: "system", content: `${coachDef.systemPrompt}\n\n${agentFraming}` },
         ...history.slice(-6),
         { role: "user", content: userMessage },
         { role: "system", content: `${agent.displayName}'s analysis:\n${result.output}\n\nSynthesize this into a cohesive response with your advisory framing.` },
@@ -587,7 +587,7 @@ export async function getOnboardingGreeting(userId: string): Promise<string> {
     return "";
   }
 
-  return `Hey there — I'm Coach, your business development advisor. I work with a small team behind the scenes to help you get the most out of Fiesta.
+  return `Hey there — I'm Forecaster Pro, your business development advisor. I work with a small team behind the scenes to help you get the most out of Fiesta.
 
 Here's who's on the team:
 
