@@ -8,9 +8,8 @@ const TABLES = [
 
 async function main() {
   for (const table of TABLES) {
-    const result = await db.execute(sql.raw(`DELETE FROM "${table}" WHERE user_id IS NULL`));
-    const count = (result as any).rowCount ?? 0;
-    if (count > 0) console.log(`Cleaned ${count} orphan row(s) from "${table}"`);
+    const rows = await db.execute<{ id: unknown }>(sql.raw(`DELETE FROM "${table}" WHERE user_id IS NULL RETURNING id`));
+    if (rows.length > 0) console.log(`Cleaned ${rows.length} orphan row(s) from "${table}"`);
   }
   console.log("Pre-deploy DB cleanup complete.");
   process.exit(0);
