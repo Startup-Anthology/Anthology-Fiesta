@@ -31,7 +31,7 @@ export async function getOidcConfig(): Promise<client.Configuration> {
   if (!oidcConfig) {
     oidcConfig = await client.discovery(
       new URL(ISSUER_URL),
-      process.env.REPL_ID!,
+      (process.env.OIDC_CLIENT_ID ?? process.env.REPL_ID)!,
     );
   }
   return oidcConfig;
