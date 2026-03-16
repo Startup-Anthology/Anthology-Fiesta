@@ -19,6 +19,14 @@ const OIDC_COOKIE_TTL = 10 * 60 * 1000;
 const router: IRouter = Router();
 
 function getOrigin(req: Request): string {
+  // REPLIT_DOMAINS is set by the platform in both dev and production deployments
+  // and is the authoritative public hostname. Prefer it to avoid building a wrong
+  // redirect_uri from internal/proxy host headers.
+  const replitDomains = process.env.REPLIT_DOMAINS;
+  if (replitDomains) {
+    const firstDomain = replitDomains.split(",")[0].trim();
+    return `https://${firstDomain}`;
+  }
   const proto = req.headers["x-forwarded-proto"] || "https";
   const host =
     req.headers["x-forwarded-host"] || req.headers["host"] || "localhost";
