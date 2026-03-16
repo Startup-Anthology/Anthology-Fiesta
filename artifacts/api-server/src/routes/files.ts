@@ -4,6 +4,7 @@ import { db } from "@workspace/db";
 import { filesTable, leadFilesTable, contactFilesTable, leadsTable, contactsTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
+import type { ObjectAclPolicy } from "../lib/objectAcl";
 import { parseIntParam, notFound, badRequest } from "../lib/errors";
 
 const router = Router();
@@ -20,11 +21,13 @@ async function verifyContactOwnership(contactId: number, userId: string): Promis
   return !!contact;
 }
 
-async function uploadToStorage(file: any): Promise<string> {
+async function uploadToStorage(file: any, userId: string): Promise<string> {
   const uploadURL = await objectStorageService.getObjectEntityUploadURL();
   const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
   const response = await fetch(uploadURL, { method: "PUT", headers: { "Content-Type": file.mimetype }, body: file.buffer });
   if (!response.ok) throw new Error("Failed to upload file to storage");
+  const aclPolicy: ObjectAclPolicy = { owner: userId, visibility: "private" };
+  await objectStorageService.trySetObjectEntityAclPolicy(uploadURL, aclPolicy);
   return objectPath;
 }
 
@@ -44,7 +47,7 @@ router.post("/files/upload", upload.single("file"), async (req: Request, res: Re
     const file = (req as any).file;
     if (!file) throw badRequest("No file provided");
 
-    const objectPath = await uploadToStorage(file);
+    const objectPath = await uploadToStorage(file, userId);
     const [record] = await db.insert(filesTable).values({
       name: file.originalname,
       mimeType: file.mimetype,
@@ -106,7 +109,7 @@ router.post("/leads/:id/files", upload.single("file"), async (req: Request, res:
     const file = (req as any).file;
     if (!file) throw badRequest("No file or fileId provided");
 
-    const objectPath = await uploadToStorage(file);
+    const objectPath = await uploadToStorage(file, userId);
     const [record] = await db.insert(filesTable).values({
       name: file.originalname, mimeType: file.mimetype, size: file.size, storageKey: objectPath, userId,
     }).returning();
@@ -171,7 +174,7 @@ router.post("/contacts/:id/files", upload.single("file"), async (req: Request, r
     const file = (req as any).file;
     if (!file) throw badRequest("No file or fileId provided");
 
-    const objectPath = await uploadToStorage(file);
+    const objectPath = await uploadToStorage(file, userId);
     const [record] = await db.insert(filesTable).values({
       name: file.originalname, mimeType: file.mimetype, size: file.size, storageKey: objectPath, userId,
     }).returning();

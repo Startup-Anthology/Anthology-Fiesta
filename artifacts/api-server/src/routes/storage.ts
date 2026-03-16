@@ -21,6 +21,26 @@ router.post("/storage/uploads/request-url", async (req: Request, res: Response, 
   }
 });
 
+router.post("/storage/uploads/finalize", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { objectPath } = req.body;
+    if (!objectPath || typeof objectPath !== "string") throw badRequest("objectPath is required");
+
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const aclPolicy = { owner: userId, visibility: "private" as const };
+    await objectStorageService.trySetObjectEntityAclPolicy(objectPath, aclPolicy);
+
+    res.json({ success: true, objectPath });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/storage/public-objects/*filePath", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const raw = req.params.filePath;
