@@ -34,4 +34,3 @@ channel = "stable-25_05"
 
 [userenv.shared]
 HORIZON_BASE_URL = "https://horizon.startupanthology.com"
-OIDC_CLIENT_ID = "c01094d4-962b-43da-95c6-f10f459f670c"
