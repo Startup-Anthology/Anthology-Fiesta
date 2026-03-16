@@ -78,7 +78,8 @@ router.post("/gmail/webhook", async (req: Request, res: Response) => {
         if (!msgMeta?.id || !msgMeta?.threadId) continue;
 
         const tracked = threadMap.get(msgMeta.threadId);
-        if (!tracked) continue;
+        if (!tracked || !tracked.userId) continue;
+        const trackedUserId = tracked.userId;
 
         const existing = await db.select().from(activitiesTable)
           .where(eq(activitiesTable.gmailMessageId, msgMeta.id));
@@ -102,7 +103,7 @@ router.post("/gmail/webhook", async (req: Request, res: Response) => {
             gmailMessageId: msgMeta.id,
             gmailThreadId: msgMeta.threadId,
             gmailLink,
-            userId: tracked.userId,
+            userId: trackedUserId,
           });
         } catch (err: any) {
           console.error("Failed to process tracked reply:", err.message);
