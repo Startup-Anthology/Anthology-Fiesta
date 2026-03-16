@@ -188,7 +188,6 @@ async function runAgentWithToolsInternal(
   }
 
   const output = msg?.content || "I wasn't able to generate a response. Please try again.";
-  await persistMessage(conversationId, "assistant", output, agentName, totalTokens || null);
   return { output, tokens: totalTokens || null };
 }
 
@@ -300,8 +299,6 @@ export async function handleSingleAgent(
   }
 
   const output = msg?.content || "I wasn't able to generate a response.";
-
-  await persistMessage(conversationId, "assistant", output, agentName, totalTokens || null);
 
   res.write(`data: ${JSON.stringify({ content: output })}\n\n`);
 

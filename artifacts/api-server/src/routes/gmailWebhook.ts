@@ -2,14 +2,37 @@ import { Router, type Request, type Response } from "express";
 import { db } from "@workspace/db";
 import { activitiesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { OAuth2Client } from "google-auth-library";
 import { getGmailHistory, getGmailMessage, setupGmailWatch, getGmailProfile } from "../lib/gmail";
 
 const router = Router();
+const googleAuthClient = new OAuth2Client();
+
+async function verifyPubSubToken(req: Request): Promise<boolean> {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) return false;
+  const token = authHeader.slice(7);
+  try {
+    await googleAuthClient.verifyIdToken({
+      idToken: token,
+      audience: `${process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(",")[0].trim()}` : ""}/api/gmail/webhook`,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 let lastHistoryId: string | null = null;
 
 router.post("/gmail/webhook", async (req: Request, res: Response) => {
   try {
+    const isValid = await verifyPubSubToken(req);
+    if (!isValid) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
     res.status(200).send();
 
     const message = req.body?.message;
