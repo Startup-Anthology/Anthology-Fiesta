@@ -210,7 +210,7 @@ async function processEnrollments() {
         );
         const body = replaceMergeTags(template.body, recipient, founderName, userSettings);
 
-        await sendGmailEmail(recipient.email, subject, body);
+        await sendGmailEmail(recipient.email, subject, body, undefined, ownerId);
 
         const nextStepIndex = enrollment.currentStep + 1;
 

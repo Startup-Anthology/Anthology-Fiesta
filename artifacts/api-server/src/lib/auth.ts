@@ -1,10 +1,9 @@
-import * as client from "openid-client";
+import * as jose from "jose";
 import crypto from "crypto";
 import { type Request, type Response } from "express";
 import { db, sessionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
-export const ISSUER_URL = process.env.ISSUER_URL ?? "https://replit.com/oidc";
 export const SESSION_COOKIE = "sid";
 export const SESSION_TTL = 7 * 24 * 60 * 60 * 1000;
 
@@ -25,16 +24,31 @@ export interface SessionData {
   twoFactorVerified?: boolean;
 }
 
-let oidcConfig: client.Configuration | null = null;
-
-export async function getOidcConfig(): Promise<client.Configuration> {
-  if (!oidcConfig) {
-    oidcConfig = await client.discovery(
-      new URL(ISSUER_URL),
-      (process.env.OIDC_CLIENT_ID ?? process.env.REPL_ID)!,
-    );
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.AUTH_JWT_SECRET;
+  if (!secret) {
+    throw new Error("AUTH_JWT_SECRET must be set");
   }
-  return oidcConfig;
+  return new TextEncoder().encode(secret);
+}
+
+export async function signJwt(payload: Record<string, unknown>, expiresInSeconds = SESSION_TTL / 1000): Promise<string> {
+  const secret = getJwtSecret();
+  return new jose.SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(`${expiresInSeconds}s`)
+    .sign(secret);
+}
+
+export async function verifyJwt(token: string): Promise<Record<string, unknown> | null> {
+  try {
+    const secret = getJwtSecret();
+    const { payload } = await jose.jwtVerify(token, secret);
+    return payload as Record<string, unknown>;
+  } catch {
+    return null;
+  }
 }
 
 export async function createSession(data: SessionData): Promise<string> {

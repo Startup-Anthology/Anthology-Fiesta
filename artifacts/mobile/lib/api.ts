@@ -333,4 +333,6 @@ export const api = {
     request("/horizon/sync", { method: "POST" }),
   getDiagnostics: () => request("/admin/diagnostics"),
   getRecentErrors: () => request("/admin/recent-errors"),
+  getIntegrations: () => request("/integrations"),
+  deleteIntegration: (provider: string) => request(`/integrations/${provider}`, { method: "DELETE" }),
 };

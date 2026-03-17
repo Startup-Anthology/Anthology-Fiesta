@@ -92,7 +92,7 @@ router.post("/calendar/events", async (req: Request, res: Response, next: NextFu
         description: data.description || undefined,
         startTime: data.startTime,
         endTime: data.endTime,
-      });
+      }, userId);
     } catch (calErr: any) {
       console.error("Google Calendar sync failed, saving locally:", calErr.message);
     }
@@ -149,7 +149,7 @@ router.patch("/calendar/events/:id", async (req: Request, res: Response, next: N
           description: data.description ?? undefined,
           startTime: data.startTime,
           endTime: data.endTime,
-        });
+        }, userId);
       } catch (calErr: any) {
         console.error("Google Calendar update failed, saved locally:", calErr.message);
       }
@@ -172,7 +172,7 @@ router.delete("/calendar/events/:id", async (req: Request, res: Response, next: 
 
     if (event.googleEventId) {
       try {
-        await deleteCalendarEvent(event.googleEventId);
+        await deleteCalendarEvent(event.googleEventId, userId);
       } catch (calErr: any) {
         console.error("Google Calendar delete failed, removing locally:", calErr.message);
       }
@@ -201,7 +201,7 @@ router.get("/calendar/sync", async (req: Request, res: Response, next: NextFunct
       googleEvents = await listCalendarEvents({
         timeMin: timeMin.toISOString(),
         timeMax: timeMax.toISOString(),
-      });
+      }, userId);
     } catch (calErr: any) {
       console.error("Google Calendar sync fetch failed:", calErr.message);
       res.json({ synced: 0, error: "Could not reach Google Calendar" });

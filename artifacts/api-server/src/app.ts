@@ -8,15 +8,13 @@ import router from "./routes";
 const app: Express = express();
 
 const allowedOrigins: string[] = [];
-const replitDomains = process.env.REPLIT_DOMAINS;
-if (replitDomains) {
-  for (const d of replitDomains.split(",")) {
-    const trimmed = d.trim();
-    if (trimmed) allowedOrigins.push(`https://${trimmed}`);
+const configuredOrigins = process.env.ALLOWED_ORIGINS;
+if (configuredOrigins) {
+  for (const o of configuredOrigins.split(",")) {
+    const trimmed = o.trim();
+    if (trimmed) allowedOrigins.push(trimmed);
   }
 }
-const expoDomain = process.env.REPLIT_EXPO_DEV_DOMAIN;
-if (expoDomain) allowedOrigins.push(`https://${expoDomain}`);
 
 app.use(cors({
   credentials: true,

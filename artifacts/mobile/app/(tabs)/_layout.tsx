@@ -12,16 +12,12 @@ function NativeTabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "chart.bar", selected: "chart.bar.fill" }} />
-        <Label>Dashboard</Label>
+        <Icon sf={{ default: "house", selected: "house.fill" }} />
+        <Label>Home</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="funnel">
-        <Icon sf={{ default: "target", selected: "target" }} />
-        <Label>Leads</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="contacts">
         <Icon sf={{ default: "person.2", selected: "person.2.fill" }} />
-        <Label>Contacts</Label>
+        <Label>Pipeline</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="calendar">
         <Icon sf={{ default: "calendar", selected: "calendar" }} />
@@ -30,6 +26,13 @@ function NativeTabLayout() {
       <NativeTabs.Trigger name="ai">
         <Icon sf={{ default: "bubble.left.and.text.bubble.right", selected: "bubble.left.and.text.bubble.right.fill" }} />
         <Label>AI</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="inbox">
+        <Icon sf={{ default: "tray", selected: "tray.fill" }} />
+        <Label>Inbox</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="contacts" hidden>
+        <Label>Contacts</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="more" hidden>
         <Label>More</Label>
@@ -77,31 +80,19 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Dashboard",
+          title: "Home",
           tabBarIcon: ({ color }) =>
             isIOS ? (
-              <SymbolView name="chart.bar" tintColor={color} size={22} />
+              <SymbolView name="house" tintColor={color} size={22} />
             ) : (
-              <Feather name="bar-chart-2" size={22} color={color} />
+              <Feather name="home" size={22} color={color} />
             ),
         }}
       />
       <Tabs.Screen
         name="funnel"
         options={{
-          title: "Leads",
-          tabBarIcon: ({ color }) =>
-            isIOS ? (
-              <SymbolView name="target" tintColor={color} size={22} />
-            ) : (
-              <Feather name="filter" size={22} color={color} />
-            ),
-        }}
-      />
-      <Tabs.Screen
-        name="contacts"
-        options={{
-          title: "Contacts",
+          title: "Pipeline",
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="person.2" tintColor={color} size={22} />
@@ -135,9 +126,19 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
-        name="more"
-        options={{ href: null }}
+        name="inbox"
+        options={{
+          title: "Inbox",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="tray" tintColor={color} size={22} />
+            ) : (
+              <Feather name="inbox" size={22} color={color} />
+            ),
+        }}
       />
+      <Tabs.Screen name="contacts" options={{ href: null }} />
+      <Tabs.Screen name="more" options={{ href: null }} />
     </Tabs>
   );
 }

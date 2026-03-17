@@ -188,9 +188,11 @@ router.post("/2fa/email/send", async (req: Request, res: Response, next: NextFun
     try {
       const { sendGmailEmail } = await import("../lib/gmail");
       await sendGmailEmail(
-        req.user!.email,
+        req.user!.email!,
         "Fiesta - Your verification code",
         `Your Fiesta admin verification code is: ${code}\n\nThis code expires in 10 minutes.`,
+        undefined,
+        req.user!.id,
       );
       res.json({ sent: true });
     } catch (emailErr) {

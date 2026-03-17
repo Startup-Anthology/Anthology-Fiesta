@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { LoginScreen } from "@/components/LoginScreen";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import { TwoFactorScreen } from "@/components/TwoFactorScreen";
 import { ThemeProvider } from "@/lib/theme";
 
@@ -35,20 +36,28 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back", headerShown: false }}>
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="lead/[id]" />
-      <Stack.Screen name="contact/[id]" />
-      <Stack.Screen name="compose-email" options={{ presentation: "modal" }} />
-      <Stack.Screen name="template/[id]" options={{ presentation: "modal" }} />
-      <Stack.Screen name="sequence/[id]" options={{ presentation: "modal" }} />
-      <Stack.Screen name="broadcast/[id]" />
-      <Stack.Screen name="broadcast/new" options={{ presentation: "modal" }} />
-      <Stack.Screen name="comms" />
-      <Stack.Screen name="files" />
-      <Stack.Screen name="settings" />
-      <Stack.Screen name="admin" />
-    </Stack>
+    <>
+      <OfflineBanner />
+      <Stack screenOptions={{ headerBackTitle: "Back", headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="lead/[id]" />
+        <Stack.Screen name="contact/[id]" />
+        <Stack.Screen name="compose-email" options={{ presentation: "modal" }} />
+        <Stack.Screen name="template/[id]" options={{ presentation: "modal" }} />
+        <Stack.Screen name="sequence/[id]" options={{ presentation: "modal" }} />
+        <Stack.Screen name="broadcast/[id]" />
+        <Stack.Screen name="broadcast/new" options={{ presentation: "modal" }} />
+        <Stack.Screen name="comms" />
+        <Stack.Screen name="files" />
+        <Stack.Screen name="settings" />
+        <Stack.Screen name="settings/profile" />
+        <Stack.Screen name="settings/appearance" />
+        <Stack.Screen name="settings/integrations" />
+        <Stack.Screen name="settings/general" />
+        <Stack.Screen name="settings/triggers" />
+        <Stack.Screen name="admin" />
+      </Stack>
+    </>
   );
 }
 

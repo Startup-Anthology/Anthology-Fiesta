@@ -15,3 +15,4 @@ export * from "./messages";
 export * from "./aiInsights";
 export * from "./onboardingProgress";
 export * from "./agentRegistry";
+export * from "./integrations";

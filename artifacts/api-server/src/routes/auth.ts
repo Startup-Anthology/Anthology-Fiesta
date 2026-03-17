@@ -1,10 +1,9 @@
-import * as oidc from "openid-client";
+import bcrypt from "bcryptjs";
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, usersTable } from "@workspace/db";
+import { db, usersTable, userCredentialsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import {
   clearSession,
-  getOidcConfig,
   getSessionId,
   createSession,
   deleteSession,
@@ -14,123 +13,16 @@ import {
 } from "../lib/auth";
 import { seedDefaultSettings } from "../lib/seed";
 
-const OIDC_COOKIE_TTL = 10 * 60 * 1000;
-
 const router: IRouter = Router();
-
-function getOrigin(req: Request): string {
-  // REPLIT_DOMAINS is set by the platform in both dev and production deployments
-  // and is the authoritative public hostname. Prefer it to avoid building a wrong
-  // redirect_uri from internal/proxy host headers.
-  const replitDomains = process.env.REPLIT_DOMAINS;
-  if (replitDomains) {
-    const firstDomain = replitDomains.split(",")[0].trim();
-    return `https://${firstDomain}`;
-  }
-  const proto = req.headers["x-forwarded-proto"] || "https";
-  const host =
-    req.headers["x-forwarded-host"] || req.headers["host"] || "localhost";
-  return `${proto}://${host}`;
-}
 
 function setSessionCookie(res: Response, sid: string) {
   res.cookie(SESSION_COOKIE, sid, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_TTL,
   });
-}
-
-function setOidcCookie(res: Response, name: string, value: string) {
-  res.cookie(name, value, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: OIDC_COOKIE_TTL,
-  });
-}
-
-function getSafeReturnTo(value: unknown): string {
-  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
-    return "/";
-  }
-  return value;
-}
-
-const MOBILE_REDIRECT_SCHEMES = ["exp://", "fiestacrm://"];
-
-function getMobileSafeRedirect(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  if (MOBILE_REDIRECT_SCHEMES.some((s) => value.startsWith(s))) return value;
-  return null;
-}
-
-async function upsertUser(claims: Record<string, unknown>) {
-  const userData = {
-    id: claims.sub as string,
-    email: (claims.email as string) || null,
-    firstName: (claims.first_name as string) || null,
-    lastName: (claims.last_name as string) || null,
-    profileImageUrl: (claims.profile_image_url || claims.picture) as string | null,
-  };
-
-  // Check by OIDC sub id first (fast path for returning users)
-  const [existingById] = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.id, userData.id));
-
-  if (existingById) {
-    const [user] = await db
-      .update(usersTable)
-      .set({
-        email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        profileImageUrl: userData.profileImageUrl,
-        updatedAt: new Date(),
-      })
-      .where(eq(usersTable.id, userData.id))
-      .returning();
-    return user;
-  }
-
-  // Check by email — handles migration from old auth systems where the user
-  // was created with a different ID (e.g. UUID from email/password auth)
-  if (userData.email) {
-    const [existingByEmail] = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, userData.email));
-
-    if (existingByEmail) {
-      // Found by email — keep their existing primary key (changing it would
-      // break FK constraints across 14 tables). Just refresh their profile info.
-      const [user] = await db
-        .update(usersTable)
-        .set({
-          firstName: userData.firstName ?? existingByEmail.firstName,
-          lastName: userData.lastName ?? existingByEmail.lastName,
-          profileImageUrl: userData.profileImageUrl ?? existingByEmail.profileImageUrl,
-          updatedAt: new Date(),
-        })
-        .where(eq(usersTable.email, userData.email))
-        .returning();
-      return user;
-    }
-  }
-
-  // Brand new user — insert and seed default settings
-  const [user] = await db
-    .insert(usersTable)
-    .values(userData)
-    .returning();
-
-  await seedDefaultSettings(user.id);
-  return user;
 }
 
 function sessionUserFromDb(dbUser: typeof usersTable.$inferSelect) {
@@ -148,120 +40,139 @@ router.get("/auth/user", (req: Request, res: Response) => {
   res.json({ user: req.isAuthenticated() ? req.user : null });
 });
 
-router.get("/login", async (req: Request, res: Response) => {
-  const config = await getOidcConfig();
-  const callbackUrl = `${getOrigin(req)}/api/callback`;
+router.post("/auth/register", async (req: Request, res: Response) => {
+  const { email, password, firstName, lastName } = req.body;
 
-  const returnTo = getSafeReturnTo(req.query.returnTo);
-  const mobileRedirect = getMobileSafeRedirect(req.query.mobileRedirect);
-
-  const state = oidc.randomState();
-  const nonce = oidc.randomNonce();
-  const codeVerifier = oidc.randomPKCECodeVerifier();
-  const codeChallenge = await oidc.calculatePKCECodeChallenge(codeVerifier);
-
-  const redirectTo = oidc.buildAuthorizationUrl(config, {
-    redirect_uri: callbackUrl,
-    scope: "openid email profile offline_access",
-    code_challenge: codeChallenge,
-    code_challenge_method: "S256",
-    prompt: "login consent",
-    state,
-    nonce,
-  });
-
-  setOidcCookie(res, "code_verifier", codeVerifier);
-  setOidcCookie(res, "nonce", nonce);
-  setOidcCookie(res, "state", state);
-  setOidcCookie(res, "return_to", returnTo);
-  if (mobileRedirect) {
-    setOidcCookie(res, "mobile_redirect", mobileRedirect);
-  }
-
-  res.redirect(redirectTo.href);
-});
-
-router.get("/callback", async (req: Request, res: Response) => {
-  const config = await getOidcConfig();
-  const callbackUrl = `${getOrigin(req)}/api/callback`;
-
-  const codeVerifier = req.cookies?.code_verifier;
-  const nonce = req.cookies?.nonce;
-  const expectedState = req.cookies?.state;
-
-  if (!codeVerifier || !expectedState) {
-    res.redirect("/api/login");
+  if (!email || !password) {
+    res.status(400).json({ error: "Email and password are required" });
     return;
   }
 
-  const currentUrl = new URL(
-    `${callbackUrl}?${new URL(req.url, `http://${req.headers.host}`).searchParams}`,
-  );
+  if (typeof password !== "string" || password.length < 8) {
+    res.status(400).json({ error: "Password must be at least 8 characters" });
+    return;
+  }
 
-  let tokens: oidc.TokenEndpointResponse & oidc.TokenEndpointResponseHelpers;
   try {
-    tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
-      pkceCodeVerifier: codeVerifier,
-      expectedNonce: nonce,
-      expectedState,
-      idTokenExpected: true,
+    const [existing] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email));
+
+    if (existing) {
+      res.status(409).json({ error: "Email already registered" });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const [user] = await db
+      .insert(usersTable)
+      .values({
+        email,
+        firstName: firstName || null,
+        lastName: lastName || null,
+      })
+      .returning();
+
+    await db.insert(userCredentialsTable).values({
+      userId: user.id,
+      passwordHash,
     });
-  } catch {
-    res.redirect("/api/login");
-    return;
+
+    await seedDefaultSettings(user.id);
+
+    const sessionData: SessionData = {
+      user: sessionUserFromDb(user),
+      access_token: "",
+    };
+
+    const sid = await createSession(sessionData);
+    setSessionCookie(res, sid);
+    res.status(201).json({ token: sid, user: sessionData.user });
+  } catch (err) {
+    console.error("Register error:", err);
+    res.status(500).json({ error: "Registration failed" });
   }
-
-  const returnTo = getSafeReturnTo(req.cookies?.return_to);
-  const mobileRedirect = getMobileSafeRedirect(req.cookies?.mobile_redirect);
-
-  res.clearCookie("code_verifier", { path: "/" });
-  res.clearCookie("nonce", { path: "/" });
-  res.clearCookie("state", { path: "/" });
-  res.clearCookie("return_to", { path: "/" });
-  res.clearCookie("mobile_redirect", { path: "/" });
-
-  const claims = tokens.claims();
-  if (!claims) {
-    res.redirect("/api/login");
-    return;
-  }
-
-  const dbUser = await upsertUser(claims as unknown as Record<string, unknown>);
-
-  const now = Math.floor(Date.now() / 1000);
-  const sessionData: SessionData = {
-    user: sessionUserFromDb(dbUser),
-    access_token: tokens.access_token,
-    refresh_token: tokens.refresh_token,
-    expires_at: tokens.expiresIn() ? now + tokens.expiresIn()! : claims.exp,
-  };
-
-  const sid = await createSession(sessionData);
-
-  if (mobileRedirect) {
-    const deepLink = new URL(mobileRedirect);
-    deepLink.searchParams.set("token", sid);
-    res.redirect(deepLink.toString());
-    return;
-  }
-
-  setSessionCookie(res, sid);
-  res.redirect(returnTo);
 });
 
-router.get("/logout", async (req: Request, res: Response) => {
-  const config = await getOidcConfig();
-  const origin = getOrigin(req);
+router.post("/auth/login", async (req: Request, res: Response) => {
+  const { email, password } = req.body;
 
+  if (!email || !password) {
+    res.status(400).json({ error: "Email and password are required" });
+    return;
+  }
+
+  try {
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, email));
+
+    if (!user) {
+      res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+
+    const [creds] = await db
+      .select()
+      .from(userCredentialsTable)
+      .where(eq(userCredentialsTable.userId, user.id));
+
+    if (!creds) {
+      res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+
+    const valid = await bcrypt.compare(password, creds.passwordHash);
+    if (!valid) {
+      res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+
+    const sessionData: SessionData = {
+      user: sessionUserFromDb(user),
+      access_token: "",
+    };
+
+    const sid = await createSession(sessionData);
+    setSessionCookie(res, sid);
+    res.json({ token: sid, user: sessionData.user });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: "Login failed" });
+  }
+});
+
+router.post("/auth/logout", async (req: Request, res: Response) => {
   const sid = getSessionId(req);
   await clearSession(res, sid);
+  res.json({ success: true });
+});
 
-  const endSessionUrl = oidc.buildEndSessionUrl(config, {
-    client_id: (process.env.OIDC_CLIENT_ID ?? process.env.REPL_ID)!,
-    post_logout_redirect_uri: origin,
-  });
+router.post("/auth/refresh", async (req: Request, res: Response) => {
+  if (!req.user) {
+    res.status(401).json({ error: "Not authenticated" });
+    return;
+  }
 
-  res.redirect(endSessionUrl.href);
+  try {
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, req.user.id));
+
+    if (!user) {
+      res.status(401).json({ error: "User not found" });
+      return;
+    }
+
+    res.json({ user: sessionUserFromDb(user) });
+  } catch (err) {
+    console.error("Refresh error:", err);
+    res.status(500).json({ error: "Refresh failed" });
+  }
 });
 
 router.put("/auth/profile", async (req: Request, res: Response) => {
@@ -307,57 +218,7 @@ router.put("/auth/profile", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/mobile-auth/token-exchange", async (req: Request, res: Response) => {
-  const { code, code_verifier, redirect_uri, state, nonce, iss } = req.body;
-
-  if (!code || !code_verifier || !redirect_uri || !state) {
-    res.status(400).json({ error: "Missing required parameters" });
-    return;
-  }
-
-  try {
-    const config = await getOidcConfig();
-
-    const callbackUrl = new URL(redirect_uri);
-    callbackUrl.searchParams.set("code", code);
-    callbackUrl.searchParams.set("state", state);
-    if (iss) {
-      callbackUrl.searchParams.set("iss", iss);
-    }
-
-    console.log("Mobile token exchange: redirect_uri =", redirect_uri, "| iss =", iss ?? "(none)");
-
-    const tokens = await oidc.authorizationCodeGrant(config, callbackUrl, {
-      pkceCodeVerifier: code_verifier,
-      expectedNonce: nonce ?? undefined,
-      expectedState: state,
-      idTokenExpected: true,
-    });
-
-    const claims = tokens.claims();
-    if (!claims) {
-      res.status(401).json({ error: "No claims in ID token" });
-      return;
-    }
-
-    const dbUser = await upsertUser(claims as unknown as Record<string, unknown>);
-
-    const now = Math.floor(Date.now() / 1000);
-    const sessionData: SessionData = {
-      user: sessionUserFromDb(dbUser),
-      access_token: tokens.access_token,
-      refresh_token: tokens.refresh_token,
-      expires_at: tokens.expiresIn() ? now + tokens.expiresIn()! : claims.exp,
-    };
-
-    const sid = await createSession(sessionData);
-    res.json({ token: sid, user: sessionData.user });
-  } catch (err) {
-    console.error("Mobile token exchange error:", err);
-    res.status(500).json({ error: "Token exchange failed" });
-  }
-});
-
+// Keep mobile-auth/logout for backward compatibility during transition
 router.post("/mobile-auth/logout", async (req: Request, res: Response) => {
   const sid = getSessionId(req);
   if (sid) {

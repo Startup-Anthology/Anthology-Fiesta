@@ -1,7 +1,8 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
 import { Readable } from "stream";
+import { db, filesTable } from "@workspace/db";
+import { eq, and } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
-import { canAccessObject, ObjectPermission } from "../lib/objectAcl";
 import { badRequest } from "../lib/errors";
 
 const router: IRouter = Router();
@@ -32,33 +33,8 @@ router.post("/storage/uploads/finalize", async (req: Request, res: Response, nex
       return;
     }
 
-    const aclPolicy = { owner: userId, visibility: "private" as const };
-    await objectStorageService.trySetObjectEntityAclPolicy(objectPath, aclPolicy);
-
+    await objectStorageService.trySetObjectEntityAclPolicy(objectPath, { owner: userId, visibility: "private" });
     res.json({ success: true, objectPath });
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.get("/storage/public-objects/*filePath", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const raw = req.params.filePath;
-    const filePath = Array.isArray(raw) ? raw.join("/") : raw;
-    const file = await objectStorageService.searchPublicObject(filePath);
-    if (!file) {
-      res.status(404).json({ error: "File not found" });
-      return;
-    }
-    const response = await objectStorageService.downloadObject(file);
-    res.status(response.status);
-    response.headers.forEach((value, key) => res.setHeader(key, value));
-    if (response.body) {
-      const nodeStream = Readable.fromWeb(response.body as ReadableStream<Uint8Array>);
-      nodeStream.pipe(res);
-    } else {
-      res.end();
-    }
   } catch (err) {
     next(err);
   }
@@ -69,19 +45,25 @@ router.get("/storage/objects/*path", async (req: Request, res: Response, next: N
     const raw = req.params.path;
     const wildcardPath = Array.isArray(raw) ? raw.join("/") : raw;
     const objectPath = `/objects/${wildcardPath}`;
-    const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+    const userId = req.user?.id;
 
-    const allowed = await canAccessObject({
-      userId: req.user?.id,
-      objectFile,
-      requestedPermission: ObjectPermission.READ,
-    });
-    if (!allowed) {
-      res.status(403).json({ error: "Access denied" });
+    // Enforce ownership: look up the file record
+    if (userId) {
+      const [fileRecord] = await db
+        .select()
+        .from(filesTable)
+        .where(and(eq(filesTable.storageKey, objectPath), eq(filesTable.userId, userId)));
+
+      if (!fileRecord) {
+        res.status(403).json({ error: "Access denied" });
+        return;
+      }
+    } else {
+      res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
-    const response = await objectStorageService.downloadObject(objectFile);
+    const response = await objectStorageService.downloadObject(objectPath);
     res.status(response.status);
     response.headers.forEach((value, key) => res.setHeader(key, value));
     if (response.body) {

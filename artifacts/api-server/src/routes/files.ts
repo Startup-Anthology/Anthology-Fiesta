@@ -4,7 +4,6 @@ import { db } from "@workspace/db";
 import { filesTable, leadFilesTable, contactFilesTable, leadsTable, contactsTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { ObjectStorageService } from "../lib/objectStorage";
-import type { ObjectAclPolicy } from "../lib/objectAcl";
 import { parseIntParam, notFound, badRequest } from "../lib/errors";
 
 const router = Router();
@@ -26,8 +25,7 @@ async function uploadToStorage(file: any, userId: string): Promise<string> {
   const objectPath = objectStorageService.normalizeObjectEntityPath(uploadURL);
   const response = await fetch(uploadURL, { method: "PUT", headers: { "Content-Type": file.mimetype }, body: file.buffer });
   if (!response.ok) throw new Error("Failed to upload file to storage");
-  const aclPolicy: ObjectAclPolicy = { owner: userId, visibility: "private" };
-  await objectStorageService.trySetObjectEntityAclPolicy(uploadURL, aclPolicy);
+  await objectStorageService.trySetObjectEntityAclPolicy(uploadURL, { owner: userId, visibility: "private" });
   return objectPath;
 }
 

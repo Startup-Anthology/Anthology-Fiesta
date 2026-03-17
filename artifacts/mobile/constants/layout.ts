@@ -1,4 +1,5 @@
 const layout = {
+  // Existing tokens (unchanged — screens depend on these)
   screenPadding: 24,
   cardRadius: 14,
   cardPadding: 16,
@@ -8,6 +9,63 @@ const layout = {
   inputRadius: 12,
   chipRadius: 20,
   badgeRadius: 8,
+
+  // Spacing scale
+  spacing: {
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 24,
+    "2xl": 32,
+    "3xl": 48,
+  },
+
+  // Shadow/elevation tokens
+  shadow: {
+    sm: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 2,
+      elevation: 1,
+    },
+    md: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.10,
+      shadowRadius: 6,
+      elevation: 3,
+    },
+    lg: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.14,
+      shadowRadius: 12,
+      elevation: 6,
+    },
+    fab: {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.20,
+      shadowRadius: 10,
+      elevation: 8,
+    },
+  },
+
+  // Motion constants
+  motion: {
+    duration: {
+      fast: 150,
+      normal: 250,
+      slow: 400,
+    },
+    easing: {
+      standard: "ease-in-out" as const,
+      decelerate: "ease-out" as const,
+      accelerate: "ease-in" as const,
+    },
+  },
 } as const;
 
 export default layout;

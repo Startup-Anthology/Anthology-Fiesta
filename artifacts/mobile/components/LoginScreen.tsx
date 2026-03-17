@@ -1,11 +1,15 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
+  TextInput,
   StyleSheet,
   ActivityIndicator,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
@@ -14,18 +18,54 @@ import { useTheme } from "@/lib/theme";
 
 const saLogoBlack = require("@/assets/images/sa-logo-black.png");
 
+function getApiBaseUrl(): string {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+  return "http://localhost:8080";
+}
+
 export function LoginScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { login, isLoading } = useAuth();
 
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async () => {
+  const handleSubmit = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Email and password are required");
+      return;
+    }
+    setError(null);
     setIsSubmitting(true);
+
     try {
-      await login();
-    } catch {
+      if (mode === "register") {
+        const apiBase = getApiBaseUrl();
+        const res = await fetch(`${apiBase}/api/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim(), password, firstName: firstName.trim() || undefined, lastName: lastName.trim() || undefined }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error || "Registration failed");
+          return;
+        }
+        // After registering, log in
+        await login(email.trim(), password);
+      } else {
+        await login(email.trim(), password);
+      }
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
@@ -33,77 +73,129 @@ export function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.logoContainer}>
-          <Image source={saLogoBlack} style={styles.logoImage} resizeMode="contain" />
-          <Text style={styles.title}>Fiesta</Text>
-          <Text style={styles.subtitle}>
-            Your relationships. Your pipeline. One place.
-          </Text>
-        </View>
-
-        <View style={styles.features}>
-          <FeatureItem icon="📊" text="See your full pipeline, clearly" colors={colors} />
-          <FeatureItem icon="👥" text="Know who to follow up with and when" colors={colors} />
-          <FeatureItem icon="📧" text="Reach out without the busywork" colors={colors} />
-          <FeatureItem icon="🎯" text="Track what matters to your launch" colors={colors} />
-        </View>
-
-        <TouchableOpacity
-          style={styles.submitButton}
-          onPress={handleLogin}
-          disabled={isSubmitting || isLoading}
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel="Log in to Fiesta"
-          accessibilityState={{ disabled: isSubmitting || isLoading, busy: isSubmitting || isLoading }}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
-          {isSubmitting || isLoading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.submitButtonText}>Log In</Text>
-          )}
-        </TouchableOpacity>
+          <View style={styles.logoContainer}>
+            <Image source={saLogoBlack} style={styles.logoImage} resizeMode="contain" />
+            <Text style={styles.title}>Fiesta</Text>
+            <Text style={styles.subtitle}>
+              Your relationships. Your pipeline. One place.
+            </Text>
+          </View>
 
-        <Text style={styles.footerText}>
-          Built for founders doing the work.
-        </Text>
-      </View>
+          <View style={styles.form}>
+            <View style={styles.modeToggle}>
+              <TouchableOpacity
+                style={[styles.modeButton, mode === "login" && styles.modeButtonActive]}
+                onPress={() => { setMode("login"); setError(null); }}
+              >
+                <Text style={[styles.modeButtonText, mode === "login" && styles.modeButtonTextActive]}>
+                  Log In
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modeButton, mode === "register" && styles.modeButtonActive]}
+                onPress={() => { setMode("register"); setError(null); }}
+              >
+                <Text style={[styles.modeButtonText, mode === "register" && styles.modeButtonTextActive]}>
+                  Sign Up
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {mode === "register" && (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder="First name"
+                  placeholderTextColor={colors.textTertiary}
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  autoCapitalize="words"
+                  returnKeyType="next"
+                  accessibilityLabel="First name"
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Last name"
+                  placeholderTextColor={colors.textTertiary}
+                  value={lastName}
+                  onChangeText={setLastName}
+                  autoCapitalize="words"
+                  returnKeyType="next"
+                  accessibilityLabel="Last name"
+                />
+              </>
+            )}
+
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor={colors.textTertiary}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              returnKeyType="next"
+              accessibilityLabel="Email address"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor={colors.textTertiary}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              returnKeyType="done"
+              onSubmitEditing={handleSubmit}
+              accessibilityLabel="Password"
+            />
+
+            {error && (
+              <Text style={styles.errorText}>{error}</Text>
+            )}
+
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
+              disabled={isSubmitting || isLoading}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={mode === "login" ? "Log in" : "Create account"}
+            >
+              {isSubmitting || isLoading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.submitButtonText}>
+                  {mode === "login" ? "Log In" : "Create Account"}
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.footerText}>
+            Built for founders doing the work.
+          </Text>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-function FeatureItem({ icon, text, colors }: { icon: string; text: string; colors: ThemeColors }) {
-  return (
-    <View style={featureStyles.featureItem}>
-      <Text style={featureStyles.featureIcon}>{icon}</Text>
-      <Text style={[featureStyles.featureText, { color: colors.text }]}>{text}</Text>
-    </View>
-  );
-}
-
-const featureStyles = StyleSheet.create({
-  featureItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  featureIcon: {
-    fontSize: 20,
-  },
-  featureText: {
-    fontSize: 15,
-    fontFamily: "SpaceGrotesk_500Medium",
-  },
-});
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 32,
@@ -114,9 +206,9 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 32,
   },
   logoImage: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
+    width: 80,
+    height: 80,
+    marginBottom: 16,
   },
   title: {
     fontSize: 28,
@@ -126,15 +218,64 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: colors.textSecondary,
     fontFamily: "SpaceGrotesk_500Medium",
     textAlign: "center",
   },
-  features: {
+  form: {
     width: "100%",
-    marginBottom: 32,
-    gap: 16,
+    marginBottom: 24,
+  },
+  modeToggle: {
+    flexDirection: "row",
+    backgroundColor: colors.surface,
+    borderRadius: 10,
+    padding: 4,
+    marginBottom: 20,
+  },
+  modeButton: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  modeButtonActive: {
+    backgroundColor: colors.background,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  modeButtonText: {
+    fontSize: 14,
+    fontFamily: "SpaceGrotesk_500Medium",
+    color: colors.textSecondary,
+  },
+  modeButtonTextActive: {
+    color: colors.text,
+    fontFamily: "SpaceGrotesk_600SemiBold",
+  },
+  input: {
+    width: "100%",
+    backgroundColor: colors.surface,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    color: colors.text,
+    fontFamily: "SpaceGrotesk_400Regular",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: 13,
+    fontFamily: "SpaceGrotesk_400Regular",
+    marginBottom: 12,
+    textAlign: "center",
   },
   submitButton: {
     width: "100%",
@@ -144,7 +285,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     height: 56,
-    marginBottom: 12,
+    marginTop: 4,
   },
   submitButtonText: {
     fontSize: 17,

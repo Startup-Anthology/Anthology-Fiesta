@@ -122,7 +122,7 @@ router.post("/broadcasts", async (req: Request, res: Response, next: NextFunctio
           .replace(/\{\{custom_link_2\}\}/g, userSettings.quick_link_custom2_url || "")
           .replace(/\{\{custom_link_3\}\}/g, userSettings.quick_link_custom3_url || "");
 
-        await sendGmailEmail(recipient.email, emailSubject, emailBody);
+        await sendGmailEmail(recipient.email, emailSubject, emailBody, undefined, userId);
         sentCount++;
 
         const [activity] = await db.insert(activitiesTable).values({

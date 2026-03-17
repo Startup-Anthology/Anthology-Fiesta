@@ -21,8 +21,7 @@ router.post("/email/send", async (req: Request, res: Response, next: NextFunctio
       const files = await db.select().from(filesTable).where(and(inArray(filesTable.id, attachmentFileIds), eq(filesTable.userId, userId)));
       for (const file of files) {
         try {
-          const objectFile = await objectStorageService.getObjectEntityFile(file.storageKey);
-          const response = await objectStorageService.downloadObject(objectFile);
+          const response = await objectStorageService.downloadObject(file.storageKey);
           const arrayBuffer = await response.arrayBuffer();
           attachments.push({
             filename: file.name,
@@ -37,11 +36,11 @@ router.post("/email/send", async (req: Request, res: Response, next: NextFunctio
 
     let sendResult;
     try {
-      sendResult = await sendGmailEmail(to, subject, body, attachments);
+      sendResult = await sendGmailEmail(to, subject, body, attachments, userId);
     } catch (gmailErr: any) {
       const msg = gmailErr.message || "";
-      if (msg.includes("access") || msg.includes("token") || msg.includes("credentials") || msg.includes("refresh")) {
-        res.status(503).json({ error: "Gmail is not connected. Please configure Gmail integration in your Replit workspace." });
+      if (msg.includes("No email provider") || msg.includes("not connected") || msg.includes("userId required")) {
+        res.status(503).json({ error: "No email account connected. Please connect Gmail or Outlook in Settings > Integrations." });
         return;
       }
       throw gmailErr;
@@ -56,7 +55,7 @@ router.post("/email/send", async (req: Request, res: Response, next: NextFunctio
       body,
       gmailMessageId: sendResult.messageId,
       gmailThreadId: sendResult.threadId,
-      gmailLink: sendResult.gmailLink,
+      gmailLink: sendResult.link,
       userId,
     }).returning();
 
@@ -72,7 +71,7 @@ router.post("/email/send", async (req: Request, res: Response, next: NextFunctio
           description: `Sent to ${to}`,
           startTime: now.toISOString(),
           endTime: endTime.toISOString(),
-        });
+        }, userId);
       } catch (calErr: any) {
         console.error("Google Calendar sync failed for email event:", calErr.message);
       }
@@ -89,7 +88,7 @@ router.post("/email/send", async (req: Request, res: Response, next: NextFunctio
       });
     }
 
-    res.json({ success: true, gmailLink: sendResult.gmailLink });
+    res.json({ success: true, gmailLink: sendResult.link });
   } catch (err) {
     next(err);
   }

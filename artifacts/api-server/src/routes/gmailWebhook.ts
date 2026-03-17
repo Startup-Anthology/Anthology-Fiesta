@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { db } from "@workspace/db";
-import { activitiesTable } from "@workspace/db";
+import { activitiesTable, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { OAuth2Client } from "google-auth-library";
 import { getGmailHistory, getGmailMessage, setupGmailWatch, getGmailProfile } from "../lib/gmail";
@@ -10,8 +10,8 @@ const googleAuthClient = new OAuth2Client();
 
 function getWebhookAudience(): string {
   if (process.env.GMAIL_WEBHOOK_AUDIENCE) return process.env.GMAIL_WEBHOOK_AUDIENCE;
-  const domains = process.env.REPLIT_DOMAINS;
-  if (domains) return `https://${domains.split(",")[0].trim()}/api/gmail/webhook`;
+  const apiBase = process.env.API_BASE_URL;
+  if (apiBase) return `${apiBase}/api/gmail/webhook`;
   return "";
 }
 
@@ -47,13 +47,21 @@ router.post("/gmail/webhook", async (req: Request, res: Response) => {
 
     const decoded = JSON.parse(Buffer.from(message.data, "base64").toString());
     const historyId = decoded.historyId;
+    const emailAddress = decoded.emailAddress;
+
+    // Find the user whose Gmail account triggered this webhook
+    let webhookUserId: string | null = null;
+    if (emailAddress) {
+      const [user] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, emailAddress));
+      webhookUserId = user?.id || null;
+    }
 
     if (!lastHistoryId || !historyId) {
       lastHistoryId = historyId;
       return;
     }
 
-    const history = await getGmailHistory(lastHistoryId);
+    const history = await getGmailHistory(lastHistoryId, webhookUserId ?? undefined);
     lastHistoryId = historyId;
 
     if (!history?.history) return;
@@ -86,7 +94,7 @@ router.post("/gmail/webhook", async (req: Request, res: Response) => {
         if (existing.length > 0) continue;
 
         try {
-          const fullMsg = await getGmailMessage(msgMeta.id);
+          const fullMsg = await getGmailMessage(msgMeta.id, trackedUserId);
           const headers = fullMsg.payload?.headers || [];
           const fromHeader = headers.find((h: any) => h.name === "From")?.value || "Unknown";
           const subjectHeader = headers.find((h: any) => h.name === "Subject")?.value || "(no subject)";
@@ -122,7 +130,8 @@ router.post("/gmail/watch", async (req: Request, res: Response) => {
       res.status(400).json({ error: "topicName is required" });
       return;
     }
-    const result = await setupGmailWatch(topicName);
+    const userId = req.user?.id;
+    const result = await setupGmailWatch(topicName, userId);
     lastHistoryId = String(result.historyId || "");
     res.json({ success: true, expiration: result.expiration });
   } catch (err: any) {
@@ -132,7 +141,7 @@ router.post("/gmail/watch", async (req: Request, res: Response) => {
 
 router.get("/gmail/profile", async (req: Request, res: Response) => {
   try {
-    const profile = await getGmailProfile();
+    const profile = await getGmailProfile(req.user?.id);
     res.json(profile);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

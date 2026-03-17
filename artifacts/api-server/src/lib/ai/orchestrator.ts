@@ -7,8 +7,8 @@ import { executeToolCall } from "./toolExecutor";
 import type { Response } from "express";
 import type OpenAI from "openai";
 
-const MAIN_MODEL = "gpt-5.2";
-const ROUTER_MODEL = "gpt-5-nano";
+const MAIN_MODEL = process.env.AI_MAIN_MODEL || "gpt-4o";
+const ROUTER_MODEL = process.env.AI_ROUTER_MODEL || "gpt-4o-mini";
 
 type ChatCompletionMessage = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -144,7 +144,6 @@ async function runAgentWithToolsInternal(
   const agentMessages: ChatCompletionMessage[] = [
     { role: "system", content: agent.systemPrompt },
     ...agentContext.slice(-10),
-    { role: "user", content: userMessage },
   ];
 
   const toolsParam = agent.tools.length > 0 ? agent.tools : undefined;
@@ -255,7 +254,6 @@ export async function handleSingleAgent(
   const agentMessages: ChatCompletionMessage[] = [
     { role: "system", content: `${coachDef.systemPrompt}\n\n${agentFraming}\n\n${agent.displayName}'s domain and tools:\n${agent.systemPrompt}` },
     ...agentContext.slice(-10),
-    { role: "user", content: userMessage },
   ];
 
   const toolsParam = agent.tools.length > 0 ? agent.tools : undefined;
@@ -412,9 +410,9 @@ export async function processChat(
   res.flushHeaders();
 
   try {
+    const history = await getForecasterProHistory(conversationId);
     await persistMessage(conversationId, "user", userMessage, null);
 
-    const history = await getForecasterProHistory(conversationId);
     const { route, isOnboarding } = await classifyIntent(userMessage);
 
     let fullResponse = "";
@@ -469,9 +467,9 @@ export async function processChatSync(
   userId: string
 ): Promise<string> {
   try {
+    const history = await getForecasterProHistory(conversationId);
     await persistMessage(conversationId, "user", userMessage, null);
 
-    const history = await getForecasterProHistory(conversationId);
     const { route, isOnboarding } = await classifyIntent(userMessage);
 
     let fullResponse = "";
