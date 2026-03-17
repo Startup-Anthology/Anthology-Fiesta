@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { Router, type IRouter, type Request, type Response } from "express";
+import rateLimit from "express-rate-limit";
 import { db, usersTable, userCredentialsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import {
@@ -14,6 +15,26 @@ import {
 import { seedDefaultSettings } from "../lib/seed";
 
 const router: IRouter = Router();
+
+const loginRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false,
+  keyGenerator: (req) => req.ip ?? req.socket?.remoteAddress ?? "unknown",
+  message: { error: "Too many login attempts, please try again in a minute" },
+});
+
+const registerRateLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false,
+  keyGenerator: (req) => req.ip ?? req.socket?.remoteAddress ?? "unknown",
+  message: { error: "Too many registration attempts, please try again later" },
+});
 
 function setSessionCookie(res: Response, sid: string) {
   res.cookie(SESSION_COOKIE, sid, {
@@ -40,8 +61,10 @@ router.get("/auth/user", (req: Request, res: Response) => {
   res.json({ user: req.isAuthenticated() ? req.user : null });
 });
 
-router.post("/auth/register", async (req: Request, res: Response) => {
-  const { email, password, firstName, lastName } = req.body;
+router.post("/auth/register", registerRateLimit, async (req: Request, res: Response) => {
+  const rawEmail = req.body.email;
+  const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : rawEmail;
+  const { password, firstName, lastName } = req.body;
 
   if (!email || !password) {
     res.status(400).json({ error: "Email and password are required" });
@@ -96,7 +119,7 @@ router.post("/auth/register", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/auth/login", async (req: Request, res: Response) => {
+router.post("/auth/login", loginRateLimit, async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {

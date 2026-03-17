@@ -1,4 +1,4 @@
-import { index, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, uniqueIndex, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
@@ -25,6 +25,7 @@ export const contactsTable = pgTable("contacts", {
   index("idx_contacts_user_id").on(table.userId),
   index("idx_contacts_email").on(table.email),
   index("idx_contacts_relationship_type").on(table.relationshipType),
+  uniqueIndex("idx_contacts_user_email").on(table.userId, table.email),
 ]);
 
 export const insertContactSchema = createInsertSchema(contactsTable).omit({ id: true, createdAt: true, updatedAt: true });

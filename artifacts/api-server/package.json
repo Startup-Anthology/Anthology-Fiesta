@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm run lint && NODE_ENV=development tsx ./src/index.ts",
-    "dev:fast": "NODE_ENV=development tsx ./src/index.ts",
+    "dev": "pnpm run lint && NODE_ENV=development node --env-file=../../.env --import tsx/esm ./src/index.ts",
+    "dev:fast": "NODE_ENV=development node --env-file=../../.env --import tsx/esm ./src/index.ts",
     "build": "tsx ./build.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src",
@@ -23,6 +23,7 @@
     "cors": "^2",
     "drizzle-orm": "catalog:",
     "express": "^5",
+    "express-rate-limit": "^8.3.1",
     "google-auth-library": "^10.6.1",
     "googleapis": "148.0.0",
     "jose": "^5.10.0",
@@ -32,7 +33,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "openai": "^6.27.0",
     "@types/bcryptjs": "^3.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
@@ -42,6 +42,7 @@
     "@types/node-cron": "3.0.11",
     "esbuild": "^0.27.3",
     "eslint": "^10.0.3",
+    "openai": "^6.27.0",
     "tsx": "catalog:",
     "typescript-eslint": "^8.57.0"
   }

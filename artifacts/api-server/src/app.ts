@@ -19,10 +19,12 @@ if (configuredOrigins) {
 app.use(cors({
   credentials: true,
   origin(incoming, callback) {
+    const isLocalhost = process.env.NODE_ENV !== "production" &&
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(incoming ?? "");
     if (
       !incoming ||
       allowedOrigins.includes(incoming) ||
-      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(incoming)
+      isLocalhost
     ) {
       callback(null, true);
     } else {
@@ -31,7 +33,7 @@ app.use(cors({
   },
 }));
 app.use(cookieParser());
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(authMiddleware);
 

@@ -6,6 +6,24 @@ import { logAudit } from "../lib/audit";
 
 const router = Router();
 
+const VALID_SETTING_KEYS = new Set([
+  "beta_slots_total",
+  "app_name",
+  "founder_name",
+  "notion_leads_db",
+  "notion_contacts_db",
+  "notion_activities_db",
+  "quick_link_my_linkedin",
+  "quick_link_company_linkedin",
+  "quick_link_calendar",
+  "quick_link_custom1_label",
+  "quick_link_custom1_url",
+  "quick_link_custom2_label",
+  "quick_link_custom2_url",
+  "quick_link_custom3_label",
+  "quick_link_custom3_url",
+]);
+
 router.get("/settings", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
@@ -26,6 +44,7 @@ router.put("/settings", async (req: Request, res: Response, next: NextFunction) 
     const entries = Object.entries(req.body) as [string, string][];
     for (const [key, value] of entries) {
       if (typeof key !== "string" || typeof value !== "string") continue;
+      if (!VALID_SETTING_KEYS.has(key)) continue;
       const existing = await db.select().from(settingsTable).where(and(eq(settingsTable.key, key), eq(settingsTable.userId, userId)));
       if (existing.length > 0) {
         const before = { key, value: existing[0].value };

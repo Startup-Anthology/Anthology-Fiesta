@@ -164,7 +164,7 @@ router.post("/sequences/:id/enroll", async (req: Request, res: Response, next: N
           description: `Enrolled in drip sequence "${sequence.name}"`,
           startTime: now.toISOString(),
           endTime: endTime.toISOString(),
-        });
+        }, userId);
       } catch (calErr: any) {
         console.error("Google Calendar sync failed for enrollment:", calErr.message);
       }

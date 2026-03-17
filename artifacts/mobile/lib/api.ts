@@ -1,12 +1,24 @@
 import { getApiBaseUrl } from "@/constants/api";
-import * as SecureStore from "expo-secure-store";
+import * as storage from "./secureStorage";
+
+type SessionExpiredListener = () => void;
+const sessionExpiredListeners: Set<SessionExpiredListener> = new Set();
+
+export function onSessionExpired(fn: SessionExpiredListener): () => void {
+  sessionExpiredListeners.add(fn);
+  return () => sessionExpiredListeners.delete(fn);
+}
+
+function notifySessionExpired() {
+  sessionExpiredListeners.forEach((fn) => fn());
+}
 
 const BASE = getApiBaseUrl();
 const AUTH_TOKEN_KEY = "auth_session_token";
 
 async function request(path: string, options?: RequestInit) {
   const url = `${BASE}${path}`;
-  const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  const token = await storage.getItem(AUTH_TOKEN_KEY);
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -17,13 +29,23 @@ async function request(path: string, options?: RequestInit) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(url, {
-    ...options,
-    headers,
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 
   if (res.status === 401) {
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    await storage.deleteItem(AUTH_TOKEN_KEY);
+    notifySessionExpired();
     throw new Error("SESSION_EXPIRED");
   }
 
@@ -44,7 +66,7 @@ async function request(path: string, options?: RequestInit) {
 
 async function uploadFile(path: string, uri: string, fileName: string, mimeType: string) {
   const url = `${BASE}${path}`;
-  const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  const token = await storage.getItem(AUTH_TOKEN_KEY);
 
   const formData = new FormData();
   formData.append("file", {
@@ -63,7 +85,8 @@ async function uploadFile(path: string, uri: string, fileName: string, mimeType:
   });
 
   if (res.status === 401) {
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    await storage.deleteItem(AUTH_TOKEN_KEY);
+    notifySessionExpired();
     throw new Error("SESSION_EXPIRED");
   }
   if (!res.ok) {
@@ -86,7 +109,7 @@ async function streamRequest(
   onChunk: (data: { content?: string; done?: boolean; error?: string }) => void
 ): Promise<{ conversationId: number | null }> {
   const url = `${BASE}${path}`;
-  const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  const token = await storage.getItem(AUTH_TOKEN_KEY);
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -100,7 +123,8 @@ async function streamRequest(
   });
 
   if (res.status === 401) {
-    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+    await storage.deleteItem(AUTH_TOKEN_KEY);
+    notifySessionExpired();
     throw new Error("SESSION_EXPIRED");
   }
 

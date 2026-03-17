@@ -15,15 +15,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
 import { type ThemeColors } from "@/constants/colors";
 import { useTheme } from "@/lib/theme";
+import { getServerBaseUrl } from "@/constants/api";
 
 const saLogoBlack = require("@/assets/images/sa-logo-black.png");
-
-function getApiBaseUrl(): string {
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
-  }
-  return "http://localhost:8080";
-}
 
 export function LoginScreen() {
   const { colors } = useTheme();
@@ -48,8 +42,7 @@ export function LoginScreen() {
 
     try {
       if (mode === "register") {
-        const apiBase = getApiBaseUrl();
-        const res = await fetch(`${apiBase}/api/auth/register`, {
+        const res = await fetch(`${getServerBaseUrl()}/api/auth/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: email.trim(), password, firstName: firstName.trim() || undefined, lastName: lastName.trim() || undefined }),

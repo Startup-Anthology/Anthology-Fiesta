@@ -9,7 +9,7 @@ import { eq, and, sql, lte, ne, isNull, or, lt, gte, desc } from "drizzle-orm";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { AGENT_DEFINITIONS } from "./agentDefinitions";
 
-const MAIN_MODEL = "gpt-5.2";
+const MAIN_MODEL = process.env.AI_MAIN_MODEL || "gpt-4o";
 const MAX_RECORDS_PER_CATEGORY = 20;
 
 interface HeuristicItem {

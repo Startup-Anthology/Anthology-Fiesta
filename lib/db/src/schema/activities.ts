@@ -2,11 +2,13 @@ import { index, pgTable, serial, integer, text, timestamp, varchar } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
+import { leadsTable } from "./leads";
+import { contactsTable } from "./contacts";
 
 export const activitiesTable = pgTable("activities", {
   id: serial("id").primaryKey(),
-  leadId: integer("lead_id"),
-  contactId: integer("contact_id"),
+  leadId: integer("lead_id").references(() => leadsTable.id, { onDelete: "set null" }),
+  contactId: integer("contact_id").references(() => contactsTable.id, { onDelete: "set null" }),
   type: text("type").notNull(),
   direction: text("direction"),
   subject: text("subject"),
@@ -16,7 +18,7 @@ export const activitiesTable = pgTable("activities", {
   gmailThreadId: text("gmail_thread_id"),
   gmailLink: text("gmail_link"),
   notionPageId: text("notion_page_id"),
-  userId: varchar("user_id").notNull().references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("idx_activities_user_id").on(table.userId),

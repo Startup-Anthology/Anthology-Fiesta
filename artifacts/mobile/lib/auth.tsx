@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import * as SecureStore from "expo-secure-store";
+import * as storage from "./secureStorage";
+import { getServerBaseUrl } from "@/constants/api";
+import { onSessionExpired } from "./api";
 
 const AUTH_TOKEN_KEY = "auth_session_token";
 
@@ -45,13 +47,6 @@ const AuthContext = createContext<AuthContextValue>({
   is2faVerified: false,
 });
 
-function getApiBaseUrl(): string {
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
-  }
-  return "http://localhost:8080";
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,14 +54,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      const token = await storage.getItem(AUTH_TOKEN_KEY);
       if (!token) {
         setUser(null);
         setIsLoading(false);
         return;
       }
 
-      const apiBase = getApiBaseUrl();
+      const apiBase = getServerBaseUrl();
       const res = await fetch(`${apiBase}/api/auth/user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -75,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.user) {
         setUser(data.user);
       } else {
-        await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+        await storage.deleteItem(AUTH_TOKEN_KEY);
         setUser(null);
       }
     } catch {
@@ -87,10 +82,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshTwoFactorStatus = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      const token = await storage.getItem(AUTH_TOKEN_KEY);
       if (!token) return;
 
-      const apiBase = getApiBaseUrl();
+      const apiBase = getServerBaseUrl();
       const res = await fetch(`${apiBase}/api/2fa/status`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -107,13 +102,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [fetchUser]);
 
   useEffect(() => {
+    return onSessionExpired(() => {
+      setUser(null);
+      setTwoFactorStatus(null);
+    });
+  }, []);
+
+  useEffect(() => {
     if (user?.role === "admin") {
       refreshTwoFactorStatus();
     }
   }, [user, refreshTwoFactorStatus]);
 
   const login = useCallback(async (email: string, password: string) => {
-    const apiBase = getApiBaseUrl();
+    const apiBase = getServerBaseUrl();
     setIsLoading(true);
     try {
       const res = await fetch(`${apiBase}/api/auth/login`, {
@@ -129,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const data = await res.json();
       if (data.token) {
-        await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+        await storage.setItem(AUTH_TOKEN_KEY, data.token);
         if (data.user) {
           setUser(data.user);
           setIsLoading(false);
@@ -145,9 +147,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      const token = await storage.getItem(AUTH_TOKEN_KEY);
       if (token) {
-        const apiBase = getApiBaseUrl();
+        const apiBase = getServerBaseUrl();
         await fetch(`${apiBase}/api/auth/logout`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -155,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch {
     } finally {
-      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+      await storage.deleteItem(AUTH_TOKEN_KEY);
       setUser(null);
       setTwoFactorStatus(null);
     }
@@ -193,5 +195,5 @@ export function useAuth(): AuthContextValue {
 }
 
 export function getAuthToken(): Promise<string | null> {
-  return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  return storage.getItem(AUTH_TOKEN_KEY);
 }

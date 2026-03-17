@@ -1,10 +1,11 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
-import React, { useState, useRef } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { SkeletonCard, SkeletonListItem } from "@/components/Skeleton";
+import { ErrorState } from "@/components/ErrorState";
 import {
   ActivityIndicator,
   Alert,
@@ -88,14 +89,30 @@ export default function FunnelScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const qc = useQueryClient();
-  const [segment, setSegment] = useState<"leads" | "contacts">("leads");
+  const params = useLocalSearchParams<{ segment?: string; contactTab?: string; filter?: string }>();
+  const [segment, setSegment] = useState<"leads" | "contacts">(
+    params.segment === "contacts" ? "contacts" : "leads"
+  );
   const [viewMode, setViewMode] = useState<"kanban" | "list">("kanban");
   const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newSource, setNewSource] = useState("other");
   // Contacts state
-  const [contactTab, setContactTab] = useState<"all" | "followups">("all");
+  const [contactTab, setContactTab] = useState<"all" | "followups">(
+    params.contactTab === "followups" ? "followups" : "all"
+  );
+
+  // Respond to navigation params (tab may already be mounted)
+  useEffect(() => {
+    if (params.segment === "contacts") setSegment("contacts");
+    else if (params.segment === "leads") setSegment("leads");
+  }, [params.segment]);
+
+  useEffect(() => {
+    if (params.contactTab === "followups") setContactTab("followups");
+    else if (params.contactTab === "all") setContactTab("all");
+  }, [params.contactTab]);
   const [showAddContact, setShowAddContact] = useState(false);
   const [newContactName, setNewContactName] = useState("");
   const [newContactEmail, setNewContactEmail] = useState("");
@@ -103,17 +120,20 @@ export default function FunnelScreen() {
   const [newContactType, setNewContactType] = useState("other");
   const [newContactPriority, setNewContactPriority] = useState("medium");
 
-  const { data: leads = [], isLoading, refetch } = useQuery({
+  const { data: leads = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["leads"],
     queryFn: () => api.getLeads(),
+    enabled: segment === "leads",
   });
   const { data: contacts = [], isLoading: contactsLoading, refetch: refetchContacts } = useQuery({
     queryKey: ["contacts"],
     queryFn: () => api.getContacts(),
+    enabled: segment === "contacts",
   });
   const { data: followUps = [], refetch: refetchFollowUps } = useQuery({
     queryKey: ["followUps"],
     queryFn: api.getFollowUps,
+    enabled: segment === "contacts",
   });
   const createContactMut = useMutation({
     mutationFn: api.createContact,
@@ -146,14 +166,13 @@ export default function FunnelScreen() {
     },
     onError: () => Alert.alert("Sync Failed", "Could not connect to Horizon. Check your API keys in Settings."),
   });
-  const { data: settings } = useQuery({
-    queryKey: ["settings"],
-    queryFn: api.getSettings,
-  });
-
   const statusMut = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => api.updateLeadStatus(id, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["leads"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["dashboard"] });
+    },
+    onError: (err: Error) => Alert.alert("Update failed", err.message),
   });
   const createMut = useMutation({
     mutationFn: api.createLead,
@@ -180,8 +199,10 @@ export default function FunnelScreen() {
     }
   };
 
-  const betaCount = leads.filter((l: any) => l.isBeta).length;
-  const betaTotal = parseInt(settings?.beta_slots_total || "100", 10);
+  const weekAgo = useMemo(() => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), []);
+  const filteredLeads = params.filter === "week"
+    ? leads.filter((l: any) => new Date(l.createdAt) >= weekAgo)
+    : leads;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   if (isLoading) {
@@ -194,139 +215,18 @@ export default function FunnelScreen() {
     );
   }
 
+  if (isError) {
+    return (
+      <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
+        <ErrorState message="Could not load pipeline." onRetry={refetch} />
+      </View>
+    );
+  }
+
   // Contacts list data
   const contactListData = contactTab === "all" ? contacts : followUps;
   const isLeadsSegment = segment === "leads";
   const isContactsSegment = segment === "contacts";
-
-  if (isContactsSegment) {
-    return (
-      <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Pipeline</Text>
-          <View style={styles.headerRight}>
-            <HamburgerMenu />
-          </View>
-        </View>
-
-        <View style={[styles.segmentBar, { backgroundColor: colors.surfaceSecondary }]}>
-          <Pressable
-            style={[styles.segBtn, isLeadsSegment && { backgroundColor: colors.background }]}
-            onPress={() => setSegment("leads")}
-            accessibilityRole="tab"
-            accessibilityLabel="Leads"
-            accessibilityState={{ selected: isLeadsSegment }}
-          >
-            <Text style={[styles.segBtnText, { color: isLeadsSegment ? colors.text : colors.textTertiary }, isLeadsSegment && { fontFamily: "SpaceGrotesk_600SemiBold" }]}>Leads</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.segBtn, isContactsSegment && { backgroundColor: colors.background }]}
-            onPress={() => setSegment("contacts")}
-            accessibilityRole="tab"
-            accessibilityLabel="Contacts"
-            accessibilityState={{ selected: isContactsSegment }}
-          >
-            <Text style={[styles.segBtnText, { color: isContactsSegment ? colors.text : colors.textTertiary }, isContactsSegment && { fontFamily: "SpaceGrotesk_600SemiBold" }]}>Contacts</Text>
-          </Pressable>
-        </View>
-
-        <View style={[styles.contactTabs, { backgroundColor: colors.background }]}>
-          <Pressable style={[styles.contactTab, { backgroundColor: colors.surfaceSecondary }, contactTab === "all" && { backgroundColor: colors.primary }]} onPress={() => setContactTab("all")} accessibilityRole="tab" accessibilityLabel="All contacts" accessibilityState={{ selected: contactTab === "all" }}>
-            <Text style={[styles.tabText, { color: contactTab === "all" ? colors.onPrimary : colors.textSecondary }]}>All</Text>
-          </Pressable>
-          <Pressable style={[styles.contactTab, { backgroundColor: colors.surfaceSecondary }, contactTab === "followups" && { backgroundColor: colors.primary }]} onPress={() => setContactTab("followups")} accessibilityRole="tab" accessibilityLabel={`Follow-ups${followUps.length > 0 ? `, ${followUps.length} due` : ""}`} accessibilityState={{ selected: contactTab === "followups" }}>
-            <Feather name="clock" size={14} color={contactTab === "followups" ? colors.onPrimary : colors.textSecondary} />
-            <Text style={[styles.tabText, { color: contactTab === "followups" ? colors.onPrimary : colors.textSecondary }]}>Follow-ups</Text>
-            {followUps.length > 0 && <View style={[styles.badge, { backgroundColor: colors.error }]}><Text style={styles.badgeText}>{followUps.length}</Text></View>}
-          </Pressable>
-        </View>
-
-        {contactsLoading ? (
-          <View style={{ padding: 16 }}>{[1,2,3,4,5,6].map((i) => <SkeletonListItem key={i} />)}</View>
-        ) : (
-          <FlatList
-            data={contactListData}
-            keyExtractor={(item) => String(item.id)}
-            contentContainerStyle={styles.listContent}
-            refreshControl={<RefreshControl refreshing={false} onRefresh={() => { refetchContacts(); refetchFollowUps(); }} tintColor={colors.primary} />}
-            renderItem={({ item }) => (
-              <Pressable
-                style={({ pressed }) => [styles.contactCard, { backgroundColor: colors.surface }, pressed && styles.pressed]}
-                onPress={() => router.push({ pathname: "/contact/[id]", params: { id: String(item.id) } })}
-                accessibilityRole="button"
-                accessibilityLabel={`${item.name}${item.company ? `, ${item.company}` : ""}`}
-                accessibilityHint="Double tap to view contact"
-              >
-                <View style={[styles.contactAvatar, { backgroundColor: (REL_COLORS[item.relationshipType] || colors.primary) + "20" }]}>
-                  <Text style={[styles.contactAvatarText, { color: REL_COLORS[item.relationshipType] || colors.primary }]}>{item.name?.charAt(0)?.toUpperCase()}</Text>
-                </View>
-                <View style={styles.contactInfo}>
-                  <Text style={[styles.contactName, { color: colors.text }]}>{item.name}</Text>
-                  <Text style={[styles.contactCompany, { color: colors.textSecondary }]}>{item.company || item.title || ""}</Text>
-                  <View style={[styles.relBadge, { backgroundColor: (REL_COLORS[item.relationshipType] || colors.primary) + "15" }]}>
-                    <Text style={[styles.relText, { color: REL_COLORS[item.relationshipType] || colors.primary }]}>{item.relationshipType}</Text>
-                  </View>
-                </View>
-                <View style={{ alignItems: "center", gap: 8 }}>
-                  <View style={[styles.priorityDot, { backgroundColor: PRIORITY_COLORS[item.priority] }]} />
-                  {contactTab === "followups" && (
-                    <Pressable
-                      style={[styles.markBtn, { backgroundColor: colors.success + "15" }]}
-                      onPress={(e) => { e.stopPropagation(); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); markContactMut.mutate(item.id); }}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Mark ${item.name} as contacted`}
-                    >
-                      <Feather name="check" size={16} color={colors.success} />
-                    </Pressable>
-                  )}
-                </View>
-              </Pressable>
-            )}
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Feather name="users" size={48} color={colors.textTertiary} />
-                <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>{contactTab === "all" ? "No contacts yet" : "No follow-ups due"}</Text>
-                <Text style={[styles.emptySubtitle, { color: colors.textTertiary }]}>{contactTab === "all" ? "Start with the people who matter most." : "All caught up."}</Text>
-              </View>
-            }
-          />
-        )}
-
-        <Pressable
-          style={({ pressed }) => [styles.fab, { backgroundColor: colors.primary }, pressed && { transform: [{ scale: 0.95 }] }]}
-          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); setShowAddContact(true); }}
-          accessibilityRole="button"
-          accessibilityLabel="Add contact"
-        >
-          <Feather name="plus" size={24} color={colors.onPrimary} />
-        </Pressable>
-
-        <Modal visible={showAddContact} animationType="slide" presentationStyle="pageSheet">
-          <ScrollView style={[styles.modalContent, { backgroundColor: colors.background, paddingTop: Platform.OS === "web" ? 67 : insets.top + 16 }]}>
-            <View style={styles.modalHeader}>
-              <Pressable onPress={() => setShowAddContact(false)}><Text style={[styles.cancelBtn, { color: colors.info }]}>Cancel</Text></Pressable>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>New Contact</Text>
-              <Pressable onPress={() => { if (newContactName) createContactMut.mutate({ name: newContactName, email: newContactEmail || undefined, company: newContactCompany || undefined, relationshipType: newContactType, priority: newContactPriority }); }} disabled={!newContactName}>
-                <Text style={[styles.saveBtn, { color: colors.info }, !newContactName && styles.saveBtnDisabled]}>Save</Text>
-              </Pressable>
-            </View>
-            <View style={styles.formGroup}><Text style={[styles.formLabel, { color: colors.textSecondary }]}>Name</Text><TextInput style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]} value={newContactName} onChangeText={setNewContactName} placeholder="Contact name" placeholderTextColor={colors.textTertiary} autoFocus /></View>
-            <View style={styles.formGroup}><Text style={[styles.formLabel, { color: colors.textSecondary }]}>Email</Text><TextInput style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]} value={newContactEmail} onChangeText={setNewContactEmail} placeholder="email@example.com" placeholderTextColor={colors.textTertiary} keyboardType="email-address" autoCapitalize="none" /></View>
-            <View style={styles.formGroup}><Text style={[styles.formLabel, { color: colors.textSecondary }]}>Company</Text><TextInput style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]} value={newContactCompany} onChangeText={setNewContactCompany} placeholder="Company name" placeholderTextColor={colors.textTertiary} /></View>
-            <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: colors.textSecondary }]}>Relationship</Text>
-              <View style={styles.sourcePicker}>{REL_TYPES.map((t) => (<Pressable key={t} style={[styles.sourceChip, { backgroundColor: colors.surface, borderColor: colors.border }, newContactType === t && { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={() => setNewContactType(t)}><Text style={[styles.sourceChipText, { color: colors.text }, newContactType === t && { color: colors.onPrimary }]}>{t}</Text></Pressable>))}</View>
-            </View>
-            <View style={styles.formGroup}>
-              <Text style={[styles.formLabel, { color: colors.textSecondary }]}>Priority</Text>
-              <View style={styles.sourcePicker}>{PRIORITIES.map((p) => (<Pressable key={p} style={[styles.sourceChip, { backgroundColor: colors.surface, borderColor: colors.border }, newContactPriority === p && { backgroundColor: PRIORITY_COLORS[p], borderColor: PRIORITY_COLORS[p] }]} onPress={() => setNewContactPriority(p)}><Text style={[styles.sourceChipText, { color: colors.text }, newContactPriority === p && { color: colors.onPrimary }]}>{p}</Text></Pressable>))}</View>
-            </View>
-            <View style={{ height: 40 }} />
-          </ScrollView>
-        </Modal>
-      </View>
-    );
-  }
 
   return (
     <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
@@ -358,10 +258,6 @@ export default function FunnelScreen() {
               </>
             )}
           </Pressable>
-          <View style={[styles.betaCounter, { backgroundColor: colors.primary + "10" }]}>
-            <Feather name="zap" size={14} color={colors.accent} />
-            <Text style={[styles.betaCountText, { color: colors.primary }]}>{betaCount}/{betaTotal}</Text>
-          </View>
           <Pressable
             onPress={() => setViewMode(viewMode === "kanban" ? "list" : "kanban")}
             style={[styles.viewToggle, { backgroundColor: colors.surfaceSecondary }]}
@@ -375,8 +271,76 @@ export default function FunnelScreen() {
         </View>
       </View>
 
-      {viewMode === "kanban" ? (
-        leads.length === 0 ? (
+      {params.filter === "week" && (
+        <View style={[styles.filterBanner, { backgroundColor: colors.info + "15" }]}>
+          <Feather name="calendar" size={13} color={colors.info} />
+          <Text style={[styles.filterBannerText, { color: colors.info }]}>New this week</Text>
+          <Pressable onPress={() => router.setParams({ filter: undefined })} hitSlop={8}>
+            <Feather name="x" size={13} color={colors.info} />
+          </Pressable>
+        </View>
+      )}
+      {isContactsSegment ? (
+        <>
+          <View style={[styles.contactTabs, { backgroundColor: colors.background }]}>
+            <Pressable style={[styles.contactTab, { backgroundColor: colors.surfaceSecondary }, contactTab === "all" && { backgroundColor: colors.primary }]} onPress={() => setContactTab("all")} accessibilityRole="tab" accessibilityLabel="All contacts" accessibilityState={{ selected: contactTab === "all" }}>
+              <Text style={[styles.tabText, { color: contactTab === "all" ? colors.onPrimary : colors.textSecondary }]}>All</Text>
+            </Pressable>
+            <Pressable style={[styles.contactTab, { backgroundColor: colors.surfaceSecondary }, contactTab === "followups" && { backgroundColor: colors.primary }]} onPress={() => setContactTab("followups")} accessibilityRole="tab" accessibilityLabel={`Follow-ups${followUps.length > 0 ? `, ${followUps.length} due` : ""}`} accessibilityState={{ selected: contactTab === "followups" }}>
+              <Feather name="clock" size={14} color={contactTab === "followups" ? colors.onPrimary : colors.textSecondary} />
+              <Text style={[styles.tabText, { color: contactTab === "followups" ? colors.onPrimary : colors.textSecondary }]}>Follow-ups</Text>
+              {followUps.length > 0 && <View style={[styles.badge, { backgroundColor: colors.error }]}><Text style={styles.badgeText}>{followUps.length}</Text></View>}
+            </Pressable>
+          </View>
+          {contactsLoading ? (
+            <View style={{ padding: 16 }}>{[1,2,3,4,5,6].map((i) => <SkeletonListItem key={i} />)}</View>
+          ) : (
+            <FlatList
+              data={contactListData}
+              keyExtractor={(item) => String(item.id)}
+              contentContainerStyle={styles.listContent}
+              refreshControl={<RefreshControl refreshing={false} onRefresh={() => { refetchContacts(); refetchFollowUps(); }} tintColor={colors.primary} />}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={({ pressed }) => [styles.listCard, { backgroundColor: colors.surface }, pressed && styles.pressed]}
+                  onPress={() => router.push({ pathname: "/contact/[id]", params: { id: String(item.id) } })}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${item.name}${item.company ? `, ${item.company}` : ""}`}
+                  accessibilityHint="Double tap to view contact"
+                >
+                  <View style={styles.listCardLeft}>
+                    <Text style={[styles.leadName, { color: colors.text }]}>{item.name}</Text>
+                    <Text style={[styles.leadEmail, { color: colors.textSecondary }]}>{item.company || item.email || ""}</Text>
+                  </View>
+                  <View style={styles.listCardRight}>
+                    <View style={[styles.statusBadge, { backgroundColor: (REL_COLORS[item.relationshipType] || colors.primary) + "20" }]}>
+                      <Text style={[styles.statusText, { color: REL_COLORS[item.relationshipType] || colors.primary }]}>{item.relationshipType}</Text>
+                    </View>
+                    {contactTab === "followups" && (
+                      <Pressable
+                        style={[styles.markBtn, { backgroundColor: colors.success + "15" }]}
+                        onPress={(e) => { e.stopPropagation(); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); markContactMut.mutate(item.id); }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Mark ${item.name} as contacted`}
+                      >
+                        <Feather name="check" size={16} color={colors.success} />
+                      </Pressable>
+                    )}
+                  </View>
+                </Pressable>
+              )}
+              ListEmptyComponent={
+                <View style={styles.emptyState}>
+                  <Feather name="users" size={48} color={colors.textTertiary} />
+                  <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>{contactTab === "all" ? "No contacts yet" : "No follow-ups due"}</Text>
+                  <Text style={[styles.emptySubtitle, { color: colors.textTertiary }]}>{contactTab === "all" ? "Start with the people who matter most." : "All caught up."}</Text>
+                </View>
+              }
+            />
+          )}
+        </>
+      ) : viewMode === "kanban" ? (
+        filteredLeads.length === 0 ? (
           <View style={styles.emptyState}>
             <Feather name="target" size={48} color={colors.textTertiary} />
             <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>No leads yet</Text>
@@ -400,7 +364,7 @@ export default function FunnelScreen() {
           contentContainerStyle={styles.kanbanContainer}
         >
           {LEAD_STATUSES.map((status) => {
-            const col = leads.filter((l: any) => l.status === status);
+            const col = filteredLeads.filter((l: any) => l.status === status);
             return (
               <View key={status} style={[styles.kanbanColumn, { backgroundColor: colors.surfaceSecondary }]}>
                 <View style={styles.columnHeader}>
@@ -434,7 +398,7 @@ export default function FunnelScreen() {
         )
       ) : (
         <FlatList
-          data={leads}
+          data={filteredLeads}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.listContent}
           refreshControl={<RefreshControl refreshing={false} onRefresh={refetch} tintColor={colors.primary} />}
@@ -488,13 +452,38 @@ export default function FunnelScreen() {
         style={({ pressed }) => [styles.fab, { backgroundColor: colors.primary }, pressed && { transform: [{ scale: 0.95 }] }]}
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          setShowAdd(true);
+          if (isContactsSegment) setShowAddContact(true);
+          else setShowAdd(true);
         }}
         accessibilityRole="button"
-        accessibilityLabel="Add lead"
+        accessibilityLabel={isContactsSegment ? "Add contact" : "Add lead"}
       >
         <Feather name="plus" size={24} color={colors.onPrimary} />
       </Pressable>
+
+      <Modal visible={showAddContact} animationType="slide" presentationStyle="pageSheet">
+        <ScrollView style={[styles.modalContent, { backgroundColor: colors.background, paddingTop: Platform.OS === "web" ? 67 : insets.top + 16 }]}>
+          <View style={styles.modalHeader}>
+            <Pressable onPress={() => setShowAddContact(false)}><Text style={[styles.cancelBtn, { color: colors.info }]}>Cancel</Text></Pressable>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>New Contact</Text>
+            <Pressable onPress={() => { if (newContactName) createContactMut.mutate({ name: newContactName, email: newContactEmail || undefined, company: newContactCompany || undefined, relationshipType: newContactType, priority: newContactPriority }); }} disabled={!newContactName}>
+              <Text style={[styles.saveBtn, { color: colors.info }, !newContactName && styles.saveBtnDisabled]}>Save</Text>
+            </Pressable>
+          </View>
+          <View style={styles.formGroup}><Text style={[styles.formLabel, { color: colors.textSecondary }]}>Name</Text><TextInput style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]} value={newContactName} onChangeText={setNewContactName} placeholder="Contact name" placeholderTextColor={colors.textTertiary} autoFocus /></View>
+          <View style={styles.formGroup}><Text style={[styles.formLabel, { color: colors.textSecondary }]}>Email</Text><TextInput style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]} value={newContactEmail} onChangeText={setNewContactEmail} placeholder="email@example.com" placeholderTextColor={colors.textTertiary} keyboardType="email-address" autoCapitalize="none" /></View>
+          <View style={styles.formGroup}><Text style={[styles.formLabel, { color: colors.textSecondary }]}>Company</Text><TextInput style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]} value={newContactCompany} onChangeText={setNewContactCompany} placeholder="Company name" placeholderTextColor={colors.textTertiary} /></View>
+          <View style={styles.formGroup}>
+            <Text style={[styles.formLabel, { color: colors.textSecondary }]}>Relationship</Text>
+            <View style={styles.sourcePicker}>{REL_TYPES.map((t) => (<Pressable key={t} style={[styles.sourceChip, { backgroundColor: colors.surface, borderColor: colors.border }, newContactType === t && { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={() => setNewContactType(t)}><Text style={[styles.sourceChipText, { color: colors.text }, newContactType === t && { color: colors.onPrimary }]}>{t}</Text></Pressable>))}</View>
+          </View>
+          <View style={styles.formGroup}>
+            <Text style={[styles.formLabel, { color: colors.textSecondary }]}>Priority</Text>
+            <View style={styles.sourcePicker}>{PRIORITIES.map((p) => (<Pressable key={p} style={[styles.sourceChip, { backgroundColor: colors.surface, borderColor: colors.border }, newContactPriority === p && { backgroundColor: PRIORITY_COLORS[p], borderColor: PRIORITY_COLORS[p] }]} onPress={() => setNewContactPriority(p)}><Text style={[styles.sourceChipText, { color: colors.text }, newContactPriority === p && { color: colors.onPrimary }]}>{p}</Text></Pressable>))}</View>
+          </View>
+          <View style={{ height: 40 }} />
+        </ScrollView>
+      </Modal>
 
       <Modal visible={showAdd} animationType="slide" presentationStyle="pageSheet">
         <View style={[styles.modalContent, { backgroundColor: colors.background, paddingTop: Platform.OS === "web" ? 67 : insets.top + 16 }]}>
@@ -568,8 +557,8 @@ const styles = StyleSheet.create({
   headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   syncBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
   syncBtnText: { fontSize: 12, fontFamily: "SpaceGrotesk_600SemiBold", color: "#fff" },
-  betaCounter: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: Layout.inputRadius },
-  betaCountText: { fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold" },
+  filterBanner: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: Layout.screenPadding, paddingVertical: 8, marginBottom: 4 },
+  filterBannerText: { fontSize: 13, fontFamily: "SpaceGrotesk_500Medium", flex: 1 },
   viewToggle: { padding: 6, borderRadius: Layout.badgeRadius },
   kanbanContainer: { paddingHorizontal: 14, gap: 14, paddingBottom: 100 },
   kanbanColumn: { width: COLUMN_WIDTH, borderRadius: Layout.cardRadius, padding: Layout.cardPadding },
@@ -644,14 +633,7 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 14, fontFamily: "SpaceGrotesk_500Medium" },
   badge: { borderRadius: 10, paddingHorizontal: 6, paddingVertical: 1, minWidth: 20, alignItems: "center" as const },
   badgeText: { fontSize: 11, fontFamily: "SpaceGrotesk_700Bold", color: "#fff" },
-  contactCard: { flexDirection: "row", alignItems: "center", borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginBottom: Layout.cardGap },
-  contactAvatar: { width: 44, height: 44, borderRadius: 22, justifyContent: "center", alignItems: "center", marginRight: 12 },
-  contactAvatarText: { fontSize: 18, fontFamily: "SpaceGrotesk_600SemiBold" },
-  contactInfo: { flex: 1 },
-  contactName: { fontSize: 15, fontFamily: "SpaceGrotesk_600SemiBold" },
-  contactCompany: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular", marginTop: 1 },
-  relBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, alignSelf: "flex-start", marginTop: 6 },
+  relBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   relText: { fontSize: 11, fontFamily: "SpaceGrotesk_600SemiBold", textTransform: "capitalize" },
-  priorityDot: { width: 8, height: 8, borderRadius: 4 },
   markBtn: { width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center" },
 });

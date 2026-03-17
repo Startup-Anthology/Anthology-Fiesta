@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AppState, Platform } from "react-native";
+import { getServerBaseUrl } from "@/constants/api";
 
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080";
 const POLL_INTERVAL_MS = 15_000;
 
 async function checkConnectivity(): Promise<boolean> {
@@ -11,7 +11,7 @@ async function checkConnectivity(): Promise<boolean> {
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 4_000);
-    const res = await fetch(`${API_BASE}/health`, {
+    const res = await fetch(`${getServerBaseUrl()}/api/healthz`, {
       method: "HEAD",
       signal: controller.signal,
     });

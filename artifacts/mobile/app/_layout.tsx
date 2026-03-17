@@ -22,7 +22,13 @@ import { ThemeProvider } from "@/lib/theme";
 
 SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+    },
+  },
+});
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { isLoading, isAuthenticated, isAdmin, is2faVerified } = useAuth();

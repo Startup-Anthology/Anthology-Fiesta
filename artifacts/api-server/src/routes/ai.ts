@@ -1,4 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
+import rateLimit from "express-rate-limit";
 import { db } from "@workspace/db";
 import { conversations, messages, aiInsightsTable, onboardingProgressTable } from "@workspace/db";
 import { eq, and, desc, or, isNull } from "drizzle-orm";
@@ -7,13 +8,28 @@ import { generateInsightsForUser } from "../lib/ai/insightWorker";
 
 const router = Router();
 
-router.post("/ai/chat", async (req: Request, res: Response, next: NextFunction) => {
+const chatRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?.id ?? "anonymous",
+  validate: { keyGeneratorIpFallback: false },
+  message: { error: "Too many AI requests, please wait a moment" },
+});
+
+router.post("/ai/chat", chatRateLimit, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const { message, conversationId } = req.body;
 
     if (!message || typeof message !== "string") {
       res.status(400).json({ error: "message is required" });
+      return;
+    }
+
+    if (message.length > 10000) {
+      res.status(400).json({ error: "Message too long (max 10000 characters)" });
       return;
     }
 
@@ -58,13 +74,18 @@ router.post("/ai/chat", async (req: Request, res: Response, next: NextFunction) 
   }
 });
 
-router.post("/ai/chat/sync", async (req: Request, res: Response, next: NextFunction) => {
+router.post("/ai/chat/sync", chatRateLimit, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
     const { message, conversationId } = req.body;
 
     if (!message || typeof message !== "string") {
       res.status(400).json({ error: "message is required" });
+      return;
+    }
+
+    if (message.length > 10000) {
+      res.status(400).json({ error: "Message too long (max 10000 characters)" });
       return;
     }
 

@@ -109,7 +109,7 @@ router.post("/contacts/:id/mark-contacted", async (req: Request, res: Response, 
           description: `Scheduled follow-up with ${contact.name}`,
           startTime: followUp.toISOString(),
           endTime: followUpEnd.toISOString(),
-        });
+        }, userId);
       } catch (calErr: any) {
         console.error("Google Calendar sync failed for follow-up:", calErr.message);
       }

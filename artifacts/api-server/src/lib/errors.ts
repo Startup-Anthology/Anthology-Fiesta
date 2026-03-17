@@ -29,7 +29,7 @@ export function parseIntParam(value: string | string[], paramName = "id"): numbe
   return n;
 }
 
-export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction) {
+export function errorHandler(err: Error & { type?: string; status?: number }, req: Request, res: Response, _next: NextFunction) {
   if (err instanceof AppError && err.isOperational) {
     res.status(err.statusCode).json({ error: err.message });
     return;
@@ -37,6 +37,12 @@ export function errorHandler(err: Error, req: Request, res: Response, _next: Nex
 
   if (err instanceof ValidationError) {
     res.status(400).json({ error: err.message });
+    return;
+  }
+
+  // express.json() body-too-large error
+  if (err.type === "entity.too.large" || err.status === 413) {
+    res.status(413).json({ error: "Request body too large (max 1mb)" });
     return;
   }
 

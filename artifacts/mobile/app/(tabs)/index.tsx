@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AiInsightCards from "@/components/AiInsightCards";
+import { ErrorState } from "@/components/ErrorState";
 import { type ThemeColors } from "@/constants/colors";
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
@@ -23,22 +24,29 @@ import { useTheme } from "@/lib/theme";
 
 const saIconWhite = require("@/assets/images/sa-icon-white.png");
 
-function StatCard({ label, value, icon, color, colors }: { label: string; value: string | number; icon: string; color: string; colors: ThemeColors }) {
+function StatCard({ label, value, icon, color, colors, onPress }: { label: string; value: string | number; icon: string; color: string; colors: ThemeColors; onPress?: () => void }) {
   return (
-    <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
+    <Pressable
+      style={({ pressed }) => [styles.statCard, { backgroundColor: colors.surface }, pressed && styles.pressed]}
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? "button" : "none"}
+      accessibilityLabel={`${label}: ${value}`}
+    >
       <View style={[styles.statIcon, { backgroundColor: color + "15" }]}>
         <Feather name={icon as any} size={18} color={color} />
       </View>
       <Text style={[styles.statValue, { color: colors.text }]}>{value}</Text>
       <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{label}</Text>
-    </View>
+      {onPress && <Feather name="chevron-right" size={14} color={colors.textTertiary} style={styles.statChevron} />}
+    </Pressable>
   );
 }
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["dashboard"],
     queryFn: api.getDashboard,
   });
@@ -65,14 +73,21 @@ export default function DashboardScreen() {
     );
   }
 
+  if (isError) {
+    return (
+      <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
+        <ErrorState message="Could not load dashboard." onRetry={refetch} />
+      </View>
+    );
+  }
+
   const d = data || {};
-  const betaPercent = d.betaSlotsTotal ? Math.round((d.betaSlotsFilled / d.betaSlotsTotal) * 100) : 0;
 
   return (
     <ScrollView
       style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
-      contentInsetAdjustmentBehavior="automatic"
+
       refreshControl={<RefreshControl refreshing={false} onRefresh={refetch} tintColor={colors.primary} />}
     >
       <View style={styles.headerRow}>
@@ -86,26 +101,17 @@ export default function DashboardScreen() {
         <HamburgerMenu />
       </View>
 
-      <View style={[styles.betaCard, { backgroundColor: colors.primary }]}>
-        <View style={styles.betaHeader}>
-          <Feather name="zap" size={16} color={colors.accent} />
-          <Text style={[styles.betaTitle, { color: colors.onPrimary }]}>Beta Slots</Text>
-          <Text style={[styles.betaCount, { color: colors.accent }]}>
-            {d.betaSlotsFilled || 0}/{d.betaSlotsTotal || 100}
-          </Text>
-        </View>
-        <View style={styles.progressBg}>
-          <View style={[styles.progressFill, { width: `${Math.min(betaPercent, 100)}%`, backgroundColor: colors.accent }]} />
-        </View>
-      </View>
-
       <View style={styles.statsGrid}>
-        <StatCard label="Leads" value={d.totalLeads || 0} icon="target" color={colors.statusNew} colors={colors} />
-        <StatCard label="New this week" value={d.leadsThisWeek || 0} icon="trending-up" color={colors.info} colors={colors} />
-        <StatCard label="Contacts" value={d.totalContacts || 0} icon="users" color={colors.primary} colors={colors} />
-        <StatCard label="Emails sent" value={d.emailsSentThisWeek || 0} icon="send" color={colors.success} colors={colors} />
-        <StatCard label="Follow-ups" value={d.followUpsDueToday || 0} icon="clock" color={colors.warning} colors={colors} />
-        <StatCard label="Beta filled" value={d.betaSlotsFilled || 0} icon="star" color={colors.accent} colors={colors} />
+        <StatCard label="Leads" value={d.totalLeads || 0} icon="target" color={colors.statusNew} colors={colors}
+          onPress={() => router.push({ pathname: "/(tabs)/funnel", params: { segment: "leads" } })} />
+        <StatCard label="New this week" value={d.leadsThisWeek || 0} icon="trending-up" color={colors.info} colors={colors}
+          onPress={() => router.push({ pathname: "/(tabs)/funnel", params: { segment: "leads", filter: "week" } })} />
+        <StatCard label="Contacts" value={d.totalContacts || 0} icon="users" color={colors.primary} colors={colors}
+          onPress={() => router.push({ pathname: "/(tabs)/funnel", params: { segment: "contacts" } })} />
+        <StatCard label="Emails sent" value={d.emailsSentThisWeek || 0} icon="send" color={colors.success} colors={colors}
+          onPress={() => router.push("/comms")} />
+        <StatCard label="Follow-ups" value={d.followUpsDueToday || 0} icon="clock" color={colors.warning} colors={colors}
+          onPress={() => router.push({ pathname: "/(tabs)/funnel", params: { segment: "contacts", contactTab: "followups" } })} />
       </View>
 
       <AiInsightCards />
@@ -156,12 +162,6 @@ const styles = StyleSheet.create({
   headerLogoImage: { width: 28, height: 28 },
   greeting: { fontSize: 24, fontFamily: "SpaceGrotesk_700Bold" },
   subtitle: { fontSize: 14, fontFamily: "SpaceGrotesk_500Medium", marginTop: 2 },
-  betaCard: { borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginBottom: Layout.sectionSpacing },
-  betaHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
-  betaTitle: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: "#fff", flex: 1 },
-  betaCount: { fontSize: 16, fontFamily: "SpaceGrotesk_700Bold" },
-  progressBg: { height: 6, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 3 },
-  progressFill: { height: 6, borderRadius: 3 },
   statsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 14, marginBottom: Layout.sectionSpacing },
   statCard: {
     width: "47%" as any,
@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
   statIcon: { width: 36, height: 36, borderRadius: 10, justifyContent: "center", alignItems: "center", marginBottom: 10 },
   statValue: { fontSize: 24, fontFamily: "SpaceGrotesk_700Bold" },
   statLabel: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular", marginTop: 2 },
+  statChevron: { position: "absolute", top: Layout.cardPadding, right: Layout.cardPadding },
   section: { marginBottom: Layout.sectionSpacing },
   sectionTitle: { fontSize: 18, fontFamily: "SpaceGrotesk_600SemiBold", marginBottom: 14 },
   followUpCard: {

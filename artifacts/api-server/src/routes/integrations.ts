@@ -24,16 +24,14 @@ router.get("/integrations", requireAuth, async (req: Request, res: Response) => 
     .from(userIntegrationsTable)
     .where(eq(userIntegrationsTable.userId, userId));
 
-  res.json({
-    integrations: rows.map((r) => ({
-      id: r.id,
-      provider: r.provider,
-      category: r.category,
-      status: r.status,
-      displayName: r.displayName,
-      connectedAt: r.createdAt,
-    })),
-  });
+  res.json(rows.map((r) => ({
+    id: r.id,
+    provider: r.provider,
+    category: r.category,
+    status: r.status,
+    displayName: r.displayName,
+    connectedAt: r.createdAt,
+  })));
 });
 
 router.get("/integrations/status", requireAuth, async (req: Request, res: Response) => {

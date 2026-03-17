@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, timestamp, jsonb, unique, index } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, varchar, text, timestamp, jsonb, unique, index } from "drizzle-orm/pg-core";
 import { usersTable } from "./auth";
 
 export const userIntegrationsTable = pgTable("user_integrations", {
@@ -18,7 +18,7 @@ export const userIntegrationsTable = pgTable("user_integrations", {
 
 export const integrationTokensTable = pgTable("integration_tokens", {
   id: serial("id").primaryKey(),
-  integrationId: serial("integration_id").notNull().references(() => userIntegrationsTable.id, { onDelete: "cascade" }),
+  integrationId: integer("integration_id").notNull().references(() => userIntegrationsTable.id, { onDelete: "cascade" }),
   accessToken: text("access_token").notNull(), // AES-256-GCM encrypted
   refreshToken: text("refresh_token"), // AES-256-GCM encrypted
   expiresAt: timestamp("expires_at", { withTimezone: true }),

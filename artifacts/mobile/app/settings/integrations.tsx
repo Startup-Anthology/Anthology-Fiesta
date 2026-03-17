@@ -123,8 +123,11 @@ export default function IntegrationsScreen() {
     onError: (err: Error) => Alert.alert("Error", err.message),
   });
 
+  const integrationList: any[] = Array.isArray(integrations)
+    ? integrations
+    : (integrations as any)?.integrations ?? [];
   const integrationMap = Object.fromEntries(
-    integrations.map((i: any) => [i.provider, i])
+    integrationList.map((i: any) => [i.provider, i])
   );
 
   const handleConnect = async (provider: string) => {

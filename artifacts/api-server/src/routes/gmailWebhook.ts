@@ -1,9 +1,10 @@
 import { Router, type Request, type Response } from "express";
 import { db } from "@workspace/db";
-import { activitiesTable, usersTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { activitiesTable, usersTable, userIntegrationsTable } from "@workspace/db";
+import { eq, and } from "drizzle-orm";
 import { OAuth2Client } from "google-auth-library";
 import { getGmailHistory, getGmailMessage, setupGmailWatch, getGmailProfile } from "../lib/gmail";
+import { requireAuth } from "../middlewares/requireAuth";
 
 const router = Router();
 const googleAuthClient = new OAuth2Client();
@@ -30,7 +31,23 @@ async function verifyPubSubToken(req: Request): Promise<boolean> {
   }
 }
 
-let lastHistoryId: string | null = null;
+async function getUserGmailHistoryId(userId: string): Promise<string | null> {
+  const [integration] = await db.select({ metadata: userIntegrationsTable.metadata })
+    .from(userIntegrationsTable)
+    .where(and(eq(userIntegrationsTable.userId, userId), eq(userIntegrationsTable.provider, "gmail")));
+  return (integration?.metadata as any)?.lastHistoryId ?? null;
+}
+
+async function setUserGmailHistoryId(userId: string, historyId: string): Promise<void> {
+  const [existing] = await db.select({ metadata: userIntegrationsTable.metadata })
+    .from(userIntegrationsTable)
+    .where(and(eq(userIntegrationsTable.userId, userId), eq(userIntegrationsTable.provider, "gmail")));
+  if (!existing) return;
+  const updated = { ...(existing.metadata as Record<string, unknown> ?? {}), lastHistoryId: historyId };
+  await db.update(userIntegrationsTable)
+    .set({ metadata: updated })
+    .where(and(eq(userIntegrationsTable.userId, userId), eq(userIntegrationsTable.provider, "gmail")));
+}
 
 router.post("/gmail/webhook", async (req: Request, res: Response) => {
   try {
@@ -49,30 +66,33 @@ router.post("/gmail/webhook", async (req: Request, res: Response) => {
     const historyId = decoded.historyId;
     const emailAddress = decoded.emailAddress;
 
-    // Find the user whose Gmail account triggered this webhook
-    let webhookUserId: string | null = null;
-    if (emailAddress) {
-      const [user] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, emailAddress));
-      webhookUserId = user?.id || null;
-    }
+    if (!emailAddress || !historyId) return;
 
-    if (!lastHistoryId || !historyId) {
-      lastHistoryId = historyId;
+    // Find the user whose Gmail account triggered this webhook
+    const [user] = await db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.email, emailAddress));
+    if (!user) return;
+
+    const webhookUserId = user.id;
+    const lastHistoryId = await getUserGmailHistoryId(webhookUserId);
+
+    if (!lastHistoryId) {
+      await setUserGmailHistoryId(webhookUserId, historyId);
       return;
     }
 
-    const history = await getGmailHistory(lastHistoryId, webhookUserId ?? undefined);
-    lastHistoryId = historyId;
+    const history = await getGmailHistory(lastHistoryId, webhookUserId);
+    await setUserGmailHistoryId(webhookUserId, historyId);
 
     if (!history?.history) return;
 
+    // Scope tracked threads to this user only
     const trackedThreads = await db.select({
       gmailThreadId: activitiesTable.gmailThreadId,
       leadId: activitiesTable.leadId,
       contactId: activitiesTable.contactId,
       userId: activitiesTable.userId,
     }).from(activitiesTable)
-      .where(eq(activitiesTable.type, "email"));
+      .where(and(eq(activitiesTable.type, "email"), eq(activitiesTable.userId, webhookUserId)));
 
     const threadMap = new Map<string, { leadId: number | null; contactId: number | null; userId: string | null }>();
     for (const t of trackedThreads) {
@@ -98,7 +118,6 @@ router.post("/gmail/webhook", async (req: Request, res: Response) => {
           const headers = fullMsg.payload?.headers || [];
           const fromHeader = headers.find((h: any) => h.name === "From")?.value || "Unknown";
           const subjectHeader = headers.find((h: any) => h.name === "Subject")?.value || "(no subject)";
-          const dateHeader = headers.find((h: any) => h.name === "Date")?.value;
           const gmailLink = `https://mail.google.com/mail/u/0/#inbox/${msgMeta.id}`;
 
           await db.insert(activitiesTable).values({
@@ -123,25 +142,27 @@ router.post("/gmail/webhook", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/gmail/watch", async (req: Request, res: Response) => {
+router.post("/gmail/watch", requireAuth, async (req: Request, res: Response) => {
   try {
     const { topicName } = req.body;
     if (!topicName) {
       res.status(400).json({ error: "topicName is required" });
       return;
     }
-    const userId = req.user?.id;
+    const userId = req.user!.id;
     const result = await setupGmailWatch(topicName, userId);
-    lastHistoryId = String(result.historyId || "");
+    if (result.historyId) {
+      await setUserGmailHistoryId(userId, String(result.historyId));
+    }
     res.json({ success: true, expiration: result.expiration });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
-router.get("/gmail/profile", async (req: Request, res: Response) => {
+router.get("/gmail/profile", requireAuth, async (req: Request, res: Response) => {
   try {
-    const profile = await getGmailProfile(req.user?.id);
+    const profile = await getGmailProfile(req.user!.id);
     res.json(profile);
   } catch (err: any) {
     res.status(500).json({ error: err.message });

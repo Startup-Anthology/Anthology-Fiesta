@@ -2,14 +2,15 @@ import { index, pgTable, serial, integer, text, timestamp, varchar } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
+import { dripSequencesTable } from "./dripSequences";
 
 export const triggerRulesTable = pgTable("trigger_rules", {
   id: serial("id").primaryKey(),
   triggerStatus: text("trigger_status").notNull(),
   actionType: text("action_type").notNull(),
-  sequenceId: integer("sequence_id"),
+  sequenceId: integer("sequence_id").references(() => dripSequencesTable.id, { onDelete: "cascade" }),
   followUpDays: integer("follow_up_days"),
-  userId: varchar("user_id").notNull().references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("idx_trigger_rules_user_id").on(table.userId),

@@ -2,18 +2,20 @@ import { index, integer, pgTable, serial, text, timestamp, varchar } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
+import { leadsTable } from "./leads";
+import { contactsTable } from "./contacts";
 
 export const aiInsightsTable = pgTable("ai_insights", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   type: text("type").notNull(),
   severity: text("severity").notNull().default("info"),
   sourceAgent: text("source_agent").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
   status: text("status").notNull().default("active"),
-  leadId: integer("lead_id"),
-  contactId: integer("contact_id"),
+  leadId: integer("lead_id").references(() => leadsTable.id, { onDelete: "set null" }),
+  contactId: integer("contact_id").references(() => contactsTable.id, { onDelete: "set null" }),
   metadata: text("metadata"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   dismissedAt: timestamp("dismissed_at", { withTimezone: true }),

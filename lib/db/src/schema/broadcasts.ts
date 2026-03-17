@@ -2,17 +2,18 @@ import { index, pgTable, serial, integer, text, timestamp, varchar } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
+import { emailTemplatesTable } from "./emailTemplates";
 
 export const broadcastsTable = pgTable("broadcasts", {
   id: serial("id").primaryKey(),
   subject: text("subject").notNull(),
-  templateId: integer("template_id"),
+  templateId: integer("template_id").references(() => emailTemplatesTable.id, { onDelete: "set null" }),
   segmentType: text("segment_type").notNull(),
   segmentValue: text("segment_value").notNull(),
   recipientCount: integer("recipient_count").notNull().default(0),
   status: text("status").notNull().default("draft"),
   sentAt: timestamp("sent_at", { withTimezone: true }),
-  userId: varchar("user_id").notNull().references(() => usersTable.id),
+  userId: varchar("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("idx_broadcasts_user_id").on(table.userId),
