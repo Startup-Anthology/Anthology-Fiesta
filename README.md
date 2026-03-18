@@ -14,15 +14,25 @@ Fiesta is a mobile CRM built for solo founders — manage your leads, contacts, 
 
 ## Running locally
 
-Everything runs in Replit. Three services start automatically:
+### Prerequisites
 
-| Service | What it does |
-|---|---|
-| `artifacts/api-server` | Express API on port 8080 |
-| `artifacts/mobile` | Expo dev server (web + Expo Go) |
-| `artifacts/mockup-sandbox` | Component preview server |
+- Node.js 20+, pnpm, PostgreSQL 16
 
-The web version of the app is available in the Replit preview pane immediately.
+### Setup
+
+```bash
+cp .env.example .env      # fill in required values
+pnpm install
+pnpm --filter db push     # push DB schema
+```
+
+Then start the services:
+
+| Service | Command | What it does |
+|---|---|---|
+| `artifacts/api-server` | `pnpm --filter api-server dev:fast` | Express API on port 8080 |
+| `artifacts/mobile` | `pnpm --filter mobile dev:fast` | Expo dev server (web + Expo Go) |
+| `artifacts/mockup-sandbox` | `pnpm --filter mockup-sandbox dev` | Component preview server |
 
 ## Using on your iPhone (Expo Go)
 
@@ -32,7 +42,7 @@ No TestFlight or Apple Developer Program needed.
 2. Open the Expo dev server logs and copy the `exp://` URL
 3. In Expo Go, tap **Enter URL manually** and paste it
 
-The app connects directly to the Replit dev server. Hot reload is enabled — changes reflect instantly.
+The app connects to your local dev server. Hot reload is enabled — changes reflect instantly.
 
 ## Installing as a PWA (web)
 
@@ -46,30 +56,30 @@ Hashed JS/CSS assets are cached for one year. HTML is never cached so updates ar
 
 ## Authentication
 
-Login uses **Replit OAuth**. Tap "Log In" and you'll be taken to Replit's sign-in page. After authorizing, you're redirected back to the app automatically.
+Login uses **email/password**. Register an account via `POST /api/auth/register`, then log in via `POST /api/auth/login`.
+
+Sessions are stored in PostgreSQL and delivered via cookie or `Authorization: Bearer <sid>` header. The mobile app stores the session token in `expo-secure-store`.
 
 **Admin users** are required to complete 2FA (TOTP authenticator app or email code) before accessing anything. You can always log out from the 2FA screen if needed.
 
 ## Setting up integrations
 
-### Gmail
-Required for sending emails and drip sequences.
-1. In the Replit workspace, open **Integrations** → connect **Google Mail**
-2. Authorize with your Google account
-3. Gmail features are immediately available in the app
+Each user connects their own accounts from **Settings → Integrations** in the app.
 
-### Google Calendar
-Required for syncing calendar events.
-1. In Replit **Integrations** → connect **Google Calendar**
-2. Authorize with your Google account
+### Gmail & Google Calendar
+1. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in `.env`
+2. Tap **Connect** next to Gmail or Google Calendar in the app
+
+### Outlook & Outlook Calendar
+1. Set `MICROSOFT_CLIENT_ID` and `MICROSOFT_CLIENT_SECRET` in `.env`
+2. Tap **Connect** next to Outlook or Outlook Calendar in the app
 
 ### Notion
-One-way sync of leads, contacts, and activities into Notion databases.
-1. In Replit **Integrations** → connect **Notion**
-2. Create three Notion databases (Leads, Contacts, Activities) with the matching property names
-3. In the Fiesta app → **Settings** → **Notion Sync** → paste each database ID
+1. Set `NOTION_CLIENT_ID` and `NOTION_CLIENT_SECRET` in `.env`
+2. Connect Notion from **Settings → Integrations**
+3. In **Settings → Notion Sync**, paste your Notion database IDs
 
-Notion database IDs are the long alphanumeric strings in Notion page URLs.
+OAuth tokens are encrypted at rest with AES-256-GCM using `INTEGRATION_ENCRYPTION_KEY`.
 
 ## Admin setup
 
@@ -87,13 +97,30 @@ The admin panel (accessible from the hamburger menu) includes user management, d
 
 ## Environment variables
 
+### Required
+
 | Variable | Purpose |
 |---|---|
-| `DATABASE_URL` | PostgreSQL connection string (set automatically by Replit) |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `PORT` | API server port (default 8080) |
+| `AUTH_JWT_SECRET` | 256-bit hex secret for session signing |
+| `INTEGRATION_ENCRYPTION_KEY` | 256-bit hex key for OAuth token encryption at rest |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `ALLOWED_ORIGINS` | Comma-separated allowed CORS origins |
+
+### Optional
+
+| Variable | Purpose |
+|---|---|
+| `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_REGION` | S3-compatible file storage |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Gmail + Google Calendar OAuth |
+| `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` | Outlook + Outlook Calendar OAuth |
+| `NOTION_CLIENT_ID`, `NOTION_CLIENT_SECRET` | Notion OAuth |
+| `AI_MAIN_MODEL` | Override main AI model (default: gpt-4o) |
+| `AI_ROUTER_MODEL` | Override router/classifier model (default: gpt-4o-mini) |
 | `CRM_API_KEY` | API key for Horizon CRM sync |
 | `HORIZON_BASE_URL` | Base URL for Horizon (e.g. `https://horizon.startupanthology.com`) |
-| `EXPO_PUBLIC_DOMAIN` | Replit dev domain — set automatically in dev script |
-| `EXPO_PUBLIC_REPL_ID` | Replit ID used as OIDC client ID — set automatically |
+| `API_BASE_URL` | Server base URL, used for OAuth callbacks and Gmail webhook audience fallback |
 
 ## Tech stack
 
@@ -101,8 +128,8 @@ The admin panel (accessible from the hamburger menu) includes user management, d
 - **Web/PWA**: Metro web bundler, SPA serving with long-lived asset cache, installable on iOS/Android/desktop
 - **API**: Express 5, TypeScript, Drizzle ORM
 - **Database**: PostgreSQL
-- **Auth**: Replit OAuth (OIDC/PKCE), expo-auth-session, expo-secure-store
-- **AI**: OpenAI via Replit AI proxy (gpt-5.2 / gpt-5-mini / gpt-5-nano)
-- **Integrations**: Gmail, Google Calendar, Notion (all via Replit Integrations OAuth), Horizon CRM (API key)
+- **Auth**: Email/password (bcryptjs), DB-backed sessions, expo-secure-store
+- **AI**: OpenAI direct (gpt-4o / gpt-4o-mini), configurable via `AI_MAIN_MODEL`/`AI_ROUTER_MODEL`
+- **Integrations**: Gmail, Outlook, Google Calendar, Outlook Calendar, Notion (per-user OAuth), Horizon CRM (API key)
 - **Typography**: Space Grotesk (Regular / Medium / SemiBold / Bold)
 - **Monorepo**: pnpm workspaces
