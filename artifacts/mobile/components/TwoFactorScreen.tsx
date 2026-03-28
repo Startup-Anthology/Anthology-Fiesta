@@ -399,6 +399,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontFamily: "HankenGrotesk_600SemiBold",
     backgroundColor: colors.surface,
     letterSpacing: 8,
+    textAlign: "center",
   },
   verifyButton: {
     width: "100%",
