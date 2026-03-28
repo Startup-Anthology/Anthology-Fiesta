@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { showAlert } from "@/lib/alert";
 import * as DocumentPicker from "expo-document-picker";

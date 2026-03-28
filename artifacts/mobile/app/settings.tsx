@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { showAlert } from "@/lib/alert";
 import { router } from "expo-router";

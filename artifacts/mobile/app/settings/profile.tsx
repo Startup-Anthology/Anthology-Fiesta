@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { showAlert } from "@/lib/alert";
 import * as Haptics from "expo-haptics";

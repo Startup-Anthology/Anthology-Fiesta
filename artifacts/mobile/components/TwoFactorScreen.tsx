@@ -1,5 +1,4 @@
 import {
-import { showAlert } from "@/lib/alert";
   View,
   Text,
   TextInput,
@@ -12,9 +11,11 @@ import { showAlert } from "@/lib/alert";
 import { SafeAreaView } from "react-native-safe-area-context";
 import QRCode from "react-native-qrcode-svg";
 import { useAuth, getAuthToken } from "@/lib/auth";
+import React, { useState, useMemo } from "react";
 import { Feather } from "@expo/vector-icons";
 import { type ThemeColors } from "@/constants/colors";
 import { useTheme } from "@/lib/theme";
+import { showAlert } from "@/lib/alert";
 function getApiBaseUrl(): string {
   if (process.env.EXPO_PUBLIC_DOMAIN) {
     return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
