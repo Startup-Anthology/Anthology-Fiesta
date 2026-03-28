@@ -9,39 +9,44 @@ Mobile-first CRM for solo founders. Full-stack monorepo, runs locally on macOS.
 ## Tech Stack
 
 - **Backend**: Express 5, TypeScript 5.9, Drizzle ORM 0.45, PostgreSQL 16
-- **Frontend**: Expo SDK 54 (React Native), React 19, React Query v5, Tailwind CSS v4 (mockup-sandbox only; mobile uses React Native StyleSheet)
+- **Frontend**: Expo SDK 54 (React Native 0.81), React 19, React Query v5, Expo Router 6 (file-based routing)
+- **Design System**: Shadcn/UI + Radix UI + Tailwind CSS v4 (mockup-sandbox only; mobile uses React Native StyleSheet)
 - **AI**: OpenAI direct (`OPENAI_API_KEY`), configurable models via `AI_MAIN_MODEL`/`AI_ROUTER_MODEL` (defaults: gpt-4o/gpt-4o-mini), 3-agent architecture (Coach aka "Forecaster Pro"/Cleo/Miles)
-- **Auth**: Email/password with session-based auth (random SIDs, DB-backed sessions via `bcryptjs` + PostgreSQL `sessions` table), 2FA (TOTP + email) for admin
-- **Integrations**: "Bring Your Own" per-user OAuth — Gmail, Outlook, Google Calendar, Outlook Calendar, Notion. Tokens encrypted at rest (AES-256-GCM). Storage: S3-compatible (Cloudflare R2, AWS S3, MinIO)
-- **Package Manager**: pnpm with workspaces
+- **Auth**: Email/password with session-based auth (random SIDs, DB-backed sessions via `bcryptjs` + PostgreSQL `sessions` table), 2FA (TOTP via `otpauth` + email) for admin
+- **Integrations**: "Bring Your Own" per-user OAuth -- Gmail, Outlook, Google Calendar, Outlook Calendar, Notion. Tokens encrypted at rest (AES-256-GCM). Storage: S3-compatible (Cloudflare R2, AWS S3, MinIO)
+- **Package Manager**: pnpm 10 with workspaces
+- **Runtime**: Node 24
 
 ## Project Structure
 
 ```
 artifacts/
-  api-server/       # Express API (port 8080)
+  api-server/       # Express API (port 8080) — routes, middleware, AI orchestrator, workers
   mobile/           # Expo mobile app (Expo Router, file-based routing under app/)
-  mockup-sandbox/   # Component preview server
+  mockup-sandbox/   # Vite-based component preview/design system (Shadcn/UI + Radix)
 lib/
   db/               # Drizzle ORM schema + config; schema split per entity in src/schema/
-  api-spec/         # OpenAPI spec + Orval codegen config
-  api-zod/          # Zod validation schemas
-  api-client-react/ # React Query client hooks (generated via Orval)
-  integrations-openai-ai-server/  # OpenAI client + batch/image/audio helpers
-  integrations-openai-ai-react/   # OpenAI client integration for React
-scripts/            # Build and utility scripts
+  api-spec/         # OpenAPI spec (openapi.yaml) + Orval codegen config
+  api-zod/          # Zod validation schemas (generated types in src/generated/types/)
+  api-client-react/ # React Query client hooks (generated via Orval from api-spec)
+  integrations-openai-ai-server/  # OpenAI server client + batch/image/audio helpers
+  integrations-openai-ai-react/   # OpenAI React hooks (voice recorder, audio playback, voice stream)
+scripts/            # Build/utility scripts + git hooks (post-merge.sh)
+.agents/skills/     # ~45 AI assistant skill definitions (Expo, design, testing, etc.)
+.github/workflows/  # CI: lint + typecheck (api-server, mobile), build, PR labeling/size checks
 ```
 
 ## Key Commands
 
 ```bash
-pnpm install                         # Install dependencies
+pnpm install                         # Install dependencies (enforces pnpm-only via preinstall)
 pnpm --filter api-server dev         # Run API server (runs lint first)
 pnpm --filter api-server dev:fast    # Run API server (skip lint)
 pnpm --filter mobile dev             # Run Expo dev server (runs lint first)
 pnpm --filter mobile dev:fast        # Run Expo dev server (skip lint)
-pnpm run build                       # Typecheck + build all packages
-pnpm run typecheck                   # Typecheck libs then all artifacts
+pnpm run build                       # Typecheck + build all packages (excludes mockup-sandbox)
+pnpm run typecheck                   # Typecheck libs (tsc --build) then all artifacts
+pnpm run typecheck:libs              # Typecheck shared libs only (tsc --build)
 pnpm run lint                        # Lint all artifacts
 pnpm run check:all:full              # Full typecheck + lint
 pnpm --filter db push                # Push DB schema changes (drizzle-kit push)
@@ -50,34 +55,140 @@ pnpm --filter api-spec codegen       # Regenerate React Query hooks from OpenAPI
 
 ## API Client Codegen
 
-`lib/api-spec` contains the OpenAPI spec and an Orval config. Running `pnpm --filter api-spec codegen` regenerates the typed React Query hooks in `lib/api-client-react`. When adding or changing API endpoints, update the spec and regenerate — the mobile app consumes only the generated client.
+`lib/api-spec` contains the OpenAPI spec (`openapi.yaml`) and an Orval config. Running `pnpm --filter api-spec codegen` regenerates the typed React Query hooks in `lib/api-client-react`. When adding or changing API endpoints, update the spec and regenerate -- the mobile app consumes only the generated client.
+
+## Database Schema
+
+Schema is in `lib/db/src/schema/` with one file per entity:
+
+| File | Entity |
+|------|--------|
+| `leads.ts` | Lead management |
+| `contacts.ts` | Contacts |
+| `activities.ts` | Activity log |
+| `emailTemplates.ts` | Email templates |
+| `dripSequences.ts` | Drip campaign sequences + steps + enrollments |
+| `broadcasts.ts` | Email broadcasts |
+| `triggerRules.ts` | Automation trigger rules |
+| `settings.ts` | Per-user settings |
+| `auth.ts` | Users + sessions |
+| `calendarEvents.ts` | Calendar events |
+| `auditLog.ts` | Audit trail |
+| `files.ts` | File storage metadata |
+| `conversations.ts` | Conversations |
+| `messages.ts` | Chat messages |
+| `aiInsights.ts` | AI-generated insight cards |
+| `onboardingProgress.ts` | Onboarding state tracking |
+| `agentRegistry.ts` | AI agent definitions (Coach/Cleo/Miles) |
+| `integrations.ts` | OAuth token storage (encrypted) |
+
+All tables are exported via `lib/db/src/schema/index.ts`.
+
+## API Routes
+
+All routes are mounted under `/api` (see `artifacts/api-server/src/routes/index.ts`).
+
+**Public (no auth):** health, auth (login/logout), Gmail webhook, Horizon webhook
+
+**Authenticated (requireAuth middleware):** leads, contacts, activities, templates, sequences, broadcasts, triggers, settings, dashboard, email, calendar, audit, storage, files, AI (chat/streaming), Horizon sync, diagnostics, integrations, twoFactor, admin
+
+## Mobile App Structure
+
+Expo Router file-based routing in `artifacts/mobile/app/`:
+
+- `(tabs)/` -- Main tab navigation: Dashboard (`index`), Pipeline (`funnel`), Calendar, AI insights, Inbox, Contacts (hidden), More (hidden)
+- Modal routes: `lead/[id]`, `contact/[id]`, `compose-email`, `template/[id]`, `sequence/[id]`, `broadcast/[id]`, `broadcast/new`, `comms`, `files`, `settings/*`, `admin`
+
+Key providers (in `_layout.tsx`): QueryClientProvider, AuthProvider, ThemeProvider, ErrorBoundary
+
+Shared code: `lib/auth.tsx` (AuthProvider + useAuth), `lib/api.ts` (fetch wrapper + session management), `lib/theme.tsx` (ThemeProvider + useTheme), `lib/useOnline.ts` (offline detection)
 
 ## Environment Variables
 
 See `.env.example` for the full list. Required:
-- `DATABASE_URL` — PostgreSQL connection string
-- `PORT` — API server port (default 8080)
-- `AUTH_JWT_SECRET` — 256-bit hex secret for session signing
-- `INTEGRATION_ENCRYPTION_KEY` — 256-bit hex key for OAuth token encryption at rest
-- `OPENAI_API_KEY` — OpenAI API key
-- `ALLOWED_ORIGINS` — comma-separated allowed CORS origins
+- `DATABASE_URL` -- PostgreSQL connection string
+- `PORT` -- API server port (default 8080)
+- `AUTH_JWT_SECRET` -- 256-bit hex secret for session signing
+- `INTEGRATION_ENCRYPTION_KEY` -- 256-bit hex key for OAuth token encryption at rest
+- `OPENAI_API_KEY` -- OpenAI API key
+- `ALLOWED_ORIGINS` -- comma-separated allowed CORS origins
 
-Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET`, `NOTION_CLIENT_ID/SECRET` for OAuth integrations, `AI_MAIN_MODEL`, `AI_ROUTER_MODEL`, `API_BASE_URL` (OAuth callbacks + Gmail webhook audience fallback), `HORIZON_WEBHOOK_SECRET`, `HORIZON_DEFAULT_USER_ID`, `INTEGRATION_SUCCESS_REDIRECT`
+Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET`, `NOTION_CLIENT_ID/SECRET` for OAuth integrations, `AI_MAIN_MODEL`, `AI_ROUTER_MODEL`, `OPENAI_BASE_URL` (Azure OpenAI or local proxy), `API_BASE_URL` (OAuth callbacks + Gmail webhook audience fallback), `CRM_API_KEY`/`HORIZON_BASE_URL`, `HORIZON_WEBHOOK_SECRET`, `HORIZON_DEFAULT_USER_ID`, `GMAIL_WEBHOOK_AUDIENCE`, `INTEGRATION_SUCCESS_REDIRECT`
 
 ## Architecture Notes
 
-- All DB queries are scoped by `userId` — never query without user filtering
-- Audit trail on all CRUD operations via `logAudit()` in `artifacts/api-server/src/lib/audit.ts`. It is **fire-and-forget** (no `await`) — failures are logged but never thrown
+### Data Access
+- All DB queries are scoped by `userId` -- never query without user filtering
+- Object ownership enforced via `findOwned()` in `artifacts/api-server/src/lib/crud.ts` -- throws 404 if row not found or userId mismatch
+- Audit trail on all CRUD operations via `logAudit()` in `artifacts/api-server/src/lib/audit.ts`. It is **fire-and-forget** (no `await`) -- failures are logged but never thrown
+
+### Auth & Security
 - Auth middleware: `requireAuth` for authenticated routes, `requireAdmin` + 2FA for admin routes
-- Object ownership enforced via `findOwned()` in `artifacts/api-server/src/lib/crud.ts` — throws 404 if row not found or userId mismatch
-- AI orchestrator (`artifacts/api-server/src/lib/ai/orchestrator.ts`) uses `gpt-4o-mini` (`AI_ROUTER_MODEL` default) to classify intent, then routes to Cleo (relationships), Miles (strategy), or Coach (onboarding/help); keyword shortcuts bypass the classifier call
+- CORS uses `ALLOWED_ORIGINS` env var; localhost auto-allowed in non-production mode
+- Session-based auth with cookie + Bearer token paths, both go through `getSession(sid)?.twoFactorVerified`
+- OAuth tokens encrypted at rest via `tokenManager.ts` (AES-256-GCM)
+- Supply-chain defense: `minimumReleaseAge: 1440` in pnpm-workspace.yaml (1-day buffer for new npm packages)
+
+### AI System
+- AI orchestrator (`artifacts/api-server/src/lib/ai/orchestrator.ts`) uses `gpt-4o-mini` (`AI_ROUTER_MODEL` default) to classify intent, then routes to:
+  - **Cleo** -- relationships/contacts
+  - **Miles** -- strategy/sales
+  - **Coach** (aka "Forecaster Pro") -- onboarding/help
+- Keyword shortcuts bypass the classifier call
 - AI streaming is the primary path (`POST /api/ai/chat`); a sync variant exists at `/api/ai/chat/sync`
-- Drip campaign worker runs on `setInterval` (every 60 seconds) via `artifacts/api-server/src/lib/dripWorker.ts`; uses advisory locking (`lockedAt` column) with 5-minute stale lock timeout
-- No test suite exists — only linting and type-checking in CI
-- Horizon CRM integration (`horizonSync.ts`, `horizonWebhook.ts`) — pull sync via `POST /api/horizon/sync` and inbound webhooks at `POST /api/webhooks/horizon/*`; uses `CRM_API_KEY`/`HORIZON_BASE_URL`
-- AI Insight Worker (`insightWorker.ts`) runs daily via `setInterval` (first run after 60s), generates insight cards per user using heuristics + OpenAI framing
-- Agent Registry seeded on startup via `seedAgentRegistry()` — upserts Coach/Cleo/Miles definitions into `agent_registry` table
+- Tool execution via `toolExecutor.ts` for agent actions
+- Agent Registry seeded on startup via `seedAgentRegistry()` -- upserts Coach/Cleo/Miles definitions into `agent_registry` table
 - Onboarding progress tracked in `onboarding_progress` table; orchestrator detects explained topics via router model and skips covered ones
+- Model availability verified on startup (`verifyModelAvailability()`)
+
+### Background Workers
+- **Drip campaign worker** (`dripWorker.ts`): runs on `setInterval` (every 60 seconds); uses advisory locking (`lockedAt` column) with 5-minute stale lock timeout
+- **AI Insight Worker** (`insightWorker.ts`): runs daily via `setInterval` (first run after 60s); generates insight cards per user using heuristics + OpenAI framing
+- Both workers start after `app.listen()` callback in `index.ts`
+
+### Startup Sequence
+1. Express app listens on `PORT`
+2. `seedDefaults()` -- seeds default data
+3. `seedAgentRegistry()` -- upserts AI agent definitions
+4. `verifyModelAvailability()` -- checks OpenAI model access (async, non-blocking)
+5. `startDripWorker()` + `startInsightWorker()` -- starts background workers
+
+### Integrations
+- Integration registry pattern in `artifacts/api-server/src/lib/integrations/registry.ts`
+- Calendar: Google Calendar (`calendar/google.ts`), Outlook Calendar (`calendar/outlook.ts`)
+- Email: Gmail (`email/gmail.ts`), Outlook (`email/outlook.ts`)
+- Notes: Notion (`notes/notion.ts`)
+- Horizon CRM (`horizonSync.ts`, `horizonWebhook.ts`) -- pull sync via `POST /api/horizon/sync` and inbound webhooks at `POST /api/webhooks/horizon/*`; uses `CRM_API_KEY`/`HORIZON_BASE_URL`
+
+### State Management (Mobile)
+- **Server state**: TanStack React Query v5
+- **Auth state**: React Context (AuthProvider in `lib/auth.tsx`)
+- **Theme state**: React Context (ThemeProvider in `lib/theme.tsx`), light/dark mode persisted
+- **Secure storage**: expo-secure-store for credentials
+- **API client**: Custom fetch wrapper in `lib/api.ts` with JWT injection
+
+## CI/CD
+
+GitHub Actions workflows in `.github/workflows/`:
+
+- **ci.yml**: Runs on push to `master` and PRs. Three jobs:
+  1. `api-server` -- typecheck shared libs, typecheck + lint API server
+  2. `mobile` -- typecheck shared libs, typecheck + lint mobile
+  3. `build-api` -- build API server (depends on api-server lint passing)
+- **pr-checks.yml**: Auto-labels PRs by changed files, adds size labels (XS/S/M/L/XL), comments on large PRs
+- **labeler.yml**: Label rules -- `api`, `mobile`, `database`, `ci`, `dependencies`, `config`, `documentation`
+
+CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
+
+**No test suite exists** -- only linting and type-checking in CI.
+
+## Conventions
+
+- pnpm-only enforced via `preinstall` script (rejects npm/yarn)
+- Workspace filter names use `@workspace/` prefix (e.g., `@workspace/api-server`, `@workspace/mobile`)
+- TypeScript strict mode enabled (`tsconfig.base.json`)
+- Module resolution: `bundler` with ES2022 target
+- esbuild version overridden globally to 0.27.3 (drizzle-kit vulnerability fix)
 
 ## Known Issues (from March 2026 audit)
 
@@ -85,11 +196,11 @@ Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CL
 - CORS now uses `ALLOWED_ORIGINS` env var (no longer `origin: true`)
 - Storage download now enforces file ownership via DB lookup
 - Auth replaced with email/password + sessions (no OIDC)
-- Admin 2FA bypass via Bearer: fixed — both cookie and Bearer paths go through `getSession(sid)?.twoFactorVerified`
-- Drip enrollment duplicate check: fixed — application-level pre-check (409) + DB unique constraint (code 23505)
-- AI orchestrator duplicate messages: fixed — history fetched before user message is persisted; agent context functions no longer deduplicate the current message
+- Admin 2FA bypass via Bearer: fixed -- both cookie and Bearer paths go through `getSession(sid)?.twoFactorVerified`
+- Drip enrollment duplicate check: fixed -- application-level pre-check (409) + DB unique constraint (code 23505)
+- AI orchestrator duplicate messages: fixed -- history fetched before user message is persisted; agent context functions no longer deduplicate the current message
 - UI/UX: error states (`ErrorState` component), offline banner (`OfflineBanner` + `useOnline` hook), settings split into sub-screens, logout confirmation dialog
 
 ### Remaining
 - Gmail webhook: PubSub signature verification requires `GMAIL_WEBHOOK_AUDIENCE` or `API_BASE_URL` env var; without either, webhook returns 401 (fails closed, not insecure)
-- Delete operations missing `userId` in WHERE clause (relies on pre-check only — cascade deletes in sequences, junction table deletes in files)
+- Delete operations missing `userId` in WHERE clause (relies on pre-check only -- cascade deletes in sequences, junction table deletes in files)
