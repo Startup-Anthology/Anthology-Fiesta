@@ -33,7 +33,7 @@
       [
         "expo-router",
         {
-          "origin": "https://replit.com/"
+          "origin": "https://fiesta.startupanthology.com"
         }
       ],
       "expo-font",
