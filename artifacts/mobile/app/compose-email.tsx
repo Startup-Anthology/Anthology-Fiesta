@@ -1,11 +1,10 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -22,7 +21,6 @@ import { type ThemeColors } from "@/constants/colors";
 import { useTheme } from "@/lib/theme";
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
-
 export default function ComposeEmailScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -34,7 +32,6 @@ export default function ComposeEmailScreen() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showAttachments, setShowAttachments] = useState(false);
   const [selectedFileIds, setSelectedFileIds] = useState<number[]>([]);
-
   const { data: templates = [] } = useQuery({
     queryKey: ["templates"],
     queryFn: () => api.getTemplates(),
@@ -53,7 +50,6 @@ export default function ComposeEmailScreen() {
     },
     enabled: !!(leadId || contactId),
   });
-
   const sendMut = useMutation({
     mutationFn: () => api.sendEmail({
       to: to || "",
@@ -67,11 +63,10 @@ export default function ComposeEmailScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["activities"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
-      Alert.alert("Sent", "Your email is on its way.", [{ text: "OK", onPress: () => router.back() }]);
+      showAlert("Sent", "Your email is on its way.", [{ text: "OK", onPress: () => router.back() }]);
     },
-    onError: (err: any) => Alert.alert("Couldn't send", err.message || "Something went wrong. Try again."),
+    onError: (err: any) => showAlert("Couldn't send", err.message || "Something went wrong. Try again."),
   });
-
   const applyTemplate = (template: any) => {
     let subj = template.subject;
     let bod = template.body;
@@ -83,20 +78,16 @@ export default function ComposeEmailScreen() {
     setBody(bod);
     setShowTemplates(false);
   };
-
   const toggleFile = (fileId: number) => {
     setSelectedFileIds((prev) =>
       prev.includes(fileId) ? prev.filter((id) => id !== fileId) : [...prev, fileId]
     );
   };
-
   const allFiles = [...libraryFiles];
   for (const rf of recipientFiles) {
     if (!allFiles.find((f: any) => f.id === rf.id)) allFiles.push(rf);
   }
-
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-
   return (
     <KeyboardAvoidingView
       style={[styles.container, { paddingTop: topPad }]}
@@ -122,7 +113,6 @@ export default function ComposeEmailScreen() {
           )}
         </Pressable>
       </View>
-
       <KeyboardAwareScrollViewCompat style={styles.form} keyboardShouldPersistTaps="handled">
         <View style={styles.fieldRow}>
           <Text style={styles.fieldLabel}>To</Text>
@@ -130,7 +120,6 @@ export default function ComposeEmailScreen() {
             <Text style={styles.toText}>{to || "No recipient"}</Text>
           </View>
         </View>
-
         <View style={styles.actionBtnRow}>
           <Pressable style={styles.templateBtn} onPress={() => setShowTemplates(!showTemplates)}>
             <Feather name="file-text" size={16} color={colors.info} />
@@ -143,7 +132,6 @@ export default function ComposeEmailScreen() {
             </Text>
           </Pressable>
         </View>
-
         {showTemplates && (
           <View style={styles.templateList}>
             {templates.map((t: any) => (
@@ -155,7 +143,6 @@ export default function ComposeEmailScreen() {
             {templates.length === 0 && <Text style={styles.noTemplates}>No templates yet.</Text>}
           </View>
         )}
-
         {showAttachments && (
           <View style={styles.templateList}>
             {allFiles.length === 0 ? (
@@ -176,7 +163,6 @@ export default function ComposeEmailScreen() {
             )}
           </View>
         )}
-
         {selectedFileIds.length > 0 && (
           <View style={styles.attachedList}>
             {allFiles.filter((f: any) => selectedFileIds.includes(f.id)).map((f: any) => (
@@ -190,7 +176,6 @@ export default function ComposeEmailScreen() {
             ))}
           </View>
         )}
-
         <View style={styles.fieldRow}>
           <Text style={styles.fieldLabel}>Subject</Text>
           <TextInput
@@ -201,7 +186,6 @@ export default function ComposeEmailScreen() {
             placeholderTextColor={colors.textTertiary}
           />
         </View>
-
         <TextInput
           style={styles.bodyInput}
           value={body}
@@ -215,7 +199,6 @@ export default function ComposeEmailScreen() {
     </KeyboardAvoidingView>
   );
 }
-
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: Layout.screenPadding, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: colors.border },

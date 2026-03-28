@@ -1,10 +1,9 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState, useEffect } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   ScrollView as RNScrollView,
@@ -19,9 +18,7 @@ import { type ThemeColors } from "@/constants/colors";
 import { useTheme } from "@/lib/theme";
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
-
 const AUDIENCES = ["general", "horizon_lead", "investor", "partner", "advisor"];
-
 export default function TemplateDetailScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -29,18 +26,15 @@ export default function TemplateDetailScreen() {
   const isNew = id === "new";
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-
   const [name, setName] = useState("");
   const [audience, setAudience] = useState("general");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-
   const { data: template } = useQuery({
     queryKey: ["template", id],
     queryFn: () => api.getTemplate(Number(id)),
     enabled: !isNew,
   });
-
   useEffect(() => {
     if (template) {
       setName(template.name);
@@ -49,7 +43,6 @@ export default function TemplateDetailScreen() {
       setBody(template.body);
     }
   }, [template]);
-
   const createMut = useMutation({
     mutationFn: () => api.createTemplate({ name, audience, subject, body }),
     onSuccess: () => {
@@ -57,7 +50,7 @@ export default function TemplateDetailScreen() {
       qc.invalidateQueries({ queryKey: ["templates"] });
       router.back();
     },
-    onError: (err: Error) => Alert.alert("Create failed", err.message),
+    onError: (err: Error) => showAlert("Create failed", err.message),
   });
   const updateMut = useMutation({
     mutationFn: () => api.updateTemplate(Number(id), { name, audience, subject, body }),
@@ -66,21 +59,18 @@ export default function TemplateDetailScreen() {
       qc.invalidateQueries({ queryKey: ["template", id] });
       router.back();
     },
-    onError: (err: Error) => Alert.alert("Update failed", err.message),
+    onError: (err: Error) => showAlert("Update failed", err.message),
   });
   const deleteMut = useMutation({
     mutationFn: () => api.deleteTemplate(Number(id)),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["templates"] }); router.back(); },
-    onError: (err: Error) => Alert.alert("Delete failed", err.message),
+    onError: (err: Error) => showAlert("Delete failed", err.message),
   });
-
   const save = () => {
     if (!name || !subject || !body) return;
     if (isNew) { createMut.mutate(); } else { updateMut.mutate(); }
   };
-
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-
   return (
     <KeyboardAwareScrollViewCompat style={[styles.container, { paddingTop: topPad }]} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.topBar}>
@@ -92,19 +82,16 @@ export default function TemplateDetailScreen() {
           <Text style={[styles.saveText, (!name || !subject || !body) && { opacity: 0.4 }]}>Save</Text>
         </Pressable>
       </View>
-
       {!isNew && (
-        <Pressable style={styles.deleteBtn} onPress={() => Alert.alert("Delete this template?", "This can't be undone.", [{ text: "Keep", style: "cancel" }, { text: "Delete", style: "destructive", onPress: () => deleteMut.mutate() }])}>
+        <Pressable style={styles.deleteBtn} onPress={() => showAlert("Delete this template?", "This can't be undone.", [{ text: "Keep", style: "cancel" }, { text: "Delete", style: "destructive", onPress: () => deleteMut.mutate() }])}>
           <Feather name="trash-2" size={16} color={colors.error} />
           <Text style={styles.deleteText}>Delete</Text>
         </Pressable>
       )}
-
       <View style={styles.formGroup}>
         <Text style={styles.label}>Template Name</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Welcome Email" placeholderTextColor={colors.textTertiary} />
       </View>
-
       <View style={styles.formGroup}>
         <Text style={styles.label}>Audience</Text>
         <View style={styles.chipRow}>
@@ -115,12 +102,10 @@ export default function TemplateDetailScreen() {
           ))}
         </View>
       </View>
-
       <View style={styles.formGroup}>
         <Text style={styles.label}>Subject</Text>
         <TextInput style={styles.input} value={subject} onChangeText={setSubject} placeholder="Email subject line" placeholderTextColor={colors.textTertiary} />
       </View>
-
       <View style={styles.formGroup}>
         <Text style={styles.label}>Body</Text>
         <TextInput
@@ -133,17 +118,14 @@ export default function TemplateDetailScreen() {
           textAlignVertical="top"
         />
       </View>
-
       <View style={styles.mergeTagInfo}>
         <Feather name="info" size={14} color={colors.textTertiary} />
         <Text style={styles.mergeTagText}>Tags you can use: {"{{first_name}}"}, {"{{company_name}}"}, {"{{founder_name}}"}, {"{{my_linkedin}}"}, {"{{company_linkedin}}"}, {"{{calendar_link}}"}, {"{{custom_link_1}}"}, {"{{custom_link_2}}"}, {"{{custom_link_3}}"}</Text>
       </View>
-
       <View style={{ height: 40 }} />
     </KeyboardAwareScrollViewCompat>
   );
 }
-
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: Layout.screenPadding },

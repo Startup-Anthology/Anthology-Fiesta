@@ -1,12 +1,11 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   Platform,
@@ -25,11 +24,9 @@ import FriendlyDateTimePicker from "@/components/FriendlyDateTimePicker";
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
 import { useTheme } from "@/lib/theme";
-
 const EVENT_TYPES = ["demo", "follow-up", "meeting", "other"];
 const WEEKDAY_SHORT = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
 function getWeekRange(date: Date) {
   const start = new Date(date);
   start.setDate(start.getDate() - start.getDay());
@@ -38,16 +35,13 @@ function getWeekRange(date: Date) {
   end.setDate(end.getDate() + 7);
   return { start, end };
 }
-
 function formatTime(dateStr: string) {
   const d = new Date(dateStr);
   return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
-
 function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
-
 function weekOffsetFromToday(date: Date): number {
   const today = new Date();
   const todayWeekStart = new Date(today);
@@ -58,7 +52,6 @@ function weekOffsetFromToday(date: Date): number {
   targetWeekStart.setHours(0, 0, 0, 0);
   return Math.round((targetWeekStart.getTime() - todayWeekStart.getTime()) / (7 * 24 * 60 * 60 * 1000));
 }
-
 export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -69,7 +62,6 @@ export default function CalendarScreen() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [showPicker, setShowPicker] = useState(false);
   const [pickerMonth, setPickerMonth] = useState(() => new Date());
-
   const EVENT_TYPE_COLORS: Record<string, string> = {
     demo: colors.statusNew,
     "follow-up": colors.warning,
@@ -77,29 +69,24 @@ export default function CalendarScreen() {
     email: colors.success,
     other: colors.textTertiary,
   };
-
   const baseDate = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() + weekOffset * 7);
     return d;
   }, [weekOffset]);
-
   const { start: weekStart, end: weekEnd } = useMemo(() => getWeekRange(baseDate), [baseDate]);
-
   const updateEventMut = useMutation({
     mutationFn: ({ evId, data }: { evId: number; data: any }) => api.updateCalendarEvent(evId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["calendarEvents"] });
       setSelectedEvent(null);
     },
-    onError: (err: Error) => Alert.alert("Update failed", err.message),
+    onError: (err: Error) => showAlert("Update failed", err.message),
   });
-
   const { data: events = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["calendarEvents", weekStart.toISOString(), weekEnd.toISOString()],
     queryFn: () => api.getCalendarEvents({ startDate: weekStart.toISOString(), endDate: weekEnd.toISOString() }),
   });
-
   const hasSynced = useRef(false);
   useEffect(() => {
     if (!hasSynced.current) {
@@ -107,14 +94,11 @@ export default function CalendarScreen() {
       api.syncCalendar().then(() => refetch()).catch(() => {});
     }
   }, []);
-
   const handleRefresh = async () => {
     try { await api.syncCalendar(); } catch {}
     refetch();
   };
-
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-
   const dayGroups = useMemo(() => {
     const days: { date: Date; label: string; shortLabel: string; events: any[] }[] = [];
     for (let i = 0; i < 7; i++) {
@@ -132,9 +116,7 @@ export default function CalendarScreen() {
     }
     return days;
   }, [events, weekStart]);
-
   const weekLabel = `${weekStart.toLocaleDateString([], { month: "short", day: "numeric" })} – ${new Date(weekEnd.getTime() - 1).toLocaleDateString([], { month: "short", day: "numeric" })}`;
-
   function jumpToDate(date: Date, openDayView = false) {
     const newOffset = weekOffsetFromToday(date);
     setWeekOffset(newOffset);
@@ -143,14 +125,12 @@ export default function CalendarScreen() {
     setShowPicker(false);
     setPickerMonth(date);
   }
-
   function stepDay(dir: 1 | -1) {
     if (!selectedDay) return;
     const next = new Date(selectedDay);
     next.setDate(next.getDate() + dir);
     jumpToDate(next, true);
   }
-
   // Day view events
   const dayViewEvents = useMemo(() => {
     if (!selectedDay) return [];
@@ -158,11 +138,9 @@ export default function CalendarScreen() {
       .filter((e: any) => isSameDay(new Date(e.startTime), selectedDay))
       .sort((a: any, b: any) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   }, [selectedDay, events]);
-
   const dayViewLabel = selectedDay
     ? selectedDay.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })
     : "";
-
   function renderEventCard(ev: any) {
     return (
       <Pressable
@@ -201,7 +179,6 @@ export default function CalendarScreen() {
       </Pressable>
     );
   }
-
   return (
     <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
       {/* Header */}
@@ -217,7 +194,6 @@ export default function CalendarScreen() {
         </View>
         <HamburgerMenu />
       </View>
-
       {/* Navigation bar */}
       <View style={styles.weekNav}>
         <Pressable
@@ -228,7 +204,6 @@ export default function CalendarScreen() {
         >
           <Feather name="chevron-left" size={24} color={colors.text} />
         </Pressable>
-
         <Pressable
           onPress={() => setShowPicker(true)}
           style={styles.navLabelBtn}
@@ -240,7 +215,6 @@ export default function CalendarScreen() {
           </Text>
           <Feather name="chevron-down" size={14} color={colors.textTertiary} />
         </Pressable>
-
         <Pressable
           onPress={() => selectedDay ? stepDay(1) : setWeekOffset((p) => p + 1)}
           hitSlop={10}
@@ -250,7 +224,6 @@ export default function CalendarScreen() {
           <Feather name="chevron-right" size={24} color={colors.text} />
         </Pressable>
       </View>
-
       {/* Today button */}
       {(weekOffset !== 0 || selectedDay) && (
         <Pressable
@@ -262,7 +235,6 @@ export default function CalendarScreen() {
           <Text style={[styles.todayBtnText, { color: colors.primary }]}>Today</Text>
         </Pressable>
       )}
-
       {isLoading ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -335,11 +307,9 @@ export default function CalendarScreen() {
           <View style={{ height: 100 }} />
         </ScrollView>
       )}
-
       <Pressable style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => setShowCreate(true)} accessibilityRole="button" accessibilityLabel="Add event">
         <Feather name="plus" size={24} color={colors.onPrimary} />
       </Pressable>
-
       <CreateEventModal
         visible={showCreate}
         onClose={() => setShowCreate(false)}
@@ -348,7 +318,6 @@ export default function CalendarScreen() {
           qc.invalidateQueries({ queryKey: ["calendarEvents"] });
         }}
       />
-
       <EventDetailModal
         visible={!!selectedEvent}
         event={selectedEvent}
@@ -356,7 +325,6 @@ export default function CalendarScreen() {
         onSave={(evId, data) => updateEventMut.mutate({ evId, data })}
         isSaving={updateEventMut.isPending}
       />
-
       {/* Month Picker Modal */}
       <Modal visible={showPicker} animationType="fade" transparent onRequestClose={() => setShowPicker(false)}>
         <Pressable style={styles.pickerOverlay} onPress={() => setShowPicker(false)}>
@@ -373,14 +341,12 @@ export default function CalendarScreen() {
                 <Feather name="chevron-right" size={22} color={colors.text} />
               </Pressable>
             </View>
-
             {/* Weekday labels */}
             <View style={styles.pickerWeekRow}>
               {WEEKDAY_SHORT.map((d) => (
                 <Text key={d} style={[styles.pickerWeekDay, { color: colors.textTertiary }]}>{d}</Text>
               ))}
             </View>
-
             {/* Day grid */}
             <MonthGrid
               month={pickerMonth}
@@ -390,7 +356,6 @@ export default function CalendarScreen() {
               onSelectDay={(date) => jumpToDate(date, true)}
               onSelectWeek={(date) => jumpToDate(date, false)}
             />
-
             {/* Footer */}
             <View style={styles.pickerFooter}>
               <Pressable
@@ -406,7 +371,6 @@ export default function CalendarScreen() {
     </View>
   );
 }
-
 function MonthGrid({ month, selectedDay, weekStart, colors, onSelectDay, onSelectWeek }: {
   month: Date;
   selectedDay: Date | null;
@@ -419,16 +383,13 @@ function MonthGrid({ month, selectedDay, weekStart, colors, onSelectDay, onSelec
   const firstDay = new Date(month.getFullYear(), month.getMonth(), 1);
   const startOffset = firstDay.getDay();
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
-
   // Build 6-week grid
   const cells: (Date | null)[] = [];
   for (let i = 0; i < startOffset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(month.getFullYear(), month.getMonth(), d));
   while (cells.length % 7 !== 0) cells.push(null);
-
   const weeks: (Date | null)[][] = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
-
   return (
     <View>
       {weeks.map((week, wi) => {
@@ -437,7 +398,6 @@ function MonthGrid({ month, selectedDay, weekStart, colors, onSelectDay, onSelec
           (() => { const s = new Date(firstRealDay); s.setDate(s.getDate() - s.getDay()); return s; })(),
           weekStart
         ) : false;
-
         return (
           <View key={wi} style={styles.pickerWeekRow}>
             {/* Week select button */}
@@ -450,7 +410,6 @@ function MonthGrid({ month, selectedDay, weekStart, colors, onSelectDay, onSelec
             >
               <Feather name="minus" size={10} color={isCurrentWeek ? colors.primary : colors.textTertiary} />
             </Pressable>
-
             {week.map((d, di) => {
               const isToday = d ? isSameDay(d, today) : false;
               const isSelected = d && selectedDay ? isSameDay(d, selectedDay) : false;
@@ -458,7 +417,6 @@ function MonthGrid({ month, selectedDay, weekStart, colors, onSelectDay, onSelec
                 (() => { const s = new Date(d); s.setDate(s.getDate() - s.getDay()); return s; })(),
                 weekStart
               ) : false;
-
               return (
                 <Pressable
                   key={di}
@@ -490,7 +448,6 @@ function MonthGrid({ month, selectedDay, weekStart, colors, onSelectDay, onSelec
     </View>
   );
 }
-
 function CreateEventModal({ visible, onClose, onCreated }: { visible: boolean; onClose: () => void; onCreated: () => void }) {
   const { colors } = useTheme();
   const [title, setTitle] = useState("");
@@ -504,7 +461,6 @@ function CreateEventModal({ visible, onClose, onCreated }: { visible: boolean; o
   const [duration, setDuration] = useState("30");
   const [linkType, setLinkType] = useState<"none" | "lead" | "contact">("none");
   const [linkId, setLinkId] = useState("");
-
   const EVENT_TYPE_COLORS: Record<string, string> = {
     demo: colors.statusNew,
     "follow-up": colors.warning,
@@ -512,10 +468,8 @@ function CreateEventModal({ visible, onClose, onCreated }: { visible: boolean; o
     email: colors.success,
     other: colors.textTertiary,
   };
-
   const { data: leads = [] } = useQuery({ queryKey: ["leads"], queryFn: () => api.getLeads() });
   const { data: contacts = [] } = useQuery({ queryKey: ["contacts"], queryFn: () => api.getContacts() });
-
   const createMut = useMutation({
     mutationFn: (data: any) => api.createCalendarEvent(data),
     onSuccess: () => {
@@ -524,7 +478,6 @@ function CreateEventModal({ visible, onClose, onCreated }: { visible: boolean; o
       onCreated();
     },
   });
-
   const handleCreate = () => {
     if (!title.trim()) return;
     const startTime = startDate.toISOString();
@@ -537,9 +490,7 @@ function CreateEventModal({ visible, onClose, onCreated }: { visible: boolean; o
       contactId: linkType === "contact" && linkId ? Number(linkId) : undefined,
     });
   };
-
   const linkedItems = linkType === "lead" ? leads : linkType === "contact" ? contacts : [];
-
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={[modalStyles.container, { backgroundColor: colors.background }]}>
@@ -599,7 +550,6 @@ function CreateEventModal({ visible, onClose, onCreated }: { visible: boolean; o
     </Modal>
   );
 }
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: Layout.screenPadding, paddingVertical: 16 },
@@ -661,7 +611,6 @@ const styles = StyleSheet.create({
   pickerTodayBtn: { paddingHorizontal: 24, paddingVertical: 10, borderRadius: Layout.inputRadius },
   pickerTodayText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold" },
 });
-
 const modalStyles = StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: Layout.cardPadding, borderBottomWidth: 1 },

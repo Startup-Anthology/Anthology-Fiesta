@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { contactsTable, calendarEventsTable } from "@workspace/db";
 import { eq, sql, and, lte, isNotNull } from "drizzle-orm";
 import { fireAndForgetContactSync } from "../lib/notionSync";
+import { fireAndForgetSlackNotify } from "../lib/slackNotify";
 import { createCalendarEvent } from "../lib/calendar";
 import { logAudit } from "../lib/audit";
 import { parseIntParam } from "../lib/errors";
@@ -43,6 +44,7 @@ router.post("/contacts", async (req: Request, res: Response, next: NextFunction)
     const [contact] = await db.insert(contactsTable).values({ ...data, userId: req.user!.id }).returning();
     logAudit("contact", contact.id, "create", req.user!.id, null, contact as Record<string, unknown>);
     fireAndForgetContactSync(contact);
+    fireAndForgetSlackNotify(req.user!.id, "contact_created", { name: contact.name, relationshipType: contact.relationshipType });
     res.status(201).json(contact);
   } catch (err) {
     next(err);

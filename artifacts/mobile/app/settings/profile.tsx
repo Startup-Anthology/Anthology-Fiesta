@@ -1,12 +1,11 @@
-import { Feather } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as Haptics from "expo-haptics";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Platform,
   Pressable,
   StyleSheet,
@@ -21,7 +20,6 @@ import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
-
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -29,11 +27,9 @@ export default function ProfileScreen() {
   const qc = useQueryClient();
   const { user, refreshUser } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top + 16;
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [profileImage, setProfileImage] = useState("");
-
   useEffect(() => {
     if (user) {
       setFirstName(user.firstName || "");
@@ -41,7 +37,6 @@ export default function ProfileScreen() {
       setProfileImage(user.profileImageUrl || "");
     }
   }, [user]);
-
   const updateMut = useMutation({
     mutationFn: (data: { firstName?: string; lastName?: string; profileImageUrl?: string }) =>
       api.updateProfile(data),
@@ -51,11 +46,10 @@ export default function ProfileScreen() {
         await SecureStore.setItemAsync("auth_session_token", result.token);
       }
       await refreshUser();
-      Alert.alert("Saved", "Profile updated.");
+      showAlert("Saved", "Profile updated.");
     },
-    onError: (err: Error) => Alert.alert("Error", err.message),
+    onError: (err: Error) => showAlert("Error", err.message),
   });
-
   const handleSave = () => {
     updateMut.mutate({
       firstName: firstName.trim() || undefined,
@@ -63,7 +57,6 @@ export default function ProfileScreen() {
       profileImageUrl: profileImage.trim() || undefined,
     });
   };
-
   return (
     <KeyboardAwareScrollViewCompat
       style={[styles.container, { paddingTop: topPad }]}
@@ -77,14 +70,12 @@ export default function ProfileScreen() {
         <Text style={styles.title}>Profile</Text>
         <View style={{ width: 22 }} />
       </View>
-
       {user?.email && (
         <View style={styles.emailRow}>
           <Text style={styles.emailLabel}>Email</Text>
           <Text style={styles.emailValue}>{user.email}</Text>
         </View>
       )}
-
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>First Name</Text>
         <TextInput
@@ -98,7 +89,6 @@ export default function ProfileScreen() {
           accessibilityLabel="First name"
         />
       </View>
-
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>Last Name</Text>
         <TextInput
@@ -112,7 +102,6 @@ export default function ProfileScreen() {
           accessibilityLabel="Last name"
         />
       </View>
-
       <View style={styles.fieldGroup}>
         <Text style={styles.label}>Avatar URL</Text>
         <TextInput
@@ -128,7 +117,6 @@ export default function ProfileScreen() {
           accessibilityLabel="Avatar URL"
         />
       </View>
-
       <Pressable
         style={[styles.saveBtn, updateMut.isPending && { opacity: 0.6 }]}
         onPress={handleSave}
@@ -142,12 +130,10 @@ export default function ProfileScreen() {
           <Text style={styles.saveBtnText}>Save Profile</Text>
         )}
       </Pressable>
-
       <View style={{ height: 40 }} />
     </KeyboardAwareScrollViewCompat>
   );
 }
-
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: Layout.screenPadding },

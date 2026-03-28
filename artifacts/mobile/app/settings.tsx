@@ -1,9 +1,8 @@
-import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { showAlert } from "@/lib/alert";
 import { router } from "expo-router";
 import React, { useMemo } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   SectionList,
@@ -16,7 +15,6 @@ import { type ThemeColors } from "@/constants/colors";
 import Layout from "@/constants/layout";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
-
 type SettingsRow = {
   label: string;
   icon: string;
@@ -24,21 +22,17 @@ type SettingsRow = {
   onPress: () => void;
   destructive?: boolean;
 };
-
 type SettingsSection = {
   title: string;
   data: SettingsRow[];
 };
-
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { user, logout, isAdmin } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top + 16;
-
   const displayName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || user?.email || "Account";
-
   const sections: SettingsSection[] = [
     {
       title: "Account",
@@ -100,7 +94,7 @@ export default function SettingsScreen() {
           icon: "log-out",
           destructive: true,
           onPress: () => {
-            Alert.alert("Log out?", "You'll need to sign in again.", [
+            showAlert("Log out?", "You'll need to sign in again.", [
               { text: "Stay", style: "cancel" },
               {
                 text: "Log Out",
@@ -116,7 +110,6 @@ export default function SettingsScreen() {
       ],
     },
   ];
-
   const renderItem = ({ item }: { item: SettingsRow }) => (
     <Pressable
       style={({ pressed }) => [
@@ -141,14 +134,12 @@ export default function SettingsScreen() {
       )}
     </Pressable>
   );
-
   const renderSectionHeader = ({ section }: { section: { title: string } }) =>
     section.title ? (
       <Text style={styles.sectionHeader}>{section.title}</Text>
     ) : (
       <View style={{ height: Layout.spacing.lg }} />
     );
-
   return (
     <SectionList
       style={[styles.container, { paddingTop: topPad }]}
@@ -185,7 +176,6 @@ export default function SettingsScreen() {
     />
   );
 }
-
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { paddingHorizontal: Layout.screenPadding, paddingBottom: 40 },

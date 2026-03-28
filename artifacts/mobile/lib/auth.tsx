@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const apiBase = getServerBaseUrl();
       const res = await fetch(`${apiBase}/api/auth/user`, {
         headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
       const data = await res.json();
 
@@ -88,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const apiBase = getServerBaseUrl();
       const res = await fetch(`${apiBase}/api/2fa/status`, {
         headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
       if (res.ok) {
         const data = await res.json();
@@ -121,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await fetch(`${apiBase}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -153,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await fetch(`${apiBase}/api/auth/logout`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
         });
       }
     } catch {

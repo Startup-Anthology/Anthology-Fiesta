@@ -48,4 +48,3 @@ Thumbs.db
 .cache/
 .local/
 .env
-artifacts/mobile/lib/secureStorage.ts

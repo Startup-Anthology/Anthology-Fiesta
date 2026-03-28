@@ -2,6 +2,9 @@ import app from "./app";
 import { seedDefaults } from "./lib/seed";
 import { startDripWorker } from "./lib/dripWorker";
 import { startInsightWorker } from "./lib/ai/insightWorker";
+import { startSlackDigestWorker } from "./lib/slackDigestWorker";
+import { startNotionPullWorker } from "./lib/notionPullWorker";
+import { startHorizonSyncWorker } from "./lib/horizonSyncWorker";
 import { seedAgentRegistry } from "./lib/ai/agentDefinitions";
 import { verifyModelAvailability } from "./lib/ai/orchestrator";
 
@@ -44,4 +47,7 @@ app.listen(port, async () => {
 
   startDripWorker();
   startInsightWorker();
+  startSlackDigestWorker();
+  startNotionPullWorker();
+  startHorizonSyncWorker();
 });

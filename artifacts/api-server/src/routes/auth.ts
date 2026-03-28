@@ -241,13 +241,4 @@ router.put("/auth/profile", async (req: Request, res: Response) => {
   }
 });
 
-// Keep mobile-auth/logout for backward compatibility during transition
-router.post("/mobile-auth/logout", async (req: Request, res: Response) => {
-  const sid = getSessionId(req);
-  if (sid) {
-    await deleteSession(sid);
-  }
-  res.json({ success: true });
-});
-
 export default router;

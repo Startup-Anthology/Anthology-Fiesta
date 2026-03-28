@@ -1,5 +1,5 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as DocumentPicker from "expo-document-picker";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
@@ -7,7 +7,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useCallback, useMemo } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Image,
   Linking,
   Platform,
@@ -83,7 +82,7 @@ export default function ContactDetailScreen() {
   const updateMut = useMutation({
     mutationFn: (data: any) => api.updateContact(contactId, data),
     onSuccess: invalidateContact,
-    onError: (err: Error) => Alert.alert("Update failed", err.message),
+    onError: (err: Error) => showAlert("Update failed", err.message),
   });
   const markMut = useMutation({
     mutationFn: () => api.markContacted(contactId),
@@ -93,22 +92,22 @@ export default function ContactDetailScreen() {
       qc.invalidateQueries({ queryKey: ["followUps"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
     },
-    onError: (err: Error) => Alert.alert("Failed", err.message),
+    onError: (err: Error) => showAlert("Failed", err.message),
   });
   const deleteMut = useMutation({
     mutationFn: () => api.deleteContact(contactId),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["contacts"] }); router.back(); },
-    onError: (err: Error) => Alert.alert("Delete failed", err.message),
+    onError: (err: Error) => showAlert("Delete failed", err.message),
   });
   const enrollMut = useMutation({
     mutationFn: (seqId: number) => api.enrollInSequence(seqId, { contactId }),
     onSuccess: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
-    onError: (err: Error) => Alert.alert("Enrollment failed", err.message),
+    onError: (err: Error) => showAlert("Enrollment failed", err.message),
   });
   const logLinkedInMut = useMutation({
     mutationFn: (data: any) => api.createActivity(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["activities", "contact", id] }); setShowLinkedInModal(false); },
-    onError: (err: Error) => Alert.alert("Failed to log", err.message),
+    onError: (err: Error) => showAlert("Failed to log", err.message),
   });
   const uploadFileMut = useMutation({
     mutationFn: async () => {
@@ -118,7 +117,7 @@ export default function ContactDetailScreen() {
       return api.uploadContactFile(contactId, asset.uri, asset.name, asset.mimeType || "application/octet-stream");
     },
     onSuccess: () => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); qc.invalidateQueries({ queryKey: ["contactFiles", id] }); },
-    onError: (err: any) => { if (err.message !== "CANCELLED") Alert.alert("Upload failed", err.message); },
+    onError: (err: any) => { if (err.message !== "CANCELLED") showAlert("Upload failed", err.message); },
   });
   const rollbackMut = useMutation({
     mutationFn: (revisionId: number) => api.rollback("contact", contactId, revisionId),
@@ -128,7 +127,7 @@ export default function ContactDetailScreen() {
       refetchHistory();
       setSelectedRevision(null);
     },
-    onError: (err: Error) => Alert.alert("Rollback failed", err.message),
+    onError: (err: Error) => showAlert("Rollback failed", err.message),
   });
   const updateActivityMut = useMutation({
     mutationFn: ({ actId, data }: { actId: number; data: any }) => api.updateActivity(actId, data),
@@ -136,7 +135,7 @@ export default function ContactDetailScreen() {
       qc.invalidateQueries({ queryKey: ["activities", "contact", id] });
       setSelectedActivity(null);
     },
-    onError: (err: Error) => Alert.alert("Update failed", err.message),
+    onError: (err: Error) => showAlert("Update failed", err.message),
   });
   const updateEventMut = useMutation({
     mutationFn: ({ evId, data }: { evId: number; data: any }) => api.updateCalendarEvent(evId, data),
@@ -144,7 +143,7 @@ export default function ContactDetailScreen() {
       qc.invalidateQueries({ queryKey: ["calendarEvents", "contact", id] });
       setSelectedEvent(null);
     },
-    onError: (err: Error) => Alert.alert("Update failed", err.message),
+    onError: (err: Error) => showAlert("Update failed", err.message),
   });
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -196,7 +195,7 @@ export default function ContactDetailScreen() {
       const uploaded = await api.uploadFile(asset.uri, "profile.jpg", asset.mimeType || "image/jpeg");
       updateMut.mutate({ profilePictureUrl: uploaded.storageKey });
     } catch (err: any) {
-      Alert.alert("Upload failed", err.message);
+      showAlert("Upload failed", err.message);
     }
   }, [updateMut]);
 
@@ -216,7 +215,7 @@ export default function ContactDetailScreen() {
   }, [contactId, logLinkedInMut]);
 
   const handleDelete = useCallback(() => {
-    Alert.alert("Delete this contact?", "This can't be undone.", [
+    showAlert("Delete this contact?", "This can't be undone.", [
       { text: "Keep", style: "cancel" },
       { text: "Delete", style: "destructive", onPress: () => deleteMut.mutate() },
     ]);

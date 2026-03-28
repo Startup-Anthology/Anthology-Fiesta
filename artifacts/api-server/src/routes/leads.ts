@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { leadsTable, triggerRulesTable, dripEnrollmentsTable, activitiesTable } from "@workspace/db";
 import { eq, sql, and } from "drizzle-orm";
 import { fireAndForgetLeadSync, fireAndForgetActivitySync } from "../lib/notionSync";
+import { fireAndForgetSlackNotify } from "../lib/slackNotify";
 import { logAudit } from "../lib/audit";
 import { parseIntParam } from "../lib/errors";
 import { findOwned } from "../lib/crud";
@@ -32,6 +33,7 @@ router.post("/leads", async (req: Request, res: Response, next: NextFunction) =>
     const [lead] = await db.insert(leadsTable).values({ ...data, userId: req.user!.id }).returning();
     logAudit("lead", lead.id, "create", req.user!.id, null, lead as Record<string, unknown>);
     fireAndForgetLeadSync(lead);
+    fireAndForgetSlackNotify(req.user!.id, "lead_created", { name: lead.name, email: lead.email, source: lead.source, status: lead.status });
     res.status(201).json(lead);
   } catch (err) {
     next(err);
@@ -86,6 +88,7 @@ router.patch("/leads/:id/status", async (req: Request, res: Response, next: Next
     logAudit("lead", leadId, "update", userId, before as Record<string, unknown>, lead as Record<string, unknown>);
 
     const oldStatus = (before.status as string) || "unknown";
+    fireAndForgetSlackNotify(userId, "lead_status_changed", { name: lead.name, oldStatus, newStatus: status });
     const [activity] = await db.insert(activitiesTable).values({
       leadId,
       type: "status_change",
