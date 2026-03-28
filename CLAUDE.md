@@ -115,7 +115,7 @@ See `.env.example` for the full list. Required:
 - `OPENAI_API_KEY` -- OpenAI API key
 - `ALLOWED_ORIGINS` -- comma-separated allowed CORS origins
 
-Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET`, `NOTION_CLIENT_ID/SECRET`, `SLACK_CLIENT_ID/SECRET` for OAuth integrations, `AI_MAIN_MODEL`, `AI_ROUTER_MODEL`, `OPENAI_BASE_URL` (Azure OpenAI or local proxy), `API_BASE_URL` (OAuth callbacks + Gmail webhook audience fallback), `CRM_API_KEY`/`HORIZON_BASE_URL`, `HORIZON_WEBHOOK_SECRET`, `HORIZON_DEFAULT_USER_ID`, `GMAIL_WEBHOOK_AUDIENCE`, `INTEGRATION_SUCCESS_REDIRECT`
+Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET`, `NOTION_CLIENT_ID/SECRET`, `SLACK_CLIENT_ID/SECRET` for OAuth integrations, `AI_MAIN_MODEL`, `AI_ROUTER_MODEL`, `OPENAI_BASE_URL` (Azure OpenAI or local proxy), `API_BASE_URL` (OAuth callbacks + Gmail webhook audience fallback), `CRM_API_KEY`/`HORIZON_BASE_URL`, `HORIZON_WEBHOOK_SECRET`, `HORIZON_DEFAULT_USER_ID`, `GMAIL_WEBHOOK_AUDIENCE`, `INTEGRATION_SUCCESS_REDIRECT`, `SA_CRM_API_KEY`/`SA_BASE_URL` (StartupAnthology.com poll sync — both required to enable worker; Cloudflare WAF bypass rule also required), `SA_WEBHOOK_SECRET` (inbound SA webhook auth), `SA_DEFAULT_USER_ID` (optional UUID; falls back to first active user)
 
 ## Architecture Notes
 
@@ -151,6 +151,7 @@ Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CL
 - **Slack Digest Worker** (`slackDigestWorker.ts`): checks hourly, sends daily pipeline summary to configured Slack channel (configurable send hour per user)
 - **Notion Pull Worker** (`notionPullWorker.ts`): runs every 5 minutes; polls Notion databases for changes and pulls them into CRM (last-write-wins conflict resolution)
 - **Horizon Sync Worker** (`horizonSyncWorker.ts`): runs every 15 minutes; auto-syncs Horizon users → leads and contacts → contacts; posts Slack notification on new records
+- **SA Sync Worker** (`saSyncWorker.ts`): runs every 15 minutes (first run after 90s, staggered from Horizon's 60s); polls `SA_BASE_URL/api/crm/contacts`, upserts into leads + contacts, saves `sa_last_sync_at` etc. to `app_settings`. Only activates when both `SA_CRM_API_KEY` and `SA_BASE_URL` are set. **Note:** Cloudflare bot protection on `startupanthology.com` blocks server-to-server requests — a WAF bypass rule is required for pull sync to work. Inbound webhook (`POST /api/webhooks/sa/contact`) works regardless and is the primary real-time path.
 - All workers start after `app.listen()` callback in `index.ts`
 
 ### Startup Sequence
@@ -158,7 +159,7 @@ Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CL
 2. `seedDefaults()` -- seeds default data
 3. `seedAgentRegistry()` -- upserts AI agent definitions
 4. `verifyModelAvailability()` -- checks OpenAI model access (async, non-blocking)
-5. `startDripWorker()` + `startInsightWorker()` + `startSlackDigestWorker()` + `startNotionPullWorker()` + `startHorizonSyncWorker()` -- starts background workers
+5. `startDripWorker()` + `startInsightWorker()` + `startSlackDigestWorker()` + `startNotionPullWorker()` + `startHorizonSyncWorker()` + `startSASyncWorker()` -- starts background workers
 
 ### Integrations
 - Integration registry pattern in `artifacts/api-server/src/lib/integrations/registry.ts`
@@ -167,6 +168,7 @@ Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CL
 - Notes: Notion (`notes/notion.ts`) -- one-way sync (CRM → Notion) + two-way pull worker (`notionPullWorker.ts`, 5-min interval) + full export (`notionExport.ts`)
 - Messaging: Slack (`messaging/slack.ts`) -- CRM event notifications (`slackNotify.ts`), daily pipeline digest worker (`slackDigestWorker.ts`)
 - Horizon CRM (`horizonSync.ts`, `horizonWebhook.ts`) -- pull sync via `POST /api/horizon/sync`, auto-sync worker (`horizonSyncWorker.ts`, 15-min interval), inbound webhooks at `POST /api/webhooks/horizon/*`; uses `CRM_API_KEY`/`HORIZON_BASE_URL`
+- StartupAnthology.com (`saSync.ts`, `saSyncWorker.ts`, `saWebhook.ts`) -- contact form submissions → leads + contacts; pull sync via `POST /api/sa/sync`, auto-sync worker (`saSyncWorker.ts`, 15-min, requires `SA_CRM_API_KEY`+`SA_BASE_URL`+Cloudflare WAF bypass), inbound webhook at `POST /api/webhooks/sa/contact` (auth via `SA_WEBHOOK_SECRET`); status at `GET /api/sa/status`
 
 ### State Management (Mobile)
 - **Server state**: TanStack React Query v5

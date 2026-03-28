@@ -16,7 +16,7 @@ Fiesta is a mobile CRM built for solo founders — manage your leads, contacts, 
 
 ### Prerequisites
 
-- Node.js 20+, pnpm, PostgreSQL 16
+- Node.js 24+, pnpm 10, PostgreSQL 16
 
 ### Setup
 
@@ -79,6 +79,20 @@ Each user connects their own accounts from **Settings → Integrations** in the 
 2. Connect Notion from **Settings → Integrations**
 3. In **Settings → Notion Sync**, paste your Notion database IDs
 
+### Slack
+1. Set `SLACK_CLIENT_ID` and `SLACK_CLIENT_SECRET` in `.env`
+2. Connect Slack from **Settings → Integrations**
+
+Once connected, Slack receives CRM event notifications and a daily pipeline digest.
+
+### StartupAnthology.com contact form sync
+
+Contact form submissions from `startupanthology.com` flow into Fiesta as both leads and contacts via two paths:
+
+**Real-time webhook (recommended):** Set `SA_WEBHOOK_SECRET` in Fiesta's env, then configure the marketing site to POST to `https://anthology-fiesta.onrender.com/api/webhooks/sa/contact` with `x-api-key: <SA_WEBHOOK_SECRET>`.
+
+**Pull sync (optional):** Set `SA_CRM_API_KEY` and `SA_BASE_URL` to enable the 15-minute polling worker. Requires a Cloudflare WAF bypass rule on `startupanthology.com` to allow server-to-server requests — skip the managed challenge when the path matches `/api/crm/*` or when the `X-CRM-API-KEY` header is present.
+
 OAuth tokens are encrypted at rest with AES-256-GCM using `INTEGRATION_ENCRYPTION_KEY`.
 
 ## Admin setup
@@ -120,6 +134,15 @@ The admin panel (accessible from the hamburger menu) includes user management, d
 | `AI_ROUTER_MODEL` | Override router/classifier model (default: gpt-4o-mini) |
 | `CRM_API_KEY` | API key for Horizon CRM sync |
 | `HORIZON_BASE_URL` | Base URL for Horizon (e.g. `https://horizon.startupanthology.com`) |
+| `HORIZON_WEBHOOK_SECRET` | Auth secret for inbound Horizon webhooks |
+| `HORIZON_DEFAULT_USER_ID` | UUID of user to assign synced Horizon records (falls back to first active user) |
+| `SA_CRM_API_KEY` | API key for polling `startupanthology.com` contact form submissions |
+| `SA_BASE_URL` | Base URL of marketing site (both required to enable pull-sync worker) |
+| `SA_WEBHOOK_SECRET` | Auth secret for inbound SA contact webhooks |
+| `SA_DEFAULT_USER_ID` | UUID of user to assign synced SA records (falls back to first active user) |
+| `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET` | Slack OAuth |
+| `GMAIL_WEBHOOK_AUDIENCE` | Expected audience for Gmail PubSub push notifications |
+| `INTEGRATION_SUCCESS_REDIRECT` | Redirect URL shown after OAuth connect success |
 | `API_BASE_URL` | Server base URL, used for OAuth callbacks and Gmail webhook audience fallback |
 
 ## Tech stack
@@ -130,6 +153,6 @@ The admin panel (accessible from the hamburger menu) includes user management, d
 - **Database**: PostgreSQL
 - **Auth**: Email/password (bcryptjs), DB-backed sessions, expo-secure-store
 - **AI**: OpenAI direct (gpt-4o / gpt-4o-mini), configurable via `AI_MAIN_MODEL`/`AI_ROUTER_MODEL`
-- **Integrations**: Gmail, Outlook, Google Calendar, Outlook Calendar, Notion (per-user OAuth), Horizon CRM (API key)
-- **Typography**: Space Grotesk (Regular / Medium / SemiBold / Bold)
+- **Integrations**: Gmail, Outlook, Google Calendar, Outlook Calendar, Notion, Slack (per-user OAuth), Horizon CRM + StartupAnthology.com (API key / webhook)
+- **Typography**: Hanken Grotesk (body) / Lato (page titles) / League Spartan (section headings) / Roboto Mono (code)
 - **Monorepo**: pnpm workspaces
