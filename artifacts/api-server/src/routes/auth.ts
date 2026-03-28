@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Router, type IRouter, type Request, type Response } from "express";
 import rateLimit from "express-rate-limit";
-import { db, usersTable, userCredentialsTable } from "@workspace/db";
+import { db, usersTable, userCredentialsTable, invitationsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import {
   clearSession,
@@ -77,6 +77,17 @@ router.post("/auth/register", registerRateLimit, async (req: Request, res: Respo
   }
 
   try {
+    // Invite-only: check invitations table (admin users bypass this check)
+    const [invitation] = await db
+      .select()
+      .from(invitationsTable)
+      .where(eq(invitationsTable.email, email));
+
+    if (!invitation) {
+      res.status(403).json({ error: "Registration is invite-only. Please ask an admin to invite you." });
+      return;
+    }
+
     const [existing] = await db
       .select()
       .from(usersTable)
@@ -102,6 +113,10 @@ router.post("/auth/register", registerRateLimit, async (req: Request, res: Respo
       userId: user.id,
       passwordHash,
     });
+
+    await db.update(invitationsTable)
+      .set({ usedAt: new Date() })
+      .where(eq(invitationsTable.email, email));
 
     await seedDefaultSettings(user.id);
 

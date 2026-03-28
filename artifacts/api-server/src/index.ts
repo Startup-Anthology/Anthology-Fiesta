@@ -1,5 +1,5 @@
 import app from "./app";
-import { seedDefaults } from "./lib/seed";
+import { seedDefaults, seedAdmin } from "./lib/seed";
 import { startDripWorker } from "./lib/dripWorker";
 import { startInsightWorker } from "./lib/ai/insightWorker";
 import { startSlackDigestWorker } from "./lib/slackDigestWorker";
@@ -24,6 +24,12 @@ if (Number.isNaN(port) || port <= 0) {
 
 app.listen(port, async () => {
   console.log(`Server listening on port ${port}`);
+  try {
+    await seedAdmin();
+  } catch (err) {
+    console.error("Admin seed error:", err);
+  }
+
   try {
     await seedDefaults();
   } catch (err) {

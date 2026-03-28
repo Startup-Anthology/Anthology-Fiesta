@@ -1,5 +1,5 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
-import { db, usersTable, leadsTable, contactsTable, activitiesTable } from "@workspace/db";
+import { db, usersTable, leadsTable, contactsTable, activitiesTable, invitationsTable } from "@workspace/db";
 import { eq, sql } from "drizzle-orm";
 import { requireAdmin } from "../middlewares/requireAdmin";
 import { badRequest, notFound } from "../lib/errors";
@@ -105,6 +105,60 @@ router.delete("/admin/users/:id", requireAdmin, async (req: Request, res: Respon
       .returning();
 
     if (!deleted) throw notFound("User not found");
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/admin/invitations", requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const invitations = await db
+      .select()
+      .from(invitationsTable)
+      .orderBy(sql`${invitationsTable.createdAt} desc`);
+    res.json(invitations);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/admin/invitations", requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const rawEmail = req.body.email;
+    if (!rawEmail || typeof rawEmail !== "string") throw badRequest("Email is required");
+
+    const email = rawEmail.trim().toLowerCase();
+
+    const [existing] = await db
+      .select()
+      .from(invitationsTable)
+      .where(eq(invitationsTable.email, email));
+
+    if (existing) {
+      res.status(409).json({ error: "This email has already been invited" });
+      return;
+    }
+
+    const [invitation] = await db
+      .insert(invitationsTable)
+      .values({ email, invitedBy: req.user!.id })
+      .returning();
+
+    res.status(201).json(invitation);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/admin/invitations/:id", requireAdmin, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const [deleted] = await db
+      .delete(invitationsTable)
+      .where(eq(invitationsTable.id, String(req.params.id)))
+      .returning();
+
+    if (!deleted) throw notFound("Invitation not found");
     res.json({ success: true });
   } catch (err) {
     next(err);
