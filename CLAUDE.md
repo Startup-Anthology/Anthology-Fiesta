@@ -15,7 +15,7 @@ Mobile-first CRM for solo founders. Full-stack monorepo, runs locally on macOS.
 - **Auth**: Email/password with session-based auth (random SIDs, DB-backed sessions via `bcryptjs` + PostgreSQL `sessions` table), 2FA (TOTP via `otpauth` + email) for admin
 - **Integrations**: "Bring Your Own" per-user OAuth -- Gmail, Outlook, Google Calendar, Outlook Calendar, Notion, Slack. Tokens encrypted at rest (AES-256-GCM). Storage: S3-compatible (Cloudflare R2, AWS S3, MinIO)
 - **PWA**: Production-ready Progressive Web App (iOS Safari "Add to Home Screen"), service worker for app shell caching, Web App Manifest
-- **Deployment**: Single Render Web Service (Express serves API + PWA static files), Neon PostgreSQL, Cloudflare DNS/CDN at `fiesta.startupanthology.com`
+- **Deployment**: Single Render Web Service (Express serves API + PWA static files), Neon PostgreSQL. Production URL: `https://anthology-fiesta.onrender.com`
 - **Package Manager**: pnpm 10 with workspaces
 - **Runtime**: Node 24
 
@@ -222,7 +222,7 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - PWA: manifest, service worker, custom HTML document with Apple meta tags, icons
 - Unified server: Express serves both API and PWA static build (single-service architecture)
 - Cross-platform: Alert.alert → showAlert, file pickers, FormData web compatibility
-- Expo Router origin fixed from `replit.com` to `fiesta.startupanthology.com`
+- Expo Router origin set to `https://anthology-fiesta.onrender.com`
 - API URLs use relative paths on web production (same-origin)
 
 ### Fixed (March 2026 brand guide update)
