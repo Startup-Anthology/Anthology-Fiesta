@@ -69,8 +69,15 @@ app.use(express.static(webRoot, {
   index: false,
 }));
 
-// SPA fallback — non-API, non-static routes serve index.html
-app.get("/{*path}", (_req, res) => {
+// SPA fallback — serve index.html only for HTML navigation requests.
+// Non-HTML requests (fonts, images, JS) get a 404 so the service worker
+// doesn't cache an HTML page as if it were a font/asset file.
+app.get("/{*path}", (req, res) => {
+  const acceptsHTML = req.headers.accept?.includes("text/html") ?? false;
+  if (!acceptsHTML) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.sendFile(path.join(webRoot, "index.html"));
 });
 

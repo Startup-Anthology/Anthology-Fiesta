@@ -14,6 +14,24 @@ import {
   RobotoMono_400Regular,
   RobotoMono_500Medium,
 } from "@expo-google-fonts/roboto-mono";
+
+// On web, font assets in pnpm's node_modules are not reliably copied by
+// expo export. Use static public URLs instead so fonts are always available.
+const webFonts: Record<string, string> = {
+  HankenGrotesk_400Regular: "/fonts/HankenGrotesk_400Regular.ttf",
+  HankenGrotesk_500Medium: "/fonts/HankenGrotesk_500Medium.ttf",
+  HankenGrotesk_600SemiBold: "/fonts/HankenGrotesk_600SemiBold.ttf",
+  HankenGrotesk_700Bold: "/fonts/HankenGrotesk_700Bold.ttf",
+  Lato_400Regular: "/fonts/Lato_400Regular.ttf",
+  Lato_700Bold: "/fonts/Lato_700Bold.ttf",
+  LeagueSpartan_500Medium: "/fonts/LeagueSpartan_500Medium.ttf",
+  LeagueSpartan_600SemiBold: "/fonts/LeagueSpartan_600SemiBold.ttf",
+  LeagueSpartan_700Bold: "/fonts/LeagueSpartan_700Bold.ttf",
+  RobotoMono_400Regular: "/fonts/RobotoMono_400Regular.ttf",
+  RobotoMono_500Medium: "/fonts/RobotoMono_500Medium.ttf",
+  feather: "/fonts/Feather.ttf",
+  "material-community": "/fonts/MaterialCommunityIcons.ttf",
+};
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -96,19 +114,23 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
-    HankenGrotesk_400Regular,
-    HankenGrotesk_500Medium,
-    HankenGrotesk_600SemiBold,
-    HankenGrotesk_700Bold,
-    Lato_400Regular,
-    Lato_700Bold,
-    LeagueSpartan_500Medium,
-    LeagueSpartan_600SemiBold,
-    LeagueSpartan_700Bold,
-    RobotoMono_400Regular,
-    RobotoMono_500Medium,
-  });
+  const [fontsLoaded, fontError] = useFonts(
+    Platform.OS === "web"
+      ? webFonts
+      : {
+          HankenGrotesk_400Regular,
+          HankenGrotesk_500Medium,
+          HankenGrotesk_600SemiBold,
+          HankenGrotesk_700Bold,
+          Lato_400Regular,
+          Lato_700Bold,
+          LeagueSpartan_500Medium,
+          LeagueSpartan_600SemiBold,
+          LeagueSpartan_700Bold,
+          RobotoMono_400Regular,
+          RobotoMono_500Medium,
+        }
+  );
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
