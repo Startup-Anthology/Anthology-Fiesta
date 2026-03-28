@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   emptyState: { alignItems: "center", paddingTop: 80, gap: 12 },
   emptyTitle: { fontSize: 18, fontFamily: "HankenGrotesk_600SemiBold" },
   emptySubtitle: { fontSize: 14, fontFamily: "HankenGrotesk_400Regular", textAlign: "center", paddingHorizontal: 32 },
-  fab: { position: "absolute", bottom: 100, right: 20, width: 56, height: 56, borderRadius: 28, justifyContent: "center", alignItems: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: Layout.fabElevation },
+  fab: { position: "absolute", bottom: 100, right: 20, width: 56, height: 56, borderRadius: 28, justifyContent: "center", alignItems: "center", ...Layout.shadow.fab },
   emptyBtn: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: Layout.inputRadius, paddingVertical: 12, paddingHorizontal: 20, marginTop: 16 },
   emptyBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
 });

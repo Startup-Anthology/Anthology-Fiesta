@@ -232,3 +232,11 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - PWA theme-color updated to brand amber #C4A57B
 - Card shadows applied to dashboard, pipeline, inbox, contacts
 - Tab bar hardcoded colors replaced with theme tokens
+
+### Fixed (March 2026 web parity update)
+- Web PWA now renders in a centered 430px column with colored margins on desktop (matches native phone width); implemented via `WebShell` wrapper in `app/_layout.tsx`
+- Shadow tokens (`constants/layout.ts`) now include explicit `boxShadow` CSS strings via `Platform.select` for forward compatibility with react-native-web (deprecated `shadow*` → `boxShadow` auto-translation)
+- HamburgerMenu shadow-clipping bug fixed: `overflow:"hidden"` was on same element as shadow (clips CSS box-shadow); separated into outer shadow wrapper + inner clip wrapper
+- All inline FAB/picker shadows consolidated into `Layout.shadow.*` tokens (comms, contacts, calendar, funnel, LoginScreen, HamburgerMenu)
+- Pipeline Kanban column width moved from static `Dimensions.get("window")` at module scope to reactive `useWindowDimensions()` inside component, capped at 430px
+- Service worker cache bumped to `fiesta-v3` to bust stale cached assets on deploy

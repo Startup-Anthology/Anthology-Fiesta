@@ -19,6 +19,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import React, { useEffect } from "react";
+import { Platform, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -28,7 +29,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { LoginScreen } from "@/components/LoginScreen";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { TwoFactorScreen } from "@/components/TwoFactorScreen";
-import { ThemeProvider } from "@/lib/theme";
+import { ThemeProvider, useTheme } from "@/lib/theme";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,6 +39,23 @@ const queryClient = new QueryClient({
       staleTime: 30_000,
     },
   },
+});
+
+function WebShell({ children }: { children: React.ReactNode }) {
+  const { colors } = useTheme();
+  if (Platform.OS !== "web") return <>{children}</>;
+  return (
+    <View style={[webShellStyles.outer, { backgroundColor: colors.surface2 }]}>
+      <View style={[webShellStyles.inner, { backgroundColor: colors.background, borderColor: colors.borderLight }]}>
+        {children}
+      </View>
+    </View>
+  );
+}
+
+const webShellStyles = StyleSheet.create({
+  outer: { flex: 1 },
+  inner: { flex: 1, maxWidth: 430, width: "100%", alignSelf: "center", borderLeftWidth: 1, borderRightWidth: 1 },
 });
 
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -110,11 +128,13 @@ export default function RootLayout() {
           <GestureHandlerRootView>
             <KeyboardProvider>
               <ThemeProvider>
-                <AuthProvider>
-                  <AuthGate>
-                    <RootLayoutNav />
-                  </AuthGate>
-                </AuthProvider>
+                <WebShell>
+                  <AuthProvider>
+                    <AuthGate>
+                      <RootLayoutNav />
+                    </AuthGate>
+                  </AuthProvider>
+                </WebShell>
               </ThemeProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>

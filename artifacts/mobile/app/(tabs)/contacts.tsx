@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
   emptyState: { alignItems: "center", paddingTop: 80, gap: 12 },
   emptyTitle: { fontSize: 18, fontFamily: "HankenGrotesk_600SemiBold" },
   emptySubtitle: { fontSize: 14, fontFamily: "HankenGrotesk_400Regular", textAlign: "center", paddingHorizontal: 32 },
-  fab: { position: "absolute", bottom: 100, right: 20, width: 56, height: 56, borderRadius: 28, justifyContent: "center", alignItems: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8, elevation: Layout.fabElevation },
+  fab: { position: "absolute", bottom: 100, right: 20, width: 56, height: 56, borderRadius: 28, justifyContent: "center", alignItems: "center", ...Layout.shadow.fab },
   modalContent: { flex: 1, padding: Layout.screenPadding },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Layout.sectionSpacing },
   modalTitle: { fontSize: 17, fontFamily: "HankenGrotesk_600SemiBold" },

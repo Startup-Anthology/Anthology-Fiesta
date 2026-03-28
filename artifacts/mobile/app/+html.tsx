@@ -30,7 +30,7 @@ export default function Root({ children }: PropsWithChildren) {
         <ScrollViewStyleReset />
 
         {/* Prevent body scroll on web */}
-        <style dangerouslySetInnerHTML={{ __html: `body{overflow:hidden;height:100vh}#root{display:flex;height:100vh}` }} />
+        <style dangerouslySetInnerHTML={{ __html: `body{overflow:hidden;height:100vh;background-color:#f0f3f7}#root{display:flex;height:100vh}` }} />
       </head>
       <body>
         {children}

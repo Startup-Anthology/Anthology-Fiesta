@@ -1,3 +1,5 @@
+import { Platform } from "react-native";
+
 const layout = {
   // Existing tokens (unchanged — screens depend on these)
   screenPadding: 24,
@@ -22,6 +24,8 @@ const layout = {
   },
 
   // Shadow/elevation tokens
+  // shadow* props are translated to CSS box-shadow by react-native-web (deprecated path).
+  // boxShadow is provided explicitly for forward compatibility.
   shadow: {
     sm: {
       shadowColor: "#000",
@@ -29,6 +33,7 @@ const layout = {
       shadowOpacity: 0.05,
       shadowRadius: 3,
       elevation: 1,
+      ...Platform.select({ web: { boxShadow: "0px 1px 3px rgba(0,0,0,0.05)" }, default: {} }),
     },
     md: {
       shadowColor: "#000",
@@ -36,6 +41,7 @@ const layout = {
       shadowOpacity: 0.10,
       shadowRadius: 6,
       elevation: 3,
+      ...Platform.select({ web: { boxShadow: "0px 2px 6px rgba(0,0,0,0.10)" }, default: {} }),
     },
     lg: {
       shadowColor: "#000",
@@ -43,6 +49,7 @@ const layout = {
       shadowOpacity: 0.14,
       shadowRadius: 12,
       elevation: 6,
+      ...Platform.select({ web: { boxShadow: "0px 4px 12px rgba(0,0,0,0.14)" }, default: {} }),
     },
     fab: {
       shadowColor: "#000",
@@ -50,6 +57,7 @@ const layout = {
       shadowOpacity: 0.20,
       shadowRadius: 10,
       elevation: 8,
+      ...Platform.select({ web: { boxShadow: "0px 4px 10px rgba(0,0,0,0.20)" }, default: {} }),
     },
   },
 
@@ -66,6 +74,6 @@ const layout = {
       accelerate: "ease-in" as const,
     },
   },
-} as const;
+};
 
 export default layout;

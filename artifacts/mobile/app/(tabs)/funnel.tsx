@@ -10,8 +10,8 @@ import { ErrorState } from "@/components/ErrorState";
 import {
   ActivityIndicator,
   Animated,
-  Dimensions,
   FlatList,
+  useWindowDimensions,
   PanResponder,
   Platform,
   Pressable,
@@ -82,6 +82,8 @@ function LeadCard({ lead, onSwipeLeft, onSwipeRight, colors }: { lead: any; onSw
   );
 }
 export default function FunnelScreen() {
+  const { width: windowWidth } = useWindowDimensions();
+  const COLUMN_WIDTH = Math.min(windowWidth, 430) * 0.75;
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const qc = useQueryClient();
@@ -352,7 +354,7 @@ export default function FunnelScreen() {
           {LEAD_STATUSES.map((status) => {
             const col = filteredLeads.filter((l: any) => l.status === status);
             return (
-              <View key={status} style={[styles.kanbanColumn, { backgroundColor: colors.surfaceSecondary }]}>
+              <View key={status} style={[styles.kanbanColumn, { width: COLUMN_WIDTH, backgroundColor: colors.surfaceSecondary }]}>
                 <View style={styles.columnHeader}>
                   <View style={[styles.columnDot, { backgroundColor: STATUS_COLORS[status] }]} />
                   <Text style={[styles.columnTitle, { color: colors.text }]}>{STATUS_LABELS[status]}</Text>
@@ -528,7 +530,6 @@ export default function FunnelScreen() {
     </View>
   );
 }
-const COLUMN_WIDTH = Dimensions.get("window").width * 0.75;
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
@@ -541,7 +542,7 @@ const styles = StyleSheet.create({
   filterBannerText: { fontSize: 13, fontFamily: "HankenGrotesk_500Medium", flex: 1 },
   viewToggle: { padding: 6, borderRadius: Layout.badgeRadius },
   kanbanContainer: { paddingHorizontal: 14, gap: 14, paddingBottom: 100 },
-  kanbanColumn: { width: COLUMN_WIDTH, borderRadius: Layout.cardRadius, padding: Layout.cardPadding },
+  kanbanColumn: { borderRadius: Layout.cardRadius, padding: Layout.cardPadding },
   columnHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
   columnDot: { width: 8, height: 8, borderRadius: 4 },
   columnTitle: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", flex: 1 },
@@ -575,11 +576,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: Layout.fabElevation,
+    ...Layout.shadow.fab,
   },
   modalContent: { flex: 1, padding: Layout.screenPadding },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: Layout.sectionSpacing },

@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
 import { type ThemeColors } from "@/constants/colors";
+import Layout from "@/constants/layout";
 import { useTheme } from "@/lib/theme";
 import { getServerBaseUrl } from "@/constants/api";
 
@@ -235,11 +236,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   modeButtonActive: {
     backgroundColor: colors.background,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    ...Layout.shadow.sm,
   },
   modeButtonText: {
     fontSize: 14,

@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Layout from "@/constants/layout";
 import { useTheme } from "@/lib/theme";
 import { useAuth } from "@/lib/auth";
 
@@ -59,9 +60,10 @@ export function HamburgerMenu() {
           accessibilityLabel="Close menu"
         >
           <View
-            style={[styles.menuContainer, { top: topPad, backgroundColor: colors.surface, shadowColor: colors.text }]}
+            style={[styles.menuShadowWrap, { top: topPad, shadowColor: colors.text }]}
             accessibilityViewIsModal
           >
+            <View style={[styles.menuContainer, { backgroundColor: colors.surface }]}>
             {menuItems.map((item, idx) => (
               <Pressable
                 key={item.label}
@@ -82,6 +84,7 @@ export function HamburgerMenu() {
                 <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
               </Pressable>
             ))}
+            </View>
           </View>
         </Pressable>
       </Modal>
@@ -93,15 +96,15 @@ const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
   },
-  menuContainer: {
+  menuShadowWrap: {
     position: "absolute",
     right: 16,
     minWidth: 200,
     borderRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
+    ...Layout.shadow.lg,
+  },
+  menuContainer: {
+    borderRadius: 12,
     overflow: "hidden",
   },
   menuItem: {
