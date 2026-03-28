@@ -70,7 +70,7 @@ app.use(express.static(webRoot, {
 }));
 
 // SPA fallback — non-API, non-static routes serve index.html
-app.get("*", (_req, res) => {
+app.get("/{*path}", (_req, res) => {
   res.sendFile(path.join(webRoot, "index.html"));
 });
 
