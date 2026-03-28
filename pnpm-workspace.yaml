@@ -71,3 +71,13 @@ overrides:
   picomatch: ">=4.0.4"
   yaml: ">=2.8.3"
   brace-expansion: ">=5.0.5"
+  # path-to-regexp: ReDoS via sequential optional groups (GHSA-j3q9-mxjg-w52f, GHSA-27v5-c462-wpq7)
+  # used by express→router in production
+  path-to-regexp: ">=8.4.0"
+  # fast-xml-parser: entity expansion bypass (GHSA-8gc5-j5rx-235r, GHSA-jp2q-39xq-3w4g)
+  # used by @aws-sdk/client-s3
+  fast-xml-parser: ">=5.5.7"
+  # node-forge: cert chain bypass + signature forgery + DoS (build tool only, @expo/cli)
+  node-forge: ">=1.4.0"
+  # flatted: prototype pollution (GHSA-rf6f-7fwh-wjgh) — dev only, via eslint
+  flatted: ">=3.4.2"
