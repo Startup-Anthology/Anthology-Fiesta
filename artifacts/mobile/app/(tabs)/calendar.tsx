@@ -279,7 +279,7 @@ export default function CalendarScreen() {
             return (
               <View key={day.label} style={styles.dayGroup}>
                 <Pressable
-                  style={({ pressed }) => [styles.dayHeader, pressed && { opacity: 0.7 }]}
+                  style={({ pressed }) => [styles.dayHeader, pressed && { opacity: 0.92 }]}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                     setSelectedDay(day.date);
@@ -289,7 +289,7 @@ export default function CalendarScreen() {
                 >
                   <View style={[styles.dayDot, { backgroundColor: colors.border }, isToday && { backgroundColor: colors.primary }]} />
                   <Text style={[styles.dayLabel, { color: colors.textSecondary }, isToday && { color: colors.text }]}>{day.label}</Text>
-                  {isToday && <Text style={[styles.todayBadge, { backgroundColor: colors.primary }]}>Today</Text>}
+                  {isToday && <Text style={[styles.todayBadge, { backgroundColor: colors.primary, color: colors.onPrimary }]}>Today</Text>}
                   {day.events.length > 0 && (
                     <View style={[styles.eventCountBadge, { backgroundColor: colors.primary + "15" }]}>
                       <Text style={[styles.eventCountText, { color: colors.primary }]}>{day.events.length}</Text>
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
   dayHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
   dayDot: { width: 8, height: 8, borderRadius: 4 },
   dayLabel: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold" },
-  todayBadge: { fontSize: 11, fontFamily: "HankenGrotesk_700Bold", color: "#fff", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
+  todayBadge: { fontSize: 11, fontFamily: "HankenGrotesk_700Bold", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
   eventCountBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 10 },
   eventCountText: { fontSize: 11, fontFamily: "HankenGrotesk_700Bold" },
   noEvents: { fontSize: 13, fontFamily: "HankenGrotesk_400Regular", paddingLeft: 16 },

@@ -111,7 +111,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     backgroundColor: colors.info,
     borderRadius: 10,
   },
-  urlBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  urlBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: colors.onPrimary },
   cancelBtn: {
     flex: 1,
     paddingVertical: 12,

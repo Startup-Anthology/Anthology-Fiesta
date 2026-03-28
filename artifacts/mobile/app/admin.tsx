@@ -240,9 +240,9 @@ function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles
               )}
               <View style={styles.badgeRow}>
                 <View style={[styles.badge, { backgroundColor: item.role === "admin" ? colors.accent : colors.border }]}>
-                  <Text style={[styles.badgeText, { color: item.role === "admin" ? "#fff" : colors.text }]}>{item.role}</Text>
+                  <Text style={[styles.badgeText, { color: item.role === "admin" ? colors.onPrimary : colors.text }]}>{item.role}</Text>
                 </View>
-                <View style={[styles.badge, { backgroundColor: item.isActive ? "#22c55e" : "#ef4444" }]}>
+                <View style={[styles.badge, { backgroundColor: item.isActive ? colors.success : colors.error }]}>
                   <Text style={styles.badgeText}>{item.isActive ? "Active" : "Suspended"}</Text>
                 </View>
               </View>
@@ -255,7 +255,7 @@ function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles
                 <Feather name={item.isActive ? "pause-circle" : "play-circle"} size={18} color={colors.textSecondary} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDelete(item)} hitSlop={8}>
-                <Feather name="trash-2" size={18} color="#ef4444" />
+                <Feather name="trash-2" size={18} color={colors.error} />
               </TouchableOpacity>
             </View>
           </View>
@@ -531,7 +531,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.textSecondary,
   },
   tabTextActive: {
-    color: "#fff",
+    color: colors.onPrimary,
   },
   searchContainer: {
     flexDirection: "row",
@@ -590,7 +590,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   badgeText: {
     fontSize: 11,
     fontFamily: "HankenGrotesk_500Medium",
-    color: "#fff",
+    color: colors.onPrimary,
   },
   userActions: {
     flexDirection: "row",
@@ -686,7 +686,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   importButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#fff",
+    color: colors.onPrimary,
     fontFamily: "HankenGrotesk_600SemiBold",
   },
   filePickerButton: {

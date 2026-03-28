@@ -205,7 +205,7 @@ export function TwoFactorScreen() {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.onPrimary} />
               ) : (
                 <Text style={styles.verifyButtonText}>Verify</Text>
               )}
@@ -236,7 +236,7 @@ export function TwoFactorScreen() {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.onPrimary} />
               ) : (
                 <Text style={styles.verifyButtonText}>Verify</Text>
               )}
@@ -264,7 +264,7 @@ export function TwoFactorScreen() {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.onPrimary} />
               ) : (
                 <Text style={styles.verifyButtonText}>Verify</Text>
               )}
@@ -412,7 +412,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   verifyButtonText: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: colors.onPrimary,
     fontFamily: "HankenGrotesk_600SemiBold",
   },
   backText: {

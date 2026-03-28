@@ -24,7 +24,7 @@ export function Skeleton({ width = "100%", height = 16, borderRadius = 6, style 
     return () => anim.stop();
   }, [opacity]);
 
-  const baseColor = isDark ? "#2C2C2C" : "#E5E5E5";
+  const baseColor = isDark ? colors.surface3 : colors.borderLight;
 
   return (
     <Animated.View

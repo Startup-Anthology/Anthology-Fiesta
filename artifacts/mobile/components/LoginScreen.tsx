@@ -160,12 +160,12 @@ export function LoginScreen() {
               style={styles.submitButton}
               onPress={handleSubmit}
               disabled={isSubmitting || isLoading}
-              activeOpacity={0.8}
+              activeOpacity={0.92}
               accessibilityRole="button"
               accessibilityLabel={mode === "login" ? "Log in" : "Create account"}
             >
               {isSubmitting || isLoading ? (
-                <ActivityIndicator color="#FFFFFF" />
+                <ActivityIndicator color={colors.onPrimary} />
               ) : (
                 <Text style={styles.submitButtonText}>
                   {mode === "login" ? "Log In" : "Create Account"}
@@ -280,7 +280,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   submitButtonText: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: colors.onPrimary,
     fontFamily: "HankenGrotesk_600SemiBold",
   },
   footerText: {

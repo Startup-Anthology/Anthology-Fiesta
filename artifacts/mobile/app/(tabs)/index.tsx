@@ -129,7 +129,7 @@ export default function DashboardScreen() {
               accessibilityHint="Double tap to view contact"
             >
               <View style={[styles.followUpAvatar, { backgroundColor: colors.primaryLight }]}>
-                <Text style={styles.avatarText}>{contact.name?.charAt(0)?.toUpperCase()}</Text>
+                <Text style={[styles.avatarText, { color: colors.onPrimary }]}>{contact.name?.charAt(0)?.toUpperCase()}</Text>
               </View>
               <View style={styles.followUpInfo}>
                 <Text style={[styles.followUpName, { color: colors.text }]}>{contact.name}</Text>
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     marginBottom: Layout.cardGap,
     ...Layout.shadow.sm,
   },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: 0.92 },
   followUpAvatar: {
     width: 40,
     height: 40,
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
-  avatarText: { fontSize: 16, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  avatarText: { fontSize: 16, fontFamily: "HankenGrotesk_600SemiBold" },
   followUpInfo: { flex: 1 },
   followUpName: { fontSize: 15, fontFamily: "HankenGrotesk_600SemiBold" },
   followUpCompany: { fontSize: 13, fontFamily: "HankenGrotesk_400Regular" },

@@ -23,33 +23,33 @@ const layout = {
     "3xl": 48,
   },
 
-  // Shadow/elevation tokens
-  // shadow* props are translated to CSS box-shadow by react-native-web (deprecated path).
-  // boxShadow is provided explicitly for forward compatibility.
+  // Shadow/elevation tokens — aligned to Startup Anthology brand guide shadow scale.
+  // Web uses CSS custom properties (--shadow-*) so dark mode can scale opacity via
+  // prefers-color-scheme in +html.tsx without needing theme context here.
   shadow: {
     sm: {
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.05,
+      shadowOpacity: 0.10,
       shadowRadius: 3,
       elevation: 1,
-      ...Platform.select({ web: { boxShadow: "0px 1px 3px rgba(0,0,0,0.05)" }, default: {} }),
+      ...Platform.select({ web: { boxShadow: "var(--shadow-sm)" }, default: {} }),
     },
     md: {
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
+      shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.10,
       shadowRadius: 6,
       elevation: 3,
-      ...Platform.select({ web: { boxShadow: "0px 2px 6px rgba(0,0,0,0.10)" }, default: {} }),
+      ...Platform.select({ web: { boxShadow: "var(--shadow-md)" }, default: {} }),
     },
     lg: {
       shadowColor: "#000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.14,
-      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.10,
+      shadowRadius: 15,
       elevation: 6,
-      ...Platform.select({ web: { boxShadow: "0px 4px 12px rgba(0,0,0,0.14)" }, default: {} }),
+      ...Platform.select({ web: { boxShadow: "var(--shadow-lg)" }, default: {} }),
     },
     fab: {
       shadowColor: "#000",
@@ -57,7 +57,7 @@ const layout = {
       shadowOpacity: 0.20,
       shadowRadius: 10,
       elevation: 8,
-      ...Platform.select({ web: { boxShadow: "0px 4px 10px rgba(0,0,0,0.20)" }, default: {} }),
+      ...Platform.select({ web: { boxShadow: "var(--shadow-fab)" }, default: {} }),
     },
   },
 

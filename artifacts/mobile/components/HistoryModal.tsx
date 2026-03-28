@@ -212,5 +212,5 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     paddingVertical: 10,
     marginTop: 4,
   },
-  rollbackBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  rollbackBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: colors.onPrimary },
 });

@@ -475,7 +475,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   profileSection: { alignItems: "center", marginBottom: Layout.sectionSpacing },
   avatar: { width: 64, height: 64, borderRadius: 32, justifyContent: "center", alignItems: "center", marginBottom: 14 },
   avatarImage: { width: 64, height: 64, borderRadius: 32, marginBottom: 14 },
-  avatarText: { fontSize: 26, fontFamily: "HankenGrotesk_700Bold", color: "#fff" },
+  avatarText: { fontSize: 26, fontFamily: "HankenGrotesk_700Bold", color: colors.onPrimary },
   cameraIcon: { position: "absolute", bottom: 10, right: -4, backgroundColor: colors.info, borderRadius: 10, width: 20, height: 20, justifyContent: "center", alignItems: "center" },
   name: { fontSize: 22, fontFamily: "HankenGrotesk_700Bold", color: colors.text },
   email: { fontSize: 14, fontFamily: "HankenGrotesk_400Regular", color: colors.textSecondary, marginTop: 2 },

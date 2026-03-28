@@ -76,7 +76,7 @@ export default function LinkedInLogModal({
               onPress={handleSubmit}
             >
               {isPending ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={colors.onPrimary} />
               ) : (
                 <Text style={styles.saveText}>Save</Text>
               )}
@@ -139,5 +139,5 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     backgroundColor: colors.info,
     alignItems: "center",
   },
-  saveText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  saveText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: colors.onPrimary },
 });

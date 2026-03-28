@@ -101,5 +101,5 @@ const styles = StyleSheet.create({
   dismissBtn: { marginLeft: "auto", padding: 4 },
   cardTitle: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", marginBottom: 4 },
   cardDesc: { fontSize: 13, fontFamily: "HankenGrotesk_400Regular", lineHeight: 18 },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: 0.92 },
 });

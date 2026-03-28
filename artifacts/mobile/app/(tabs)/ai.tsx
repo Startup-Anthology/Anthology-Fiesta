@@ -230,7 +230,7 @@ export default function AIChatScreen() {
         </Pressable>
         <View style={styles.headerCenter}>
           <View style={[styles.forecasterAvatar, { backgroundColor: colors.accent }]}>
-            <Text style={styles.forecasterAvatarText}>F</Text>
+            <Text style={[styles.forecasterAvatarText, { color: colors.onPrimary }]}>F</Text>
           </View>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Forecaster Pro</Text>
         </View>
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   headerBtn: { padding: 8 },
   headerCenter: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   forecasterAvatar: { width: 28, height: 28, borderRadius: 14, justifyContent: "center", alignItems: "center" },
-  forecasterAvatarText: { fontSize: 14, fontFamily: "HankenGrotesk_700Bold", color: "#fff" },
+  forecasterAvatarText: { fontSize: 14, fontFamily: "HankenGrotesk_700Bold" },
   headerTitle: { fontSize: 18, fontFamily: "HankenGrotesk_600SemiBold" },
   messageList: { padding: Layout.screenPadding, paddingBottom: 20, flexGrow: 1 },
   messageBubble: { borderRadius: 16, padding: 14, marginBottom: 10, maxWidth: "85%" },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
   },
   historyTitle: { fontSize: 15, fontFamily: "HankenGrotesk_600SemiBold" },
   historyDate: { fontSize: 12, fontFamily: "HankenGrotesk_400Regular", marginTop: 2 },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: 0.92 },
   emptyText: { fontSize: 14, fontFamily: "HankenGrotesk_400Regular", textAlign: "center", padding: 40 },
   emptyChat: { alignItems: "center", justifyContent: "center", paddingTop: 80, paddingHorizontal: 40 },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, justifyContent: "center", alignItems: "center", marginBottom: 16 },

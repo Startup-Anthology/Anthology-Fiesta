@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   cardBody: { flex: 1 },
   cardTitle: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold" },
   cardMeta: { fontSize: 12, fontFamily: "HankenGrotesk_400Regular", marginTop: 2 },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: 0.92 },
   empty: { alignItems: "center", paddingTop: 80, gap: 12 },
   emptyText: { fontSize: 15, fontFamily: "HankenGrotesk_400Regular" },
 });

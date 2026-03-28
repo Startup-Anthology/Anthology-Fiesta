@@ -209,8 +209,8 @@ export default function IntegrationsScreen() {
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>Notion Actions</Text>
               <View style={[styles.row, { backgroundColor: colors.surface }]}>
-                <View style={[styles.rowIcon, { backgroundColor: "#00000015" }]}>
-                  <Feather name="upload-cloud" size={18} color="#000000" />
+                <View style={[styles.rowIcon, { backgroundColor: colors.primary + "15" }]}>
+                  <Feather name="upload-cloud" size={18} color={colors.primary} />
                 </View>
                 <View style={styles.rowInfo}>
                   <Text style={[styles.rowLabel, { color: colors.text }]}>Export All to Notion</Text>
@@ -241,8 +241,8 @@ export default function IntegrationsScreen() {
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>CRM Sync</Text>
             <View style={[styles.row, { backgroundColor: colors.surface }]}>
-              <View style={[styles.rowIcon, { backgroundColor: "#6366f115" }]}>
-                <Feather name="refresh-cw" size={18} color="#6366f1" />
+              <View style={[styles.rowIcon, { backgroundColor: colors.statusNew + "15" }]}>
+                <Feather name="refresh-cw" size={18} color={colors.statusNew} />
               </View>
               <View style={styles.rowInfo}>
                 <Text style={[styles.rowLabel, { color: colors.text }]}>Horizon</Text>

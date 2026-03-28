@@ -103,11 +103,11 @@ export default function ContactsScreen() {
             accessibilityLabel="Sync from Horizon"
           >
             {horizonSyncMut.isPending ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
               <>
-                <Feather name="refresh-cw" size={13} color="#fff" />
-                <Text style={styles.syncBtnText}>Sync</Text>
+                <Feather name="refresh-cw" size={13} color={colors.onPrimary} />
+                <Text style={[styles.syncBtnText, { color: colors.onPrimary }]}>Sync</Text>
               </>
             )}
           </Pressable>
@@ -134,7 +134,7 @@ export default function ContactsScreen() {
           <Feather name="clock" size={14} color={tab === "followups" ? colors.onPrimary : colors.textSecondary} />
           <Text style={[styles.tabText, { color: colors.textSecondary }, tab === "followups" && styles.tabTextActive, tab === "followups" && { color: colors.onPrimary }]}>Follow-ups</Text>
           {followUps.length > 0 && (
-            <View style={[styles.badge, { backgroundColor: colors.error }]}><Text style={styles.badgeText}>{followUps.length}</Text></View>
+            <View style={[styles.badge, { backgroundColor: colors.error }]}><Text style={[styles.badgeText, { color: colors.onPrimary }]}>{followUps.length}</Text></View>
           )}
         </Pressable>
       </View>
@@ -152,7 +152,7 @@ export default function ContactsScreen() {
             accessibilityHint="Double tap to view contact"
           >
             <View style={[styles.avatar, { backgroundColor: REL_COLORS[item.relationshipType] || colors.primary }]}>
-              <Text style={styles.avatarText}>{item.name?.charAt(0)?.toUpperCase()}</Text>
+              <Text style={[styles.avatarText, { color: colors.onPrimary }]}>{item.name?.charAt(0)?.toUpperCase()}</Text>
             </View>
             <View style={styles.contactInfo}>
               <Text style={[styles.contactName, { color: colors.text }]}>{item.name}</Text>
@@ -271,18 +271,18 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontFamily: "Lato_700Bold" },
   headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   syncBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
-  syncBtnText: { fontSize: 12, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  syncBtnText: { fontSize: 12, fontFamily: "HankenGrotesk_600SemiBold" },
   tabs: { flexDirection: "row", paddingHorizontal: Layout.screenPadding, gap: 8, marginBottom: 12, marginTop: 10 },
   tab: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: Layout.chipRadius },
   tabText: { fontSize: 14, fontFamily: "HankenGrotesk_500Medium" },
-  tabTextActive: { color: "#FFFFFF" },
+  tabTextActive: {},
   badge: { borderRadius: 10, paddingHorizontal: 6, paddingVertical: 1, minWidth: 20, alignItems: "center" },
-  badgeText: { fontSize: 11, fontFamily: "HankenGrotesk_700Bold", color: "#fff" },
+  badgeText: { fontSize: 11, fontFamily: "HankenGrotesk_700Bold" },
   listContent: { padding: Layout.screenPadding, paddingBottom: 100 },
   contactCard: { flexDirection: "row", alignItems: "center", borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginBottom: Layout.cardGap, ...Layout.shadow.sm },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: 0.92 },
   avatar: { width: 44, height: 44, borderRadius: 22, justifyContent: "center", alignItems: "center", marginRight: 12 },
-  avatarText: { fontSize: 18, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  avatarText: { fontSize: 18, fontFamily: "HankenGrotesk_600SemiBold" },
   contactInfo: { flex: 1 },
   contactName: { fontSize: 16, fontFamily: "HankenGrotesk_600SemiBold" },
   contactCompany: { fontSize: 13, fontFamily: "HankenGrotesk_400Regular", marginTop: 1 },
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: Layout.chipRadius, borderWidth: 1 },
   chipText: { fontSize: 13, fontFamily: "HankenGrotesk_500Medium", textTransform: "capitalize" },
-  chipTextActive: { color: "#fff" },
+  chipTextActive: {},
   emptyBtn: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: Layout.inputRadius, paddingVertical: 12, paddingHorizontal: 20, marginTop: 16 },
-  emptyBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  emptyBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold" },
 });

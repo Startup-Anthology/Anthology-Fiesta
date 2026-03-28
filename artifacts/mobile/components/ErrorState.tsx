@@ -18,7 +18,7 @@ export function ErrorState({ message = "Something went wrong.", onRetry }: Error
       <Text style={[styles.message, { color: colors.textSecondary }]}>{message}</Text>
       {onRetry && (
         <Pressable
-          style={({ pressed }) => [styles.retryBtn, { backgroundColor: colors.primary }, pressed && { opacity: 0.7 }]}
+          style={({ pressed }) => [styles.retryBtn, { backgroundColor: colors.primary }, pressed && { opacity: 0.92 }]}
           onPress={onRetry}
           accessibilityRole="button"
           accessibilityLabel="Retry"

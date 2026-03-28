@@ -239,11 +239,11 @@ export default function FunnelScreen() {
             accessibilityLabel="Sync from Horizon"
           >
             {horizonSyncMut.isPending ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
               <>
-                <Feather name="refresh-cw" size={13} color="#fff" />
-                <Text style={styles.syncBtnText}>Sync</Text>
+                <Feather name="refresh-cw" size={13} color={colors.onPrimary} />
+                <Text style={[styles.syncBtnText, { color: colors.onPrimary }]}>Sync</Text>
               </>
             )}
           </Pressable>
@@ -277,7 +277,7 @@ export default function FunnelScreen() {
             <Pressable style={[styles.contactTab, { backgroundColor: colors.surfaceSecondary }, contactTab === "followups" && { backgroundColor: colors.primary }]} onPress={() => setContactTab("followups")} accessibilityRole="tab" accessibilityLabel={`Follow-ups${followUps.length > 0 ? `, ${followUps.length} due` : ""}`} accessibilityState={{ selected: contactTab === "followups" }}>
               <Feather name="clock" size={14} color={contactTab === "followups" ? colors.onPrimary : colors.textSecondary} />
               <Text style={[styles.tabText, { color: contactTab === "followups" ? colors.onPrimary : colors.textSecondary }]}>Follow-ups</Text>
-              {followUps.length > 0 && <View style={[styles.badge, { backgroundColor: colors.error }]}><Text style={styles.badgeText}>{followUps.length}</Text></View>}
+              {followUps.length > 0 && <View style={[styles.badge, { backgroundColor: colors.error }]}><Text style={[styles.badgeText, { color: colors.onPrimary }]}>{followUps.length}</Text></View>}
             </Pressable>
           </View>
           {contactsLoading ? (
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontFamily: "Lato_700Bold" },
   headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   syncBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
-  syncBtnText: { fontSize: 12, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  syncBtnText: { fontSize: 12, fontFamily: "HankenGrotesk_600SemiBold" },
   filterBanner: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: Layout.screenPadding, paddingVertical: 8, marginBottom: 4 },
   filterBannerText: { fontSize: 13, fontFamily: "HankenGrotesk_500Medium", flex: 1 },
   viewToggle: { padding: 6, borderRadius: Layout.badgeRadius },
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   emptyText: { fontSize: 13, fontFamily: "HankenGrotesk_400Regular" },
   listContent: { padding: Layout.screenPadding, paddingBottom: 100 },
   listCard: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginBottom: Layout.cardGap },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: 0.92 },
   listCardLeft: { flex: 1, marginRight: 12 },
   listCardRight: { alignItems: "flex-end", gap: 4 },
   emptyState: { alignItems: "center", paddingTop: 80, gap: 12 },
@@ -595,11 +595,11 @@ const styles = StyleSheet.create({
   sourcePicker: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   sourceChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: Layout.chipRadius, borderWidth: 1 },
   sourceChipText: { fontSize: 13, fontFamily: "HankenGrotesk_500Medium", textTransform: "capitalize" },
-  sourceChipTextActive: { color: "#fff" },
+  sourceChipTextActive: {},
   swipeHint: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 10, opacity: 0.5 },
   swipeHintText: { fontSize: 10, fontFamily: "HankenGrotesk_400Regular" },
   emptyBtn: { flexDirection: "row", alignItems: "center", gap: 6, borderRadius: Layout.inputRadius, paddingVertical: 12, paddingHorizontal: 20, marginTop: 16 },
-  emptyBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  emptyBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold" },
   // Segment / Pipeline
   segmentBar: { flexDirection: "row", borderRadius: 8, padding: 3, gap: 2 },
   segBtn: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 6 },
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
   contactTab: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: Layout.chipRadius },
   tabText: { fontSize: 14, fontFamily: "HankenGrotesk_500Medium" },
   badge: { borderRadius: 10, paddingHorizontal: 6, paddingVertical: 1, minWidth: 20, alignItems: "center" as const },
-  badgeText: { fontSize: 11, fontFamily: "HankenGrotesk_700Bold", color: "#fff" },
+  badgeText: { fontSize: 11, fontFamily: "HankenGrotesk_700Bold" },
   relBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   relText: { fontSize: 11, fontFamily: "HankenGrotesk_600SemiBold", textTransform: "capitalize" },
   markBtn: { width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center" },

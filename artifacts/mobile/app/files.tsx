@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, gap: 12 },
   title: { fontSize: 22, fontFamily: "HankenGrotesk_700Bold" },
   uploadBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10 },
-  uploadText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
+  uploadText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold" },
   center: { flex: 1, justifyContent: "center", alignItems: "center", gap: 8 },
   emptyText: { fontSize: 16, fontFamily: "HankenGrotesk_600SemiBold" },
   emptySubtext: { fontSize: 14, fontFamily: "HankenGrotesk_400Regular" },
