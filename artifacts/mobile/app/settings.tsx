@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { showAlert } from "@/lib/alert";
 import { router } from "expo-router";
@@ -19,6 +19,7 @@ import { useTheme } from "@/lib/theme";
 type SettingsRow = {
   label: string;
   icon: string;
+  iconSet?: "feather" | "material";
   iconColor?: string;
   onPress: () => void;
   destructive?: boolean;
@@ -45,7 +46,8 @@ export default function SettingsScreen() {
         },
         {
           label: "Connected Accounts",
-          icon: "link",
+          icon: "power-plug",
+          iconSet: "material",
           iconColor: colors.accent,
           onPress: () => router.push("/settings/integrations"),
         },
@@ -123,11 +125,19 @@ export default function SettingsScreen() {
       accessibilityLabel={item.label}
     >
       <View style={[styles.rowIcon, { backgroundColor: (item.iconColor || colors.text) + "18" }]}>
-        <Feather
-          name={item.icon as any}
-          size={17}
-          color={item.destructive ? colors.error : (item.iconColor || colors.text)}
-        />
+        {item.iconSet === "material" ? (
+          <MaterialCommunityIcons
+            name={item.icon as any}
+            size={18}
+            color={item.destructive ? colors.error : (item.iconColor || colors.text)}
+          />
+        ) : (
+          <Feather
+            name={item.icon as any}
+            size={17}
+            color={item.destructive ? colors.error : (item.iconColor || colors.text)}
+          />
+        )}
       </View>
       <Text style={[styles.rowLabel, item.destructive && { color: colors.error }]}>{item.label}</Text>
       {!item.destructive && (

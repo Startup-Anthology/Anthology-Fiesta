@@ -14,7 +14,7 @@ import { useTheme } from "@/lib/theme";
 import { useAuth } from "@/lib/auth";
 
 const BASE_MENU_ITEMS: { label: string; icon: string; route: string }[] = [
-  { label: "Workflows", icon: "git-branch", route: "/comms" },
+  { label: "Workflows", icon: "sliders", route: "/comms" },
   { label: "Files", icon: "folder", route: "/files" },
   { label: "Settings", icon: "settings", route: "/settings" },
 ];

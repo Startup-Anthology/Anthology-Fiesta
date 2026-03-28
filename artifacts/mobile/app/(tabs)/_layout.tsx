@@ -121,7 +121,7 @@ function ClassicTabLayout() {
             isIOS ? (
               <SymbolView name="bubble.left.and.text.bubble.right" tintColor={color} size={22} />
             ) : (
-              <Feather name="cpu" size={22} color={color} />
+              <Feather name="message-circle" size={22} color={color} />
             ),
         }}
       />

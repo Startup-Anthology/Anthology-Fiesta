@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { showAlert } from "@/lib/alert";
 import * as DocumentPicker from "expo-document-picker";
@@ -373,7 +373,7 @@ export default function ContactDetailScreen() {
 
       <View style={styles.quickActions}>
         <Pressable style={styles.quickBtn} onPress={() => setShowLinkedInModal(true)}>
-          <Feather name="message-circle" size={16} color="#0A66C2" />
+          <MaterialCommunityIcons name="linkedin" size={16} color="#0A66C2" />
           <Text style={styles.quickText}>Log LinkedIn Message</Text>
         </Pressable>
       </View>
