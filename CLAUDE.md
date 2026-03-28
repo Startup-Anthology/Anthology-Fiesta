@@ -125,8 +125,10 @@ Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CL
 ### Auth & Security
 - Auth middleware: `requireAuth` for authenticated routes, `requireAdmin` + 2FA for admin routes
 - CORS uses `ALLOWED_ORIGINS` env var; localhost auto-allowed in non-production mode
-- Session-based auth with cookie + Bearer token paths, both go through `getSession(sid)?.twoFactorVerified`
+- Session-based auth (cookie name `sid`, 7-day TTL) with cookie + Bearer token paths, both go through `getSession(sid)?.twoFactorVerified`
+- Passwords hashed with bcryptjs (salt rounds 12)
 - OAuth tokens encrypted at rest via `tokenManager.ts` (AES-256-GCM)
+- Rate limiting: login 5/min per IP, registration 3/hour per IP, AI chat 20/min per user
 - Supply-chain defense: `minimumReleaseAge: 1440` in pnpm-workspace.yaml (1-day buffer for new npm packages)
 
 ### AI System
@@ -189,6 +191,8 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - TypeScript strict mode enabled (`tsconfig.base.json`)
 - Module resolution: `bundler` with ES2022 target
 - esbuild version overridden globally to 0.27.3 (drizzle-kit vulnerability fix)
+- API server runs via `tsx` in dev (Node `--import tsx/esm`), esbuild bundle for production
+- API server loads `.env` from repo root via Node `--env-file=../../.env`
 
 ## Known Issues (from March 2026 audit)
 
