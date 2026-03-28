@@ -127,6 +127,14 @@ router.get("/integrations/:provider/callback", async (req: Request, res: Respons
           const me = await meRes.json() as { mail?: string; userPrincipalName?: string };
           displayName = me.mail || me.userPrincipalName || null;
         }
+      } else if (provider === "slack") {
+        const teamRes = await fetch("https://slack.com/api/team.info", {
+          headers: { Authorization: `Bearer ${tokenData.access_token}` },
+        });
+        if (teamRes.ok) {
+          const teamData = await teamRes.json() as { ok?: boolean; team?: { name?: string } };
+          displayName = teamData.team?.name || null;
+        }
       }
     } catch {
       // display name is optional
@@ -140,6 +148,17 @@ router.get("/integrations/:provider/callback", async (req: Request, res: Respons
   } catch (err: any) {
     console.error(`Integration callback error for ${provider}:`, err.message);
     res.status(500).json({ error: "Failed to complete OAuth connection" });
+  }
+});
+
+router.post("/integrations/notion/export", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { exportAllToNotion } = await import("../lib/notionExport");
+    const result = await exportAllToNotion(req.user!.id);
+    res.json(result);
+  } catch (err: any) {
+    console.error("Notion export error:", err.message);
+    res.status(500).json({ error: err.message || "Export failed" });
   }
 });
 

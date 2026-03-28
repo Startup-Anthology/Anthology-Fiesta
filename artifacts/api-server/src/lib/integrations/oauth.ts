@@ -84,6 +84,19 @@ export const OAUTH_CONFIGS: Record<string, (redirectBase: string) => OAuthConfig
       redirectUri: `${redirectBase}/api/integrations/notion/callback`,
     };
   },
+  slack: (redirectBase) => {
+    const clientId = process.env.SLACK_CLIENT_ID;
+    const clientSecret = process.env.SLACK_CLIENT_SECRET;
+    if (!clientId || !clientSecret) return null;
+    return {
+      clientId,
+      clientSecret,
+      authorizationUrl: "https://slack.com/oauth/v2/authorize",
+      tokenUrl: "https://slack.com/api/oauth.v2.access",
+      scopes: ["chat:write", "chat:write.public", "channels:read", "groups:read"],
+      redirectUri: `${redirectBase}/api/integrations/slack/callback`,
+    };
+  },
 };
 
 const PROVIDER_CATEGORY: Record<string, string> = {
@@ -92,6 +105,7 @@ const PROVIDER_CATEGORY: Record<string, string> = {
   google_calendar: "calendar",
   outlook_calendar: "calendar",
   notion: "notes",
+  slack: "messaging",
 };
 
 export function buildAuthorizationUrl(

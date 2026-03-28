@@ -371,4 +371,13 @@ export const api = {
   getRecentErrors: () => request("/admin/recent-errors"),
   getIntegrations: () => request("/integrations"),
   deleteIntegration: (provider: string) => request(`/integrations/${provider}`, { method: "DELETE" }),
+  exportToNotion: () => request("/integrations/notion/export", { method: "POST" }),
+  getHorizonStatus: () => request("/horizon/status") as Promise<{
+    configured: boolean;
+    lastSyncAt: string | null;
+    lastSyncLeadsCreated: number;
+    lastSyncLeadsUpdated: number;
+    lastSyncContactsCreated: number;
+    lastSyncContactsUpdated: number;
+  }>,
 };

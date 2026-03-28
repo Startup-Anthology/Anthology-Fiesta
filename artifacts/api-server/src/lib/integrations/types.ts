@@ -50,3 +50,14 @@ export interface NotesProvider {
   syncContact(contact: any, databaseId: string): Promise<string | null>;
   syncActivity(activity: any, databaseId: string): Promise<string | null>;
 }
+
+export interface MessagingProvider {
+  sendMessage(channelId: string, text: string, blocks?: unknown[]): Promise<string | null>;
+  listChannels(): Promise<{ id: string; name: string }[]>;
+  postDigest(channelId: string, summary: {
+    newLeads: number;
+    pipelineCounts: Record<string, number>;
+    overdueFollowUps: number;
+    upcomingEvents: number;
+  }): Promise<string | null>;
+}

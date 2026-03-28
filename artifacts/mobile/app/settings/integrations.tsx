@@ -1,3 +1,4 @@
+import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { showAlert } from "@/lib/alert";
 import * as WebBrowser from "expo-web-browser";
@@ -31,11 +32,13 @@ const PROVIDERS: ProviderConfig[] = [
   { provider: "google_calendar", label: "Google Calendar", category: "calendar", icon: "calendar", color: "#4285F4" },
   { provider: "outlook_calendar", label: "Outlook Calendar", category: "calendar", icon: "calendar", color: "#0078D4" },
   { provider: "notion", label: "Notion", category: "notes", icon: "book", color: "#000000" },
+  { provider: "slack", label: "Slack", category: "messaging", icon: "message-square", color: "#4A154B" },
 ];
 const CATEGORY_LABELS: Record<string, string> = {
   email: "Email",
   calendar: "Calendar",
   notes: "Notes",
+  messaging: "Messaging",
 };
 function IntegrationRow({ config, status, onConnect, onDisconnect, isDisconnecting }: {
   config: ProviderConfig;
@@ -106,10 +109,31 @@ export default function IntegrationsScreen() {
     queryKey: ["integrations"],
     queryFn: api.getIntegrations,
   });
+  const { data: horizonStatus } = useQuery({
+    queryKey: ["horizonStatus"],
+    queryFn: () => api.getHorizonStatus(),
+  });
   const disconnectMut = useMutation({
     mutationFn: (provider: string) => api.deleteIntegration(provider),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations"] }),
     onError: (err: Error) => showAlert("Error", err.message),
+  });
+  const horizonSyncMut = useMutation({
+    mutationFn: () => api.syncFromHorizon(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["horizonStatus"] });
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["contacts"] });
+      showAlert("Sync Complete", "Horizon data has been synced.");
+    },
+    onError: (err: Error) => showAlert("Sync Failed", err.message),
+  });
+  const notionExportMut = useMutation({
+    mutationFn: () => api.exportToNotion(),
+    onSuccess: (data: any) => {
+      showAlert("Export Complete", `Leads: ${data.leads?.synced || 0}, Contacts: ${data.contacts?.synced || 0}, Activities: ${data.activities?.synced || 0}`);
+    },
+    onError: (err: Error) => showAlert("Export Failed", err.message),
   });
   const integrationList: any[] = Array.isArray(integrations)
     ? integrations
@@ -123,7 +147,6 @@ export default function IntegrationsScreen() {
       window.open(url, "_blank");
     } else {
       await WebBrowser.openBrowserAsync(url);
-      // Refetch after browser closes (user completed OAuth or cancelled)
       qc.invalidateQueries({ queryKey: ["integrations"] });
     }
   };
@@ -132,6 +155,9 @@ export default function IntegrationsScreen() {
     acc[p.category].push(p);
     return acc;
   }, {} as Record<string, ProviderConfig[]>);
+
+  const isNotionConnected = integrationMap.notion?.status === "active";
+
   if (isError) {
     return <ErrorState message="Failed to load integrations." onRetry={refetch} />;
   }
@@ -153,23 +179,100 @@ export default function IntegrationsScreen() {
       {isLoading ? (
         <ActivityIndicator style={{ marginTop: 40 }} color={colors.primary} />
       ) : (
-        Object.entries(groupedProviders).map(([category, providers]) => (
-          <View key={category} style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>
-              {CATEGORY_LABELS[category] || category}
-            </Text>
-            {providers.map((p) => (
-              <IntegrationRow
-                key={p.provider}
-                config={p}
-                status={integrationMap[p.provider]}
-                onConnect={() => handleConnect(p.provider)}
-                onDisconnect={() => disconnectMut.mutate(p.provider)}
-                isDisconnecting={disconnectMut.isPending && disconnectMut.variables === p.provider}
-              />
-            ))}
+        <>
+          {Object.entries(groupedProviders).map(([category, providers]) => (
+            <View key={category} style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>
+                {CATEGORY_LABELS[category] || category}
+              </Text>
+              {providers.map((p) => (
+                <IntegrationRow
+                  key={p.provider}
+                  config={p}
+                  status={integrationMap[p.provider]}
+                  onConnect={() => handleConnect(p.provider)}
+                  onDisconnect={() => disconnectMut.mutate(p.provider)}
+                  isDisconnecting={disconnectMut.isPending && disconnectMut.variables === p.provider}
+                />
+              ))}
+            </View>
+          ))}
+
+          {isNotionConnected && (
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>Notion Actions</Text>
+              <View style={[styles.row, { backgroundColor: colors.surface }]}>
+                <View style={[styles.rowIcon, { backgroundColor: "#00000015" }]}>
+                  <Feather name="upload-cloud" size={18} color="#000000" />
+                </View>
+                <View style={styles.rowInfo}>
+                  <Text style={[styles.rowLabel, { color: colors.text }]}>Export All to Notion</Text>
+                  <Text style={[styles.statusText, { color: colors.textTertiary }]}>Sync all leads, contacts, and activities</Text>
+                </View>
+                <Pressable
+                  style={[styles.connectBtn, { backgroundColor: colors.primary }]}
+                  onPress={() => {
+                    showAlert("Export to Notion", "This will sync all your CRM data to Notion. Continue?", [
+                      { text: "Cancel", style: "cancel" },
+                      { text: "Export", onPress: () => notionExportMut.mutate() },
+                    ]);
+                  }}
+                  disabled={notionExportMut.isPending}
+                  accessibilityRole="button"
+                  accessibilityLabel="Export all to Notion"
+                >
+                  {notionExportMut.isPending ? (
+                    <ActivityIndicator size="small" color={colors.onPrimary} />
+                  ) : (
+                    <Text style={[styles.connectText, { color: colors.onPrimary }]}>Export</Text>
+                  )}
+                </Pressable>
+              </View>
+            </View>
+          )}
+
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colors.textTertiary }]}>CRM Sync</Text>
+            <View style={[styles.row, { backgroundColor: colors.surface }]}>
+              <View style={[styles.rowIcon, { backgroundColor: "#6366f115" }]}>
+                <Feather name="refresh-cw" size={18} color="#6366f1" />
+              </View>
+              <View style={styles.rowInfo}>
+                <Text style={[styles.rowLabel, { color: colors.text }]}>Horizon</Text>
+                <View style={styles.statusRow}>
+                  <View style={[styles.dot, { backgroundColor: horizonStatus?.configured ? colors.success : colors.textTertiary }]} />
+                  <Text style={[styles.statusText, { color: colors.textTertiary }]}>
+                    {horizonStatus?.configured
+                      ? horizonStatus.lastSyncAt
+                        ? `Last sync: ${new Date(horizonStatus.lastSyncAt).toLocaleDateString()}`
+                        : "Connected — never synced"
+                      : "Not configured"}
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                style={[styles.connectBtn, { backgroundColor: horizonStatus?.configured ? colors.primary : colors.surface2 }]}
+                onPress={() => horizonSyncMut.mutate()}
+                disabled={!horizonStatus?.configured || horizonSyncMut.isPending}
+                accessibilityRole="button"
+                accessibilityLabel="Sync from Horizon"
+              >
+                {horizonSyncMut.isPending ? (
+                  <ActivityIndicator size="small" color={colors.onPrimary} />
+                ) : (
+                  <Text style={[styles.connectText, { color: horizonStatus?.configured ? colors.onPrimary : colors.textTertiary }]}>Sync</Text>
+                )}
+              </Pressable>
+            </View>
+            {horizonStatus?.lastSyncAt && (
+              <View style={[styles.syncStats, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.syncStatsText, { color: colors.textSecondary }]}>
+                  Last sync: {horizonStatus.lastSyncLeadsCreated} new leads, {horizonStatus.lastSyncLeadsUpdated} updated | {horizonStatus.lastSyncContactsCreated} new contacts, {horizonStatus.lastSyncContactsUpdated} updated
+                </Text>
+              </View>
+            )}
           </View>
-        ))
+        </>
       )}
       <View style={{ height: 40 }} />
     </ScrollView>
@@ -232,4 +335,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   disconnectText: { fontSize: 12, fontFamily: "SpaceGrotesk_500Medium" },
+  syncStats: {
+    borderRadius: Layout.cardRadius,
+    padding: Layout.cardPadding,
+    marginTop: -Layout.cardGap + 2,
+  },
+  syncStatsText: { fontSize: 11, fontFamily: "SpaceGrotesk_400Regular", lineHeight: 16 },
 });

@@ -4,6 +4,7 @@ import { dripSequencesTable, dripSequenceStepsTable, dripEnrollmentsTable, calen
 import { eq, sql, and, isNull } from "drizzle-orm";
 import { createCalendarEvent } from "../lib/calendar";
 import { logAudit } from "../lib/audit";
+import { fireAndForgetSlackNotify } from "../lib/slackNotify";
 import { parseIntParam, notFound } from "../lib/errors";
 import { validate, createSequenceSchema, updateSequenceSchema, createStepSchema } from "../lib/validation";
 
@@ -153,6 +154,11 @@ router.post("/sequences/:id/enroll", async (req: Request, res: Response, next: N
       }
       throw insertErr;
     }
+
+    fireAndForgetSlackNotify(userId, "sequence_enrolled", {
+      sequenceName: sequence.name,
+      entityName: parsedLeadId ? `Lead #${parsedLeadId}` : `Contact #${parsedContactId}`,
+    });
 
     if (req.body.addToCalendar && sequence) {
       const now = new Date();
