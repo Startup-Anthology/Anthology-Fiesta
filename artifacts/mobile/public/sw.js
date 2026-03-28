@@ -1,10 +1,10 @@
 // Fiesta CRM — Minimal service worker for PWA installability + app shell caching
 // Bump CACHE_VERSION to bust the cache on deploys.
-const CACHE_VERSION = "fiesta-v4";
+const CACHE_VERSION = "fiesta-v5";
 const SHELL_CACHE = `shell-${CACHE_VERSION}`;
 
 // Precache the app shell on install
-const SHELL_URLS = ["/", "/manifest.json", "/pwa-icon-192.png"];
+const SHELL_URLS = ["/", "/manifest.json", "/pwa-icon-192.png", "/fonts/Feather.ttf", "/fonts/MaterialCommunityIcons.ttf"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
