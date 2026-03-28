@@ -367,9 +367,21 @@ export const api = {
     request("/ai/generate-insights", { method: "POST" }),
   syncFromHorizon: () =>
     request("/horizon/sync", { method: "POST" }),
+  syncFromSA: () =>
+    request("/sa/sync", { method: "POST" }),
+  getSAStatus: () => request("/sa/status") as Promise<{
+    configured: boolean;
+    lastSyncAt: string | null;
+    lastSyncLeadsCreated: number;
+    lastSyncLeadsUpdated: number;
+    lastSyncContactsCreated: number;
+    lastSyncContactsUpdated: number;
+  }>,
   getDiagnostics: () => request("/admin/diagnostics"),
   getRecentErrors: () => request("/admin/recent-errors"),
   getIntegrations: () => request("/integrations"),
+  initiateConnect: (provider: string) =>
+    request(`/integrations/${provider}/connect`, { method: "POST" }) as Promise<{ url: string }>,
   deleteIntegration: (provider: string) => request(`/integrations/${provider}`, { method: "DELETE" }),
   exportToNotion: () => request("/integrations/notion/export", { method: "POST" }),
   getHorizonStatus: () => request("/horizon/status") as Promise<{

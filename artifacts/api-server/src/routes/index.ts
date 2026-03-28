@@ -22,8 +22,10 @@ import aiRouter from "./ai";
 import gmailWebhookRouter from "./gmailWebhook";
 import horizonWebhookRouter from "./horizonWebhook";
 import horizonSyncRouter from "./horizonSync";
+import saWebhookRouter from "./saWebhook";
+import saSyncRouter from "./saSync";
 import diagnosticsRouter from "./diagnostics";
-import integrationsRouter from "./integrations";
+import integrationsRouter, { integrationsPublicRouter } from "./integrations";
 
 const router: IRouter = Router();
 
@@ -31,6 +33,8 @@ router.use(healthRouter);
 router.use(authRouter);
 router.use(gmailWebhookRouter);
 router.use(horizonWebhookRouter);
+router.use(saWebhookRouter);
+router.use(integrationsPublicRouter); // OAuth callbacks — public, validated by CSRF state
 
 router.use(requireAuth);
 
@@ -52,6 +56,7 @@ router.use(storageRouter);
 router.use(filesRouter);
 router.use(aiRouter);
 router.use(horizonSyncRouter);
+router.use(saSyncRouter);
 router.use(diagnosticsRouter);
 router.use(integrationsRouter);
 

@@ -18,7 +18,6 @@ import { ErrorState } from "@/components/ErrorState";
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
 import { useTheme } from "@/lib/theme";
-const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080";
 type ProviderConfig = {
   provider: string;
   label: string;
@@ -120,6 +119,10 @@ export default function IntegrationsScreen() {
     queryKey: ["horizonStatus"],
     queryFn: () => api.getHorizonStatus(),
   });
+  const { data: saStatus } = useQuery({
+    queryKey: ["saStatus"],
+    queryFn: () => api.getSAStatus(),
+  });
   const disconnectMut = useMutation({
     mutationFn: (provider: string) => api.deleteIntegration(provider),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations"] }),
@@ -132,6 +135,16 @@ export default function IntegrationsScreen() {
       qc.invalidateQueries({ queryKey: ["leads"] });
       qc.invalidateQueries({ queryKey: ["contacts"] });
       showAlert("Sync Complete", "Horizon data has been synced.");
+    },
+    onError: (err: Error) => showAlert("Sync Failed", err.message),
+  });
+  const saSyncMut = useMutation({
+    mutationFn: () => api.syncFromSA(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["saStatus"] });
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["contacts"] });
+      showAlert("Sync Complete", "StartupAnthology.com data has been synced.");
     },
     onError: (err: Error) => showAlert("Sync Failed", err.message),
   });
@@ -149,12 +162,16 @@ export default function IntegrationsScreen() {
     integrationList.map((i: any) => [i.provider, i])
   );
   const handleConnect = async (provider: string) => {
-    const url = `${API_BASE}/api/integrations/${provider}/connect`;
-    if (Platform.OS === "web") {
-      window.open(url, "_blank");
-    } else {
-      await WebBrowser.openBrowserAsync(url);
-      qc.invalidateQueries({ queryKey: ["integrations"] });
+    try {
+      const data = await api.initiateConnect(provider);
+      if (Platform.OS === "web") {
+        window.open(data.url, "_blank");
+      } else {
+        await WebBrowser.openBrowserAsync(data.url);
+        qc.invalidateQueries({ queryKey: ["integrations"] });
+      }
+    } catch {
+      showAlert("Error", "Failed to start connection. Please try again.");
     }
   };
   const groupedProviders = PROVIDERS.reduce((acc, p) => {
@@ -275,6 +292,44 @@ export default function IntegrationsScreen() {
               <View style={[styles.syncStats, { backgroundColor: colors.surface }]}>
                 <Text style={[styles.syncStatsText, { color: colors.textSecondary }]}>
                   Last sync: {horizonStatus.lastSyncLeadsCreated} new leads, {horizonStatus.lastSyncLeadsUpdated} updated | {horizonStatus.lastSyncContactsCreated} new contacts, {horizonStatus.lastSyncContactsUpdated} updated
+                </Text>
+              </View>
+            )}
+            <View style={[styles.row, { backgroundColor: colors.surface }]}>
+              <View style={[styles.rowIcon, { backgroundColor: colors.accent + "15" }]}>
+                <Feather name="globe" size={18} color={colors.accent} />
+              </View>
+              <View style={styles.rowInfo}>
+                <Text style={[styles.rowLabel, { color: colors.text }]}>StartupAnthology.com</Text>
+                <View style={styles.statusRow}>
+                  <View style={[styles.dot, { backgroundColor: saStatus?.configured ? colors.success : colors.textTertiary }]} />
+                  <Text style={[styles.statusText, { color: colors.textTertiary }]}>
+                    {saStatus?.configured
+                      ? saStatus.lastSyncAt
+                        ? `Last sync: ${new Date(saStatus.lastSyncAt).toLocaleDateString()}`
+                        : "Connected — never synced"
+                      : "Not configured"}
+                  </Text>
+                </View>
+              </View>
+              <Pressable
+                style={[styles.connectBtn, { backgroundColor: saStatus?.configured ? colors.primary : colors.surface2 }]}
+                onPress={() => saSyncMut.mutate()}
+                disabled={!saStatus?.configured || saSyncMut.isPending}
+                accessibilityRole="button"
+                accessibilityLabel="Sync from StartupAnthology.com"
+              >
+                {saSyncMut.isPending ? (
+                  <ActivityIndicator size="small" color={colors.onPrimary} />
+                ) : (
+                  <Text style={[styles.connectText, { color: saStatus?.configured ? colors.onPrimary : colors.textTertiary }]}>Sync</Text>
+                )}
+              </Pressable>
+            </View>
+            {saStatus?.lastSyncAt && (
+              <View style={[styles.syncStats, { backgroundColor: colors.surface }]}>
+                <Text style={[styles.syncStatsText, { color: colors.textSecondary }]}>
+                  Last sync: {saStatus.lastSyncLeadsCreated} new leads, {saStatus.lastSyncLeadsUpdated} updated | {saStatus.lastSyncContactsCreated} new contacts, {saStatus.lastSyncContactsUpdated} updated
                 </Text>
               </View>
             )}

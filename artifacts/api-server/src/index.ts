@@ -5,6 +5,7 @@ import { startInsightWorker } from "./lib/ai/insightWorker";
 import { startSlackDigestWorker } from "./lib/slackDigestWorker";
 import { startNotionPullWorker } from "./lib/notionPullWorker";
 import { startHorizonSyncWorker } from "./lib/horizonSyncWorker";
+import { startSASyncWorker } from "./lib/saSyncWorker";
 import { seedAgentRegistry } from "./lib/ai/agentDefinitions";
 import { verifyModelAvailability } from "./lib/ai/orchestrator";
 
@@ -56,4 +57,5 @@ app.listen(port, async () => {
   startSlackDigestWorker();
   startNotionPullWorker();
   startHorizonSyncWorker();
+  startSASyncWorker();
 });

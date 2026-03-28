@@ -72,6 +72,15 @@ export function fireAndForgetSlackNotify(
         );
         break;
       }
+      case "sa_sync": {
+        const leadsCreated = data.leadsCreated as number;
+        const contactsCreated = data.contactsCreated as number;
+        text = `SA sync: ${leadsCreated} new leads, ${contactsCreated} new contacts`;
+        blocks.push(
+          { type: "section", text: { type: "mrkdwn", text: `*Startup Anthology Sync Complete*\n>Leads: ${leadsCreated} new, ${data.leadsUpdated} updated\n>Contacts: ${contactsCreated} new, ${data.contactsUpdated} updated` } },
+        );
+        break;
+      }
       default:
         text = `CRM event: ${event}`;
     }

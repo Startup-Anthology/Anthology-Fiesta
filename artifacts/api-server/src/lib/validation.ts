@@ -175,6 +175,19 @@ export const horizonContactSchema = z.object({
   notes: z.string().nullish(),
 });
 
+export const saContactSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  message: z.string().min(1),
+  topic: z.enum(["demo_request", "pricing_question", "contractor_construction", "partnership", "support", "feedback", "other"]),
+  company: z.string().nullish(),
+  phone: z.string().nullish(),
+  leadScore: z.number().int().optional(),
+  priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+  status: z.string().optional(),
+  submittedAt: z.string().optional(),
+});
+
 export class ValidationError extends Error {
   public statusCode = 400;
   constructor(issues: string) {

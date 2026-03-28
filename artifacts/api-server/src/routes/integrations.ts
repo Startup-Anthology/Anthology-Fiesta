@@ -6,6 +6,7 @@ import { requireAuth } from "../middlewares/requireAuth";
 import { OAUTH_CONFIGS, buildAuthorizationUrl, exchangeCodeForTokens, upsertIntegration } from "../lib/integrations/oauth";
 
 const router: IRouter = Router();
+export const integrationsPublicRouter: IRouter = Router();
 
 // In-memory state store for CSRF protection (production: use Redis or DB)
 const pendingStates = new Map<string, { userId: string; provider: string; expiresAt: number }>();
@@ -48,7 +49,7 @@ router.get("/integrations/status", requireAuth, async (req: Request, res: Respon
   res.json(statusMap);
 });
 
-router.get("/integrations/:provider/connect", requireAuth, async (req: Request, res: Response) => {
+router.post("/integrations/:provider/connect", requireAuth, async (req: Request, res: Response) => {
   const provider = req.params.provider as string;
   const userId = req.user!.id;
   const redirectBase = getRedirectBase(req);
@@ -73,10 +74,10 @@ router.get("/integrations/:provider/connect", requireAuth, async (req: Request, 
   });
 
   const authUrl = buildAuthorizationUrl(provider, config, state);
-  res.redirect(authUrl);
+  res.json({ url: authUrl });
 });
 
-router.get("/integrations/:provider/callback", async (req: Request, res: Response) => {
+integrationsPublicRouter.get("/integrations/:provider/callback", async (req: Request, res: Response) => {
   const provider = req.params.provider as string;
   const { code, state, error } = req.query as Record<string, string>;
 
@@ -143,7 +144,7 @@ router.get("/integrations/:provider/callback", async (req: Request, res: Respons
     await upsertIntegration(userId, provider, displayName, tokenData);
 
     // Redirect to mobile deep link or web settings
-    const successRedirect = process.env.INTEGRATION_SUCCESS_REDIRECT || "/";
+    const successRedirect = process.env.INTEGRATION_SUCCESS_REDIRECT || "/settings/integrations";
     res.redirect(successRedirect);
   } catch (err: any) {
     console.error(`Integration callback error for ${provider}:`, err.message);
