@@ -68,7 +68,7 @@ async function queryNotionDatabase(
     return [];
   }
 
-  const data = await res.json();
+  const data = await res.json() as { results?: unknown[] };
   return data.results || [];
 }
 
@@ -123,7 +123,7 @@ async function pullLeadsFromNotion(userId: string, databaseId: string, accessTok
         const crmUpdated = existing.updatedAt ? new Date(existing.updatedAt) : new Date(0);
         if (notionEdited > crmUpdated) {
           await db.update(leadsTable)
-            .set({ name, email, status, source, isBeta, updatedAt: new Date() })
+            .set({ name, email: email ?? undefined, status, source, isBeta, updatedAt: new Date() })
             .where(and(eq(leadsTable.id, existing.id), eq(leadsTable.userId, userId)));
         }
       } else if (email) {

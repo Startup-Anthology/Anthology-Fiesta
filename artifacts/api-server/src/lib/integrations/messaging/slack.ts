@@ -25,7 +25,7 @@ export class SlackProvider implements MessagingProvider {
       return null;
     }
 
-    const data = await res.json();
+    const data = await res.json() as { ok: boolean; error?: string; [key: string]: unknown };
     if (!data.ok) {
       console.error(`Slack API error: ${data.error}`);
       return null;
