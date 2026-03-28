@@ -1,4 +1,4 @@
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { showAlert } from "@/lib/alert";
 import * as WebBrowser from "expo-web-browser";
@@ -24,15 +24,16 @@ type ProviderConfig = {
   label: string;
   category: string;
   icon: string;
+  iconSet: "feather" | "material" | "text";
   color: string;
 };
 const PROVIDERS: ProviderConfig[] = [
-  { provider: "gmail", label: "Gmail", category: "email", icon: "mail", color: "#EA4335" },
-  { provider: "outlook", label: "Outlook", category: "email", icon: "mail", color: "#0078D4" },
-  { provider: "google_calendar", label: "Google Calendar", category: "calendar", icon: "calendar", color: "#4285F4" },
-  { provider: "outlook_calendar", label: "Outlook Calendar", category: "calendar", icon: "calendar", color: "#0078D4" },
-  { provider: "notion", label: "Notion", category: "notes", icon: "book", color: "#000000" },
-  { provider: "slack", label: "Slack", category: "messaging", icon: "message-square", color: "#4A154B" },
+  { provider: "gmail", label: "Gmail", category: "email", icon: "gmail", iconSet: "material", color: "#EA4335" },
+  { provider: "outlook", label: "Outlook", category: "email", icon: "microsoft-outlook", iconSet: "material", color: "#0078D4" },
+  { provider: "google_calendar", label: "Google Calendar", category: "calendar", icon: "G", iconSet: "text", color: "#4285F4" },
+  { provider: "outlook_calendar", label: "Outlook Calendar", category: "calendar", icon: "microsoft-outlook", iconSet: "material", color: "#0078D4" },
+  { provider: "notion", label: "Notion", category: "notes", icon: "N", iconSet: "text", color: "#000000" },
+  { provider: "slack", label: "Slack", category: "messaging", icon: "slack", iconSet: "material", color: "#4A154B" },
 ];
 const CATEGORY_LABELS: Record<string, string> = {
   email: "Email",
@@ -55,7 +56,13 @@ function IntegrationRow({ config, status, onConnect, onDisconnect, isDisconnecti
   return (
     <View style={[styles.row, { backgroundColor: colors.surface }]}>
       <View style={[styles.rowIcon, { backgroundColor: config.color + "15" }]}>
-        <Feather name={config.icon as any} size={18} color={config.color} />
+        {config.iconSet === "material" ? (
+          <MaterialCommunityIcons name={config.icon as any} size={20} color={config.color} />
+        ) : config.iconSet === "text" ? (
+          <Text style={{ fontSize: 16, fontFamily: "SpaceGrotesk_700Bold", color: config.color }}>{config.icon}</Text>
+        ) : (
+          <Feather name={config.icon as any} size={18} color={config.color} />
+        )}
       </View>
       <View style={styles.rowInfo}>
         <Text style={[styles.rowLabel, { color: colors.text }]}>{config.label}</Text>
