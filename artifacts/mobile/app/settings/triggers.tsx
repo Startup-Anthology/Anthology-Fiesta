@@ -1,9 +1,8 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -17,24 +16,19 @@ import { type ThemeColors } from "@/constants/colors";
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
 import { useTheme } from "@/lib/theme";
-
 const STATUSES = ["new", "contacted", "interested", "engaged", "converted"];
 const ACTION_TYPES = ["enroll_sequence", "schedule_followup"];
-
 export default function TriggersScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const topPad = Platform.OS === "web" ? 67 : insets.top + 16;
-
   const [triggerStatus, setTriggerStatus] = useState("");
   const [triggerAction, setTriggerAction] = useState("");
   const [triggerSeqId, setTriggerSeqId] = useState<number | null>(null);
   const [triggerDays, setTriggerDays] = useState("3");
-
   const { data: triggers = [], refetch } = useQuery({ queryKey: ["triggers"], queryFn: api.getTriggerRules });
   const { data: sequences = [] } = useQuery({ queryKey: ["sequences"], queryFn: api.getSequences });
-
   const createMut = useMutation({
     mutationFn: () => api.createTriggerRule({
       triggerStatus,
@@ -49,12 +43,10 @@ export default function TriggersScreen() {
       setTriggerSeqId(null);
     },
   });
-
   const deleteMut = useMutation({
     mutationFn: (id: number) => api.deleteTriggerRule(id),
     onSuccess: () => refetch(),
   });
-
   return (
     <ScrollView
       style={[styles.container, { paddingTop: topPad }]}
@@ -67,9 +59,7 @@ export default function TriggersScreen() {
         <Text style={styles.title}>Automation Rules</Text>
         <View style={{ width: 22 }} />
       </View>
-
       <Text style={styles.subtitle}>Set it and forget it. Rules fire when a lead changes status.</Text>
-
       {triggers.length > 0 && (
         <View style={styles.section}>
           {triggers.map((t: any) => (
@@ -85,7 +75,7 @@ export default function TriggersScreen() {
                 </Text>
               </View>
               <Pressable
-                onPress={() => Alert.alert("Delete rule?", "This cannot be undone.", [
+                onPress={() => showAlert("Delete rule?", "This cannot be undone.", [
                   { text: "Cancel", style: "cancel" },
                   { text: "Delete", style: "destructive", onPress: () => deleteMut.mutate(t.id) },
                 ])}
@@ -99,10 +89,8 @@ export default function TriggersScreen() {
           ))}
         </View>
       )}
-
       <View style={styles.addCard}>
         <Text style={styles.addCardTitle}>New Rule</Text>
-
         <Text style={styles.label}>When status becomes</Text>
         <View style={styles.chipRow}>
           {STATUSES.map((s) => (
@@ -117,7 +105,6 @@ export default function TriggersScreen() {
             </Pressable>
           ))}
         </View>
-
         <Text style={[styles.label, { marginTop: 16 }]}>Action</Text>
         <View style={styles.chipRow}>
           {ACTION_TYPES.map((a) => (
@@ -132,7 +119,6 @@ export default function TriggersScreen() {
             </Pressable>
           ))}
         </View>
-
         {triggerAction === "enroll_sequence" && sequences.length > 0 && (
           <>
             <Text style={[styles.label, { marginTop: 16 }]}>Sequence</Text>
@@ -147,7 +133,6 @@ export default function TriggersScreen() {
             ))}
           </>
         )}
-
         {triggerAction === "schedule_followup" && (
           <>
             <Text style={[styles.label, { marginTop: 16 }]}>Days until follow-up</Text>
@@ -160,7 +145,6 @@ export default function TriggersScreen() {
             />
           </>
         )}
-
         <Pressable
           style={[styles.addBtn, { backgroundColor: colors.primary }, (!triggerStatus || !triggerAction) && { opacity: 0.4 }]}
           onPress={() => triggerStatus && triggerAction && createMut.mutate()}
@@ -171,12 +155,10 @@ export default function TriggersScreen() {
           <Text style={[styles.addBtnText, { color: colors.onPrimary }]}>Add Rule</Text>
         </Pressable>
       </View>
-
       <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
-
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: Layout.screenPadding },

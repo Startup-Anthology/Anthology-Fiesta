@@ -1,5 +1,5 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useRef, useEffect, useMemo } from "react";
@@ -8,7 +8,6 @@ import { SkeletonCard, SkeletonListItem } from "@/components/Skeleton";
 import { ErrorState } from "@/components/ErrorState";
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   Dimensions,
   FlatList,
@@ -29,7 +28,6 @@ import { LEAD_STATUSES, STATUS_LABELS, STATUS_COLORS, LEAD_SOURCES, REL_TYPES, R
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
 import { useTheme } from "@/lib/theme";
-
 function LeadCard({ lead, onSwipeLeft, onSwipeRight, colors }: { lead: any; onSwipeLeft: () => void; onSwipeRight: () => void; colors: ThemeColors }) {
   const pan = useRef(new Animated.Value(0)).current;
   const panResponder = useRef(
@@ -48,9 +46,7 @@ function LeadCard({ lead, onSwipeLeft, onSwipeRight, colors }: { lead: any; onSw
       },
     })
   ).current;
-
   const statusColor = STATUS_COLORS[lead.status] || colors.textSecondary;
-
   return (
     <Animated.View style={[styles.leadCard, { backgroundColor: colors.surface, transform: [{ translateX: pan }] }]} {...panResponder.panHandlers}>
       <Pressable
@@ -84,7 +80,6 @@ function LeadCard({ lead, onSwipeLeft, onSwipeRight, colors }: { lead: any; onSw
     </Animated.View>
   );
 }
-
 export default function FunnelScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -102,13 +97,11 @@ export default function FunnelScreen() {
   const [contactTab, setContactTab] = useState<"all" | "followups">(
     params.contactTab === "followups" ? "followups" : "all"
   );
-
   // Respond to navigation params (tab may already be mounted)
   useEffect(() => {
     if (params.segment === "contacts") setSegment("contacts");
     else if (params.segment === "leads") setSegment("leads");
   }, [params.segment]);
-
   useEffect(() => {
     if (params.contactTab === "followups") setContactTab("followups");
     else if (params.contactTab === "all") setContactTab("all");
@@ -119,7 +112,6 @@ export default function FunnelScreen() {
   const [newContactCompany, setNewContactCompany] = useState("");
   const [newContactType, setNewContactType] = useState("other");
   const [newContactPriority, setNewContactPriority] = useState("medium");
-
   const { data: leads = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["leads"],
     queryFn: () => api.getLeads(),
@@ -162,9 +154,9 @@ export default function FunnelScreen() {
       const parts = [];
       if (data.leads) parts.push(`Leads: ${data.leads.created} new, ${data.leads.updated} updated`);
       if (data.contacts) parts.push(`Contacts: ${data.contacts.created} new, ${data.contacts.updated} updated`);
-      Alert.alert("Horizon Sync Complete", parts.join("\n") || "Sync finished.");
+      showAlert("Horizon Sync Complete", parts.join("\n") || "Sync finished.");
     },
-    onError: () => Alert.alert("Sync Failed", "Could not connect to Horizon. Check your API keys in Settings."),
+    onError: () => showAlert("Sync Failed", "Could not connect to Horizon. Check your API keys in Settings."),
   });
   const statusMut = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) => api.updateLeadStatus(id, status),
@@ -172,7 +164,7 @@ export default function FunnelScreen() {
       qc.invalidateQueries({ queryKey: ["leads"] });
       qc.invalidateQueries({ queryKey: ["dashboard"] });
     },
-    onError: (err: Error) => Alert.alert("Update failed", err.message),
+    onError: (err: Error) => showAlert("Update failed", err.message),
   });
   const createMut = useMutation({
     mutationFn: api.createLead,
@@ -185,7 +177,6 @@ export default function FunnelScreen() {
       setNewSource("other");
     },
   });
-
   const advanceStatus = (lead: any) => {
     const idx = LEAD_STATUSES.indexOf(lead.status);
     if (idx < LEAD_STATUSES.length - 1) {
@@ -198,13 +189,11 @@ export default function FunnelScreen() {
       statusMut.mutate({ id: lead.id, status: LEAD_STATUSES[idx - 1] });
     }
   };
-
   const weekAgo = useMemo(() => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), []);
   const filteredLeads = params.filter === "week"
     ? leads.filter((l: any) => new Date(l.createdAt) >= weekAgo)
     : leads;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-
   if (isLoading) {
     return (
       <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
@@ -214,7 +203,6 @@ export default function FunnelScreen() {
       </View>
     );
   }
-
   if (isError) {
     return (
       <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
@@ -222,12 +210,10 @@ export default function FunnelScreen() {
       </View>
     );
   }
-
   // Contacts list data
   const contactListData = contactTab === "all" ? contacts : followUps;
   const isLeadsSegment = segment === "leads";
   const isContactsSegment = segment === "contacts";
-
   return (
     <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
       <View style={styles.header}>
@@ -239,7 +225,7 @@ export default function FunnelScreen() {
           </View>
           <Pressable
             onPress={() => {
-              Alert.alert("Sync from Horizon", "Pull latest leads and contacts from Horizon?", [
+              showAlert("Sync from Horizon", "Pull latest leads and contacts from Horizon?", [
                 { text: "Cancel", style: "cancel" },
                 { text: "Sync Now", onPress: () => horizonSyncMut.mutate() },
               ]);
@@ -270,7 +256,6 @@ export default function FunnelScreen() {
           <HamburgerMenu />
         </View>
       </View>
-
       {params.filter === "week" && (
         <View style={[styles.filterBanner, { backgroundColor: colors.info + "15" }]}>
           <Feather name="calendar" size={13} color={colors.info} />
@@ -447,7 +432,6 @@ export default function FunnelScreen() {
           }
         />
       )}
-
       <Pressable
         style={({ pressed }) => [styles.fab, { backgroundColor: colors.primary }, pressed && { transform: [{ scale: 0.95 }] }]}
         onPress={() => {
@@ -460,7 +444,6 @@ export default function FunnelScreen() {
       >
         <Feather name="plus" size={24} color={colors.onPrimary} />
       </Pressable>
-
       <Modal visible={showAddContact} animationType="slide" presentationStyle="pageSheet">
         <ScrollView style={[styles.modalContent, { backgroundColor: colors.background, paddingTop: Platform.OS === "web" ? 67 : insets.top + 16 }]}>
           <View style={styles.modalHeader}>
@@ -484,7 +467,6 @@ export default function FunnelScreen() {
           <View style={{ height: 40 }} />
         </ScrollView>
       </Modal>
-
       <Modal visible={showAdd} animationType="slide" presentationStyle="pageSheet">
         <View style={[styles.modalContent, { backgroundColor: colors.background, paddingTop: Platform.OS === "web" ? 67 : insets.top + 16 }]}>
           <View style={styles.modalHeader}>
@@ -501,7 +483,6 @@ export default function FunnelScreen() {
               <Text style={[styles.saveBtn, { color: colors.info }, (!newName || !newEmail) && styles.saveBtnDisabled]}>Save</Text>
             </Pressable>
           </View>
-
           <View style={styles.formGroup}>
             <Text style={[styles.formLabel, { color: colors.textSecondary }]}>Name</Text>
             <TextInput
@@ -546,9 +527,7 @@ export default function FunnelScreen() {
     </View>
   );
 }
-
 const COLUMN_WIDTH = Dimensions.get("window").width * 0.75;
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },

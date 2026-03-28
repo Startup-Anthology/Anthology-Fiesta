@@ -1,4 +1,4 @@
-import type { EmailProvider, CalendarProvider, NotesProvider } from "./types";
+import type { EmailProvider, CalendarProvider, NotesProvider, MessagingProvider } from "./types";
 import { getIntegration, getTokens, isTokenExpiringSoon, markIntegrationError } from "./tokenManager";
 import { OAUTH_CONFIGS, refreshAccessToken } from "./oauth";
 import { storeTokens } from "./tokenManager";
@@ -78,6 +78,16 @@ export async function getNotesProvider(userId: string): Promise<NotesProvider | 
   if (notionToken) {
     const { NotionProvider } = await import("./notes/notion");
     return new NotionProvider(notionToken);
+  }
+
+  return null;
+}
+
+export async function getMessagingProvider(userId: string): Promise<MessagingProvider | null> {
+  const slackToken = await getFreshTokens(userId, "slack");
+  if (slackToken) {
+    const { SlackProvider } = await import("./messaging/slack");
+    return new SlackProvider(slackToken);
   }
 
   return null;

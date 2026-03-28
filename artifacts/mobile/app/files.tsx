@@ -1,12 +1,11 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as DocumentPicker from "expo-document-picker";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Platform,
   Pressable,
@@ -17,13 +16,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "@/lib/api";
 import { useTheme } from "@/lib/theme";
-
 function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
 function getFileIcon(mimeType: string): string {
   if (mimeType.startsWith("image/")) return "image";
   if (mimeType.includes("pdf")) return "file-text";
@@ -32,18 +29,15 @@ function getFileIcon(mimeType: string): string {
   if (mimeType.includes("word") || mimeType.includes("document")) return "file-text";
   return "file";
 }
-
 export default function FilesScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
-
   const { data: files = [], isLoading } = useQuery({
     queryKey: ["files"],
     queryFn: () => api.getFiles(),
   });
-
   const uploadMut = useMutation({
     mutationFn: async () => {
       const result = await DocumentPicker.getDocumentAsync({ type: "*/*", copyToCacheDirectory: true });
@@ -57,15 +51,13 @@ export default function FilesScreen() {
     },
     onError: (err: any) => {
       if (err.message === "CANCELLED") return;
-      Alert.alert("Upload failed", err.message);
+      showAlert("Upload failed", err.message);
     },
   });
-
   const deleteMut = useMutation({
     mutationFn: (id: number) => api.deleteFile(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["files"] }),
   });
-
   const renderItem = ({ item }: { item: any }) => (
     <View style={[styles.fileCard, { backgroundColor: colors.surface }]}>
       <View style={[styles.fileIconWrap, { backgroundColor: colors.info + "15" }]}>
@@ -76,7 +68,7 @@ export default function FilesScreen() {
         <Text style={[styles.fileMeta, { color: colors.textTertiary }]}>{formatSize(item.size)} · {new Date(item.createdAt).toLocaleDateString()}</Text>
       </View>
       <Pressable
-        onPress={() => Alert.alert("Delete file?", item.name, [
+        onPress={() => showAlert("Delete file?", item.name, [
           { text: "Cancel", style: "cancel" },
           { text: "Delete", style: "destructive", onPress: () => deleteMut.mutate(item.id) },
         ])}
@@ -86,7 +78,6 @@ export default function FilesScreen() {
       </Pressable>
     </View>
   );
-
   return (
     <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
@@ -105,7 +96,6 @@ export default function FilesScreen() {
           )}
         </Pressable>
       </View>
-
       {isLoading ? (
         <View style={styles.center}><ActivityIndicator size="large" color={colors.primary} /></View>
       ) : files.length === 0 ? (
@@ -125,7 +115,6 @@ export default function FilesScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, gap: 12 },

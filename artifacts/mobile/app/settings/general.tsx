@@ -4,7 +4,6 @@ import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
   Platform,
   Pressable,
   StyleSheet,
@@ -43,6 +42,9 @@ export default function GeneralScreen() {
   const [customUrl2, setCustomUrl2] = useState("");
   const [customLabel3, setCustomLabel3] = useState("");
   const [customUrl3, setCustomUrl3] = useState("");
+  const [slackChannelId, setSlackChannelId] = useState("");
+  const [slackDigestEnabled, setSlackDigestEnabled] = useState(false);
+  const [slackDigestTime, setSlackDigestTime] = useState("9");
 
   useEffect(() => {
     if (settings) {
@@ -61,6 +63,9 @@ export default function GeneralScreen() {
       setCustomUrl2(settings.quick_link_custom2_url || "");
       setCustomLabel3(settings.quick_link_custom3_label || "");
       setCustomUrl3(settings.quick_link_custom3_url || "");
+      setSlackChannelId(settings.slack_channel_id || "");
+      setSlackDigestEnabled(settings.slack_digest_enabled === "true");
+      setSlackDigestTime(settings.slack_digest_time || "9");
     }
   }, [settings]);
 
@@ -203,6 +208,64 @@ export default function GeneralScreen() {
             />
           </View>
         ))}
+      </View>
+
+      <Text style={[styles.sectionTitle, { marginTop: Layout.sectionSpacing }]}>Slack</Text>
+      <Text style={styles.sectionSubtitle}>Configure Slack notifications and daily digest.</Text>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>Channel ID</Text>
+          <TextInput
+            style={[styles.rowInput, { flex: 1, marginLeft: 8 }]}
+            value={slackChannelId}
+            onChangeText={setSlackChannelId}
+            placeholder="C0123456789"
+            placeholderTextColor={colors.textTertiary}
+            autoCapitalize="none"
+            autoCorrect={false}
+            onBlur={() => save({ slack_channel_id: slackChannelId })}
+            accessibilityLabel="Slack channel ID"
+          />
+        </View>
+        <View style={[styles.row, styles.rowBorder]}>
+          <Text style={styles.rowLabel}>Daily Digest</Text>
+          <Pressable
+            onPress={() => {
+              const next = !slackDigestEnabled;
+              setSlackDigestEnabled(next);
+              save({ slack_digest_enabled: String(next) });
+            }}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: slackDigestEnabled }}
+            style={[
+              {
+                width: 48, height: 28, borderRadius: 14,
+                justifyContent: "center",
+                padding: 2,
+                backgroundColor: slackDigestEnabled ? colors.primary : colors.surface2,
+              },
+            ]}
+          >
+            <View style={{
+              width: 24, height: 24, borderRadius: 12,
+              backgroundColor: "#fff",
+              alignSelf: slackDigestEnabled ? "flex-end" : "flex-start",
+            }} />
+          </Pressable>
+        </View>
+        {slackDigestEnabled && (
+          <View style={[styles.row, styles.rowBorder]}>
+            <Text style={styles.rowLabel}>Digest Hour (UTC)</Text>
+            <TextInput
+              style={[styles.rowInput, { width: 60, textAlign: "right" }]}
+              value={slackDigestTime}
+              onChangeText={setSlackDigestTime}
+              keyboardType="numeric"
+              onBlur={() => save({ slack_digest_time: slackDigestTime })}
+              accessibilityLabel="Digest hour"
+            />
+          </View>
+        )}
       </View>
 
       <View style={{ height: 40 }} />

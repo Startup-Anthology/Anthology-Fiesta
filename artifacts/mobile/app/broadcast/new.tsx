@@ -1,11 +1,10 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Platform,
   Pressable,
   ScrollView as RNScrollView,
@@ -19,12 +18,10 @@ import { type ThemeColors } from "@/constants/colors";
 import { useTheme } from "@/lib/theme";
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
-
 const SEGMENTS = [
   { type: "lead_status", values: ["new", "contacted", "interested", "engaged", "converted"], label: "Lead Status" },
   { type: "contact_type", values: ["investor", "partner", "advisor", "vendor", "press", "other"], label: "Contact Type" },
 ];
-
 export default function BroadcastNewScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -34,9 +31,7 @@ export default function BroadcastNewScreen() {
   const [selectedLeadStatuses, setSelectedLeadStatuses] = useState<string[]>([]);
   const [selectedContactTypes, setSelectedContactTypes] = useState<string[]>([]);
   const [templateId, setTemplateId] = useState<number | null>(null);
-
   const hasSelection = selectedLeadStatuses.length > 0 || selectedContactTypes.length > 0;
-
   const toggleChip = (type: string, value: string) => {
     if (type === "lead_status") {
       setSelectedLeadStatuses((prev) =>
@@ -48,13 +43,11 @@ export default function BroadcastNewScreen() {
       );
     }
   };
-
   const isChipActive = (type: string, value: string) => {
     return type === "lead_status"
       ? selectedLeadStatuses.includes(value)
       : selectedContactTypes.includes(value);
   };
-
   const { data: templates = [] } = useQuery({
     queryKey: ["templates"],
     queryFn: () => api.getTemplates(),
@@ -64,7 +57,6 @@ export default function BroadcastNewScreen() {
     queryFn: () => api.previewBroadcastRecipients(selectedLeadStatuses, selectedContactTypes),
     enabled: hasSelection && step >= 2,
   });
-
   const sendMut = useMutation({
     mutationFn: () => {
       const tmpl = templates.find((t: any) => t.id === templateId);
@@ -78,19 +70,16 @@ export default function BroadcastNewScreen() {
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       qc.invalidateQueries({ queryKey: ["broadcasts"] });
-      Alert.alert("Sent", "Your broadcast is on its way.", [{ text: "OK", onPress: () => router.back() }]);
+      showAlert("Sent", "Your broadcast is on its way.", [{ text: "OK", onPress: () => router.back() }]);
     },
-    onError: (err: any) => Alert.alert("Couldn't send", err.message || "Something went wrong. Try again."),
+    onError: (err: any) => showAlert("Couldn't send", err.message || "Something went wrong. Try again."),
   });
-
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const selectedTemplate = templates.find((t: any) => t.id === templateId);
-
   const segmentSummary = [
     ...selectedLeadStatuses.map((s) => s.replace("_", " ")),
     ...selectedContactTypes.map((s) => s.replace("_", " ")),
   ].join(", ");
-
   return (
     <KeyboardAwareScrollViewCompat style={[styles.container, { paddingTop: topPad }]} contentContainerStyle={styles.content}>
       <View style={styles.topBar}>
@@ -100,13 +89,11 @@ export default function BroadcastNewScreen() {
         <Text style={styles.title}>Broadcast</Text>
         <View style={{ width: 60 }} />
       </View>
-
       <View style={styles.stepIndicator}>
         {[0, 1, 2, 3].map((s) => (
           <View key={s} style={[styles.dot, step >= s && styles.dotActive]} />
         ))}
       </View>
-
       {step === 0 && (
         <View>
           <Text style={styles.stepTitle}>Who's getting this?</Text>
@@ -135,7 +122,6 @@ export default function BroadcastNewScreen() {
           </Pressable>
         </View>
       )}
-
       {step === 1 && (
         <View>
           <Text style={styles.stepTitle}>Pick a template</Text>
@@ -155,7 +141,6 @@ export default function BroadcastNewScreen() {
           </Pressable>
         </View>
       )}
-
       {step === 2 && (
         <View>
           <Text style={styles.stepTitle}>Review your list</Text>
@@ -182,7 +167,6 @@ export default function BroadcastNewScreen() {
           )}
         </View>
       )}
-
       {step === 3 && (
         <View>
           <Text style={styles.stepTitle}>Ready to send</Text>
@@ -216,12 +200,10 @@ export default function BroadcastNewScreen() {
           </Pressable>
         </View>
       )}
-
       <View style={{ height: 40 }} />
     </KeyboardAwareScrollViewCompat>
   );
 }
-
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: Layout.screenPadding },
