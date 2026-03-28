@@ -33,7 +33,7 @@
       [
         "expo-router",
         {
-          "origin": "https://fiesta.startupanthology.com"
+          "origin": "https://anthology-fiesta.onrender.com"
         }
       ],
       "expo-font",
