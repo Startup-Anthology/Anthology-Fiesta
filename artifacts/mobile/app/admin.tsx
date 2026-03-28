@@ -1,12 +1,11 @@
-import React, { useState, useMemo, useCallback } from "react";
 import {
+import { showAlert } from "@/lib/alert";
   View,
   Text,
   FlatList,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   TextInput,
   Platform,
   ScrollView,
@@ -21,14 +20,12 @@ import * as DocumentPicker from "expo-document-picker";
 import { useTheme } from "@/lib/theme";
 import { getAuthToken } from "@/lib/auth";
 import { type ThemeColors } from "@/constants/colors";
-
 function getApiBaseUrl(): string {
   if (process.env.EXPO_PUBLIC_DOMAIN) {
     return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
   }
   return "";
 }
-
 async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
   const token = await getAuthToken();
   const apiBase = getApiBaseUrl();
@@ -46,7 +43,6 @@ async function apiFetch(path: string, options: RequestInit = {}): Promise<Respon
   }
   return res;
 }
-
 interface AdminUser {
   id: string;
   email: string | null;
@@ -56,12 +52,10 @@ interface AdminUser {
   isActive: boolean;
   createdAt: string;
 }
-
 interface UserUpdatePayload {
   role?: string;
   isActive?: boolean;
 }
-
 interface AdminStyles {
   container: object;
   header: object;
@@ -101,16 +95,13 @@ interface AdminStyles {
   filePickerText: object;
   filePickerHint: object;
 }
-
 type Tab = "users" | "export" | "import";
-
 export default function AdminScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
   const topPad = Platform.OS === "web" ? 12 : insets.top + 4;
   const [activeTab, setActiveTab] = useState<Tab>("users");
-
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       <View style={[styles.header, { paddingTop: topPad }]}>
@@ -120,7 +111,6 @@ export default function AdminScreen() {
         <Text style={styles.headerTitle}>Admin Panel</Text>
         <View style={{ width: 22 }} />
       </View>
-
       <View style={styles.tabBar}>
         {(["users", "export", "import"] as Tab[]).map((tab) => (
           <TouchableOpacity
@@ -134,18 +124,15 @@ export default function AdminScreen() {
           </TouchableOpacity>
         ))}
       </View>
-
       {activeTab === "users" && <UsersTab colors={colors} styles={styles} />}
       {activeTab === "export" && <ExportTab colors={colors} styles={styles} />}
       {activeTab === "import" && <ImportTab colors={colors} styles={styles} />}
     </SafeAreaView>
   );
 }
-
 function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles }) {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-
   const { data: users = [], isLoading } = useQuery<AdminUser[]>({
     queryKey: ["admin-users"],
     queryFn: async () => {
@@ -153,7 +140,6 @@ function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles
       return res.json();
     },
   });
-
   const updateUser = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: UserUpdatePayload }) => {
       await apiFetch(`/admin/users/${id}`, {
@@ -162,17 +148,15 @@ function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles
       });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
-    onError: (err: Error) => Alert.alert("Error", err.message),
+    onError: (err: Error) => showAlert("Error", err.message),
   });
-
   const deleteUser = useMutation({
     mutationFn: async (id: string) => {
       await apiFetch(`/admin/users/${id}`, { method: "DELETE" });
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
-    onError: (err: Error) => Alert.alert("Error", err.message),
+    onError: (err: Error) => showAlert("Error", err.message),
   });
-
   const filteredUsers = users.filter((u) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -182,10 +166,9 @@ function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles
       u.lastName?.toLowerCase().includes(q)
     );
   });
-
   const handleToggleActive = (user: AdminUser) => {
     const action = user.isActive ? "suspend" : "activate";
-    Alert.alert(
+    showAlert(
       `${action.charAt(0).toUpperCase() + action.slice(1)} User`,
       `Are you sure you want to ${action} ${user.email || user.firstName || "this user"}?`,
       [
@@ -198,9 +181,8 @@ function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles
       ],
     );
   };
-
   const handleDelete = (user: AdminUser) => {
-    Alert.alert(
+    showAlert(
       "Delete User",
       `Are you sure you want to permanently delete ${user.email || user.firstName || "this user"}? This cannot be undone.`,
       [
@@ -213,10 +195,9 @@ function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles
       ],
     );
   };
-
   const handleToggleRole = (user: AdminUser) => {
     const newRole = user.role === "admin" ? "user" : "admin";
-    Alert.alert(
+    showAlert(
       "Change Role",
       `Set ${user.email || user.firstName || "this user"} to ${newRole}?`,
       [
@@ -228,11 +209,9 @@ function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles
       ],
     );
   };
-
   if (isLoading) {
     return <ActivityIndicator style={{ marginTop: 40 }} color={colors.accent} />;
   }
-
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.searchContainer}>
@@ -284,17 +263,14 @@ function UsersTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles
     </View>
   );
 }
-
 function ExportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles }) {
   const [loading, setLoading] = useState<string | null>(null);
-
   const handleExport = async (type: string, format: string) => {
     setLoading(`${type}-${format}`);
     try {
       const res = await apiFetch(`/admin/export/${type}?format=${format}`);
       const content = format === "csv" ? await res.text() : JSON.stringify(await res.json(), null, 2);
       const filename = `${type}_export.${format}`;
-
       if (Platform.OS === "web") {
         const blob = new Blob([content], { type: format === "csv" ? "text/csv" : "application/json" });
         const url = URL.createObjectURL(blob);
@@ -303,7 +279,7 @@ function ExportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
         a.download = filename;
         a.click();
         URL.revokeObjectURL(url);
-        Alert.alert("Export Complete", `${type} exported as ${format.toUpperCase()}.`);
+        showAlert("Export Complete", `${type} exported as ${format.toUpperCase()}.`);
       } else {
         const fileUri = `${FileSystem.cacheDirectory}${filename}`;
         await FileSystem.writeAsStringAsync(fileUri, content);
@@ -314,23 +290,21 @@ function ExportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
             dialogTitle: `Share ${type} export`,
           });
         } else {
-          Alert.alert("Export Saved", `File saved to ${fileUri}`);
+          showAlert("Export Saved", `File saved to ${fileUri}`);
         }
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Export failed";
-      Alert.alert("Error", message);
+      showAlert("Error", message);
     } finally {
       setLoading(null);
     }
   };
-
   const exportTypes = [
     { type: "leads", icon: "trending-up" as const, label: "Leads" },
     { type: "contacts", icon: "users" as const, label: "Contacts" },
     { type: "activities", icon: "activity" as const, label: "Activities" },
   ];
-
   return (
     <ScrollView contentContainerStyle={styles.exportContent}>
       {exportTypes.map((item) => (
@@ -368,13 +342,11 @@ function ExportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
     </ScrollView>
   );
 }
-
 function ImportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyles }) {
   const [importType, setImportType] = useState<"leads" | "contacts">("leads");
   const [jsonInput, setJsonInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [pickedFileName, setPickedFileName] = useState<string | null>(null);
-
   const parseCSV = (csvText: string): Record<string, string>[] => {
     const lines = csvText.trim().split("\n");
     if (lines.length < 2) return [];
@@ -401,19 +373,15 @@ function ImportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
       return obj;
     });
   };
-
   const handleFilePick = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: ["application/json", "text/csv", "text/comma-separated-values"],
         copyToCacheDirectory: true,
       });
-
       if (result.canceled || !result.assets?.length) return;
-
       const asset = result.assets[0];
       setPickedFileName(asset.name);
-
       if (Platform.OS === "web") {
         const response = await fetch(asset.uri);
         const text = await response.text();
@@ -423,38 +391,34 @@ function ImportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
         setJsonInput(text);
       }
     } catch {
-      Alert.alert("Error", "Failed to pick file");
+      showAlert("Error", "Failed to pick file");
     }
   };
-
   const handleImport = async () => {
     if (!jsonInput.trim()) {
-      Alert.alert("Error", "Please paste data or pick a file to import");
+      showAlert("Error", "Please paste data or pick a file to import");
       return;
     }
-
     let data: Record<string, string | boolean | number>[];
     const trimmed = jsonInput.trim();
-
     if (trimmed.startsWith("[")) {
       try {
         data = JSON.parse(trimmed);
         if (!Array.isArray(data)) {
-          Alert.alert("Error", "Data must be a JSON array");
+          showAlert("Error", "Data must be a JSON array");
           return;
         }
       } catch {
-        Alert.alert("Error", "Invalid JSON format");
+        showAlert("Error", "Invalid JSON format");
         return;
       }
     } else {
       data = parseCSV(trimmed);
       if (data.length === 0) {
-        Alert.alert("Error", "CSV must have a header row and at least one data row");
+        showAlert("Error", "CSV must have a header row and at least one data row");
         return;
       }
     }
-
     setLoading(true);
     try {
       const res = await apiFetch(`/admin/import/${importType}`, {
@@ -462,17 +426,16 @@ function ImportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
         body: JSON.stringify({ data }),
       });
       const result: { imported: number } = await res.json();
-      Alert.alert("Import Complete", `Successfully imported ${result.imported} ${importType}.`);
+      showAlert("Import Complete", `Successfully imported ${result.imported} ${importType}.`);
       setJsonInput("");
       setPickedFileName(null);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Import failed";
-      Alert.alert("Error", message);
+      showAlert("Error", message);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <ScrollView contentContainerStyle={styles.exportContent}>
       <View style={styles.importTypeRow}>
@@ -489,22 +452,18 @@ function ImportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
           <Text style={[styles.importTypeText, importType === "contacts" && styles.importTypeTextActive]}>Contacts</Text>
         </TouchableOpacity>
       </View>
-
       <TouchableOpacity style={styles.filePickerButton} onPress={handleFilePick}>
         <Feather name="upload" size={18} color={colors.accent} />
         <Text style={styles.filePickerText}>
           {pickedFileName || "Pick a JSON or CSV file"}
         </Text>
       </TouchableOpacity>
-
       <Text style={styles.filePickerHint}>
         Or paste JSON / CSV data below:
       </Text>
-
       <Text style={styles.importHint}>
         Each record should include at minimum a "name" field for {importType}.
       </Text>
-
       <TextInput
         style={styles.jsonInput}
         placeholder={`[{"name": "John Doe", "email": "john@example.com"}]`}
@@ -515,7 +474,6 @@ function ImportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
         numberOfLines={8}
         textAlignVertical="top"
       />
-
       <TouchableOpacity
         style={styles.importButton}
         onPress={handleImport}
@@ -530,7 +488,6 @@ function ImportTab({ colors, styles }: { colors: ThemeColors; styles: AdminStyle
     </ScrollView>
   );
 }
-
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,

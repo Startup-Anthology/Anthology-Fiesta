@@ -1,11 +1,10 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as WebBrowser from "expo-web-browser";
 import { router } from "expo-router";
 import React from "react";
 import {
   ActivityIndicator,
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -18,9 +17,7 @@ import { ErrorState } from "@/components/ErrorState";
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
 import { useTheme } from "@/lib/theme";
-
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8080";
-
 type ProviderConfig = {
   provider: string;
   label: string;
@@ -28,7 +25,6 @@ type ProviderConfig = {
   icon: string;
   color: string;
 };
-
 const PROVIDERS: ProviderConfig[] = [
   { provider: "gmail", label: "Gmail", category: "email", icon: "mail", color: "#EA4335" },
   { provider: "outlook", label: "Outlook", category: "email", icon: "mail", color: "#0078D4" },
@@ -36,13 +32,11 @@ const PROVIDERS: ProviderConfig[] = [
   { provider: "outlook_calendar", label: "Outlook Calendar", category: "calendar", icon: "calendar", color: "#0078D4" },
   { provider: "notion", label: "Notion", category: "notes", icon: "book", color: "#000000" },
 ];
-
 const CATEGORY_LABELS: Record<string, string> = {
   email: "Email",
   calendar: "Calendar",
   notes: "Notes",
 };
-
 function IntegrationRow({ config, status, onConnect, onDisconnect, isDisconnecting }: {
   config: ProviderConfig;
   status?: { id: number; status: string; displayName?: string | null };
@@ -53,10 +47,8 @@ function IntegrationRow({ config, status, onConnect, onDisconnect, isDisconnecti
   const { colors } = useTheme();
   const isConnected = status?.status === "active";
   const isError = status?.status === "error";
-
   const dotColor = isConnected ? colors.success : isError ? colors.error : colors.textTertiary;
   const statusLabel = isConnected ? (status?.displayName || "Connected") : isError ? "Error — reconnect" : "Not connected";
-
   return (
     <View style={[styles.row, { backgroundColor: colors.surface }]}>
       <View style={[styles.rowIcon, { backgroundColor: config.color + "15" }]}>
@@ -73,7 +65,7 @@ function IntegrationRow({ config, status, onConnect, onDisconnect, isDisconnecti
         <Pressable
           style={[styles.disconnectBtn, { borderColor: colors.border }]}
           onPress={() => {
-            Alert.alert(
+            showAlert(
               `Disconnect ${config.label}`,
               "Your access token will be removed. You can reconnect at any time.",
               [
@@ -105,31 +97,26 @@ function IntegrationRow({ config, status, onConnect, onDisconnect, isDisconnecti
     </View>
   );
 }
-
 export default function IntegrationsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const qc = useQueryClient();
   const topPad = Platform.OS === "web" ? 67 : insets.top + 16;
-
   const { data: integrations = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["integrations"],
     queryFn: api.getIntegrations,
   });
-
   const disconnectMut = useMutation({
     mutationFn: (provider: string) => api.deleteIntegration(provider),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["integrations"] }),
-    onError: (err: Error) => Alert.alert("Error", err.message),
+    onError: (err: Error) => showAlert("Error", err.message),
   });
-
   const integrationList: any[] = Array.isArray(integrations)
     ? integrations
     : (integrations as any)?.integrations ?? [];
   const integrationMap = Object.fromEntries(
     integrationList.map((i: any) => [i.provider, i])
   );
-
   const handleConnect = async (provider: string) => {
     const url = `${API_BASE}/api/integrations/${provider}/connect`;
     if (Platform.OS === "web") {
@@ -140,17 +127,14 @@ export default function IntegrationsScreen() {
       qc.invalidateQueries({ queryKey: ["integrations"] });
     }
   };
-
   const groupedProviders = PROVIDERS.reduce((acc, p) => {
     if (!acc[p.category]) acc[p.category] = [];
     acc[p.category].push(p);
     return acc;
   }, {} as Record<string, ProviderConfig[]>);
-
   if (isError) {
     return <ErrorState message="Failed to load integrations." onRetry={refetch} />;
   }
-
   return (
     <ScrollView
       style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}
@@ -163,11 +147,9 @@ export default function IntegrationsScreen() {
         <Text style={[styles.title, { color: colors.text }]}>Connected Accounts</Text>
         <View style={{ width: 22 }} />
       </View>
-
       <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
         Connect your own accounts. Tokens are encrypted and stored only for you.
       </Text>
-
       {isLoading ? (
         <ActivityIndicator style={{ marginTop: 40 }} color={colors.primary} />
       ) : (
@@ -189,12 +171,10 @@ export default function IntegrationsScreen() {
           </View>
         ))
       )}
-
       <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: Layout.screenPadding },

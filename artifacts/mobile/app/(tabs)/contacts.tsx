@@ -1,5 +1,5 @@
-import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { showAlert } from "@/lib/alert";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -7,7 +7,6 @@ import { HamburgerMenu } from "@/components/HamburgerMenu";
 import { SkeletonListItem } from "@/components/Skeleton";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Modal,
   Platform,
@@ -24,7 +23,6 @@ import { REL_TYPES, REL_COLORS, PRIORITIES, PRIORITY_COLORS } from "@/constants/
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
 import { useTheme } from "@/lib/theme";
-
 export default function ContactsScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -36,7 +34,6 @@ export default function ContactsScreen() {
   const [newCompany, setNewCompany] = useState("");
   const [newType, setNewType] = useState("other");
   const [newPriority, setNewPriority] = useState("medium");
-
   const { data: contacts = [], isLoading, refetch } = useQuery({
     queryKey: ["contacts"],
     queryFn: () => api.getContacts(),
@@ -45,7 +42,6 @@ export default function ContactsScreen() {
     queryKey: ["followUps"],
     queryFn: api.getFollowUps,
   });
-
   const createMut = useMutation({
     mutationFn: api.createContact,
     onSuccess: () => {
@@ -73,14 +69,12 @@ export default function ContactsScreen() {
       const parts = [];
       if (data.leads) parts.push(`Leads: ${data.leads.created} new, ${data.leads.updated} updated`);
       if (data.contacts) parts.push(`Contacts: ${data.contacts.created} new, ${data.contacts.updated} updated`);
-      Alert.alert("Horizon Sync Complete", parts.join("\n") || "Sync finished.");
+      showAlert("Horizon Sync Complete", parts.join("\n") || "Sync finished.");
     },
-    onError: () => Alert.alert("Sync Failed", "Could not connect to Horizon. Check your API keys in Settings."),
+    onError: () => showAlert("Sync Failed", "Could not connect to Horizon. Check your API keys in Settings."),
   });
-
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const listData = tab === "all" ? contacts : followUps;
-
   if (isLoading) {
     return (
       <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
@@ -90,7 +84,6 @@ export default function ContactsScreen() {
       </View>
     );
   }
-
   return (
     <View style={[styles.container, { paddingTop: topPad, backgroundColor: colors.background }]}>
       <View style={styles.header}>
@@ -98,7 +91,7 @@ export default function ContactsScreen() {
         <View style={styles.headerRight}>
           <Pressable
             onPress={() => {
-              Alert.alert("Sync from Horizon", "Pull latest leads and contacts from Horizon?", [
+              showAlert("Sync from Horizon", "Pull latest leads and contacts from Horizon?", [
                 { text: "Cancel", style: "cancel" },
                 { text: "Sync Now", onPress: () => horizonSyncMut.mutate() },
               ]);
@@ -120,7 +113,6 @@ export default function ContactsScreen() {
           <HamburgerMenu />
         </View>
       </View>
-
       <View style={styles.tabs}>
         <Pressable
           style={[styles.tab, { backgroundColor: colors.surfaceSecondary }, tab === "all" && { backgroundColor: colors.primary }]}
@@ -145,7 +137,6 @@ export default function ContactsScreen() {
           )}
         </Pressable>
       </View>
-
       <FlatList
         data={listData}
         keyExtractor={(item) => String(item.id)}
@@ -212,7 +203,6 @@ export default function ContactsScreen() {
           </View>
         }
       />
-
       <Pressable
         style={({ pressed }) => [styles.fab, { backgroundColor: colors.primary }, pressed && { transform: [{ scale: 0.95 }] }]}
         accessibilityRole="button"
@@ -224,7 +214,6 @@ export default function ContactsScreen() {
       >
         <Feather name="plus" size={24} color={colors.onPrimary} />
       </Pressable>
-
       <Modal visible={showAdd} animationType="slide" presentationStyle="pageSheet">
         <ScrollView style={[styles.modalContent, { backgroundColor: colors.background, paddingTop: Platform.OS === "web" ? 67 : insets.top + 16 }]}>
           <View style={styles.modalHeader}>
@@ -274,7 +263,6 @@ export default function ContactsScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },

@@ -1,8 +1,7 @@
-import { Feather } from "@expo/vector-icons";
 import React, { useMemo, useCallback } from "react";
+import { showAlert } from "@/lib/alert";
 import {
   ActivityIndicator,
-  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -14,7 +13,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { type ThemeColors } from "@/constants/colors";
 import { useTheme } from "@/lib/theme";
 import { ACTION_LABELS, ACTION_COLORS } from "@/constants/crm";
-
 interface HistoryEntry {
   id: number;
   action: string;
@@ -23,7 +21,6 @@ interface HistoryEntry {
   beforeSnapshot?: Record<string, unknown>;
   afterSnapshot?: Record<string, unknown>;
 }
-
 interface HistoryModalProps {
   visible: boolean;
   onClose: () => void;
@@ -34,7 +31,6 @@ interface HistoryModalProps {
   isRollingBack: boolean;
   entityLabel: string;
 }
-
 export default function HistoryModal({
   visible,
   onClose,
@@ -48,22 +44,19 @@ export default function HistoryModal({
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const insets = useSafeAreaInsets();
-
   const handleClose = useCallback(() => {
     onSelectRevision(null);
     onClose();
   }, [onClose, onSelectRevision]);
-
   const handleEntryPress = useCallback(
     (entry: HistoryEntry) => {
       onSelectRevision(selectedRevision?.id === entry.id ? null : entry);
     },
     [selectedRevision, onSelectRevision],
   );
-
   const handleRollback = useCallback(
     (entryId: number) => {
-      Alert.alert(
+      showAlert(
         "Restore this version?",
         `The ${entityLabel} will be reverted to the state before this change.`,
         [
@@ -74,12 +67,10 @@ export default function HistoryModal({
     },
     [entityLabel, onRollback],
   );
-
   const canRestore = (entry: HistoryEntry) =>
     ((entry.action === "update" || entry.action === "delete" || entry.action === "rollback") &&
       entry.beforeSnapshot) ||
     (entry.action === "create" && entry.afterSnapshot);
-
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
@@ -170,7 +161,6 @@ export default function HistoryModal({
     </Modal>
   );
 }
-
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: 20 },
   header: {

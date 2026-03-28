@@ -37,6 +37,7 @@ async function request(path: string, options?: RequestInit) {
     res = await fetch(url, {
       ...options,
       headers,
+      credentials: "include",
       signal: controller.signal,
     });
   } finally {
@@ -81,6 +82,7 @@ async function uploadFile(path: string, uri: string, fileName: string, mimeType:
   const res = await fetch(url, {
     method: "POST",
     headers,
+    credentials: "include",
     body: formData,
   });
 
@@ -119,6 +121,7 @@ async function streamRequest(
   const res = await fetch(url, {
     method: "POST",
     headers,
+    credentials: "include",
     body: JSON.stringify(body),
   });
 

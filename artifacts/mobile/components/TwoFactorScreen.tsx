@@ -1,12 +1,11 @@
-import React, { useState, useMemo } from "react";
 import {
+import { showAlert } from "@/lib/alert";
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   ScrollView,
   Platform,
 } from "react-native";
@@ -16,30 +15,24 @@ import { useAuth, getAuthToken } from "@/lib/auth";
 import { Feather } from "@expo/vector-icons";
 import { type ThemeColors } from "@/constants/colors";
 import { useTheme } from "@/lib/theme";
-
 function getApiBaseUrl(): string {
   if (process.env.EXPO_PUBLIC_DOMAIN) {
     return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
   }
   return "";
 }
-
 export function TwoFactorScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { twoFactorStatus, refreshTwoFactorStatus, logout } = useAuth();
-
   const [mode, setMode] = useState<"choose" | "totp-setup" | "totp-verify" | "email-verify" | null>(null);
   const [totpUri, setTotpUri] = useState<string | null>(null);
   const [totpSecret, setTotpSecret] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
-
   const isEnrolled = twoFactorStatus?.enrolled;
   const enrolledMethod = twoFactorStatus?.method;
-
   const currentMode = mode || (isEnrolled && enrolledMethod === "totp" ? "totp-verify" : isEnrolled && enrolledMethod === "email" ? "email-verify" : "choose");
-
   const enrollTotp = async () => {
     setLoading(true);
     try {
@@ -51,22 +44,21 @@ export function TwoFactorScreen() {
       });
       const data = await res.json();
       if (!res.ok) {
-        Alert.alert("Error", data.error || "Failed to enroll");
+        showAlert("Error", data.error || "Failed to enroll");
         return;
       }
       setTotpUri(data.uri);
       setTotpSecret(data.secret);
       setMode("totp-setup");
     } catch {
-      Alert.alert("Error", "Failed to start TOTP setup");
+      showAlert("Error", "Failed to start TOTP setup");
     } finally {
       setLoading(false);
     }
   };
-
   const verifyTotp = async () => {
     if (!code || code.length !== 6) {
-      Alert.alert("Invalid code", "Please enter a 6-digit code");
+      showAlert("Invalid code", "Please enter a 6-digit code");
       return;
     }
     setLoading(true);
@@ -80,17 +72,16 @@ export function TwoFactorScreen() {
       });
       const data = await res.json();
       if (!res.ok) {
-        Alert.alert("Error", data.error || "Verification failed");
+        showAlert("Error", data.error || "Verification failed");
         return;
       }
       await refreshTwoFactorStatus();
     } catch {
-      Alert.alert("Error", "Verification failed");
+      showAlert("Error", "Verification failed");
     } finally {
       setLoading(false);
     }
   };
-
   const sendEmailCode = async () => {
     setLoading(true);
     try {
@@ -102,20 +93,19 @@ export function TwoFactorScreen() {
       });
       const data = await res.json();
       if (!res.ok) {
-        Alert.alert("Error", data.error || "Failed to send code");
+        showAlert("Error", data.error || "Failed to send code");
         return;
       }
       setMode("email-verify");
     } catch {
-      Alert.alert("Error", "Failed to send code");
+      showAlert("Error", "Failed to send code");
     } finally {
       setLoading(false);
     }
   };
-
   const verifyEmailCode = async () => {
     if (!code || code.length !== 6) {
-      Alert.alert("Invalid code", "Please enter a 6-digit code");
+      showAlert("Invalid code", "Please enter a 6-digit code");
       return;
     }
     setLoading(true);
@@ -129,17 +119,16 @@ export function TwoFactorScreen() {
       });
       const data = await res.json();
       if (!res.ok) {
-        Alert.alert("Error", data.error || "Verification failed");
+        showAlert("Error", data.error || "Verification failed");
         return;
       }
       await refreshTwoFactorStatus();
     } catch {
-      Alert.alert("Error", "Verification failed");
+      showAlert("Error", "Verification failed");
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -147,7 +136,6 @@ export function TwoFactorScreen() {
         <Text style={styles.subtitle}>
           Two-factor authentication is required for admin access.
         </Text>
-
         {currentMode === "choose" && (
           <View style={styles.optionsContainer}>
             <TouchableOpacity
@@ -161,7 +149,6 @@ export function TwoFactorScreen() {
                 <Text style={styles.optionDesc}>Use Google Authenticator or similar</Text>
               </View>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.optionButton}
               onPress={sendEmailCode}
@@ -173,11 +160,9 @@ export function TwoFactorScreen() {
                 <Text style={styles.optionDesc}>Receive a one-time code via email</Text>
               </View>
             </TouchableOpacity>
-
             {loading && <ActivityIndicator style={{ marginTop: 16 }} color={colors.accent} />}
           </View>
         )}
-
         {currentMode === "totp-setup" && (
           <View style={styles.setupContainer}>
             <Text style={styles.setupLabel}>
@@ -229,7 +214,6 @@ export function TwoFactorScreen() {
             </TouchableOpacity>
           </View>
         )}
-
         {currentMode === "totp-verify" && (
           <View style={styles.setupContainer}>
             <Text style={styles.setupLabel}>
@@ -258,7 +242,6 @@ export function TwoFactorScreen() {
             </TouchableOpacity>
           </View>
         )}
-
         {currentMode === "email-verify" && (
           <View style={styles.setupContainer}>
             <Text style={styles.setupLabel}>
@@ -293,11 +276,10 @@ export function TwoFactorScreen() {
             </TouchableOpacity>
           </View>
         )}
-
         <TouchableOpacity
           style={styles.logoutButton}
           onPress={() => {
-            Alert.alert("Log out?", "You'll need to sign in again.", [
+            showAlert("Log out?", "You'll need to sign in again.", [
               { text: "Stay", style: "cancel" },
               { text: "Log Out", style: "destructive", onPress: () => logout() },
             ]);
@@ -310,7 +292,6 @@ export function TwoFactorScreen() {
     </SafeAreaView>
   );
 }
-
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
