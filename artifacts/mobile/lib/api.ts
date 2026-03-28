@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { getApiBaseUrl } from "@/constants/api";
 import * as storage from "./secureStorage";
 
@@ -70,11 +71,19 @@ async function uploadFile(path: string, uri: string, fileName: string, mimeType:
   const token = await storage.getItem(AUTH_TOKEN_KEY);
 
   const formData = new FormData();
-  formData.append("file", {
-    uri,
-    name: fileName,
-    type: mimeType,
-  } as any);
+  if (Platform.OS === "web") {
+    // Web: fetch blob URL into a File object for standard FormData
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    formData.append("file", new File([blob], fileName, { type: mimeType }));
+  } else {
+    // Native: React Native FormData accepts { uri, name, type }
+    formData.append("file", {
+      uri,
+      name: fileName,
+      type: mimeType,
+    } as any);
+  }
 
   const headers: Record<string, string> = {};
   if (token) headers["Authorization"] = `Bearer ${token}`;
