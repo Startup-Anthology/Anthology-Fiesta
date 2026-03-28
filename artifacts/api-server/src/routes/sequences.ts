@@ -73,9 +73,14 @@ router.delete("/sequences/:id", async (req: Request, res: Response, next: NextFu
     for (const step of steps) {
       logAudit("sequence_step", step.id, "delete", userId, step as Record<string, unknown>, null);
     }
-    await db.delete(dripSequenceStepsTable).where(eq(dripSequenceStepsTable.sequenceId, id));
-    await db.delete(dripEnrollmentsTable).where(eq(dripEnrollmentsTable.sequenceId, id));
-    await db.delete(dripSequencesTable).where(and(eq(dripSequencesTable.id, id), eq(dripSequencesTable.userId, userId)));
+
+    // Wrap cascade deletes in a transaction for atomicity
+    await db.transaction(async (tx) => {
+      await tx.delete(dripSequenceStepsTable).where(eq(dripSequenceStepsTable.sequenceId, id));
+      await tx.delete(dripEnrollmentsTable).where(eq(dripEnrollmentsTable.sequenceId, id));
+      await tx.delete(dripSequencesTable).where(and(eq(dripSequencesTable.id, id), eq(dripSequencesTable.userId, userId)));
+    });
+
     logAudit("sequence", id, "delete", userId, before as Record<string, unknown>, null);
     res.status(204).send();
   } catch (err) {

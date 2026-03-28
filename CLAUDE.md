@@ -13,7 +13,9 @@ Mobile-first CRM for solo founders. Full-stack monorepo, runs locally on macOS.
 - **Design System**: Shadcn/UI + Radix UI + Tailwind CSS v4 (mockup-sandbox only; mobile uses React Native StyleSheet)
 - **AI**: OpenAI direct (`OPENAI_API_KEY`), configurable models via `AI_MAIN_MODEL`/`AI_ROUTER_MODEL` (defaults: gpt-4o/gpt-4o-mini), 3-agent architecture (Coach aka "Forecaster Pro"/Cleo/Miles)
 - **Auth**: Email/password with session-based auth (random SIDs, DB-backed sessions via `bcryptjs` + PostgreSQL `sessions` table), 2FA (TOTP via `otpauth` + email) for admin
-- **Integrations**: "Bring Your Own" per-user OAuth -- Gmail, Outlook, Google Calendar, Outlook Calendar, Notion. Tokens encrypted at rest (AES-256-GCM). Storage: S3-compatible (Cloudflare R2, AWS S3, MinIO)
+- **Integrations**: "Bring Your Own" per-user OAuth -- Gmail, Outlook, Google Calendar, Outlook Calendar, Notion, Slack. Tokens encrypted at rest (AES-256-GCM). Storage: S3-compatible (Cloudflare R2, AWS S3, MinIO)
+- **PWA**: Production-ready Progressive Web App (iOS Safari "Add to Home Screen"), service worker for app shell caching, Web App Manifest
+- **Deployment**: Single Render Web Service (Express serves API + PWA static files), Neon PostgreSQL, Cloudflare DNS/CDN at `fiesta.startupanthology.com`
 - **Package Manager**: pnpm 10 with workspaces
 - **Runtime**: Node 24
 
@@ -113,7 +115,7 @@ See `.env.example` for the full list. Required:
 - `OPENAI_API_KEY` -- OpenAI API key
 - `ALLOWED_ORIGINS` -- comma-separated allowed CORS origins
 
-Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET`, `NOTION_CLIENT_ID/SECRET` for OAuth integrations, `AI_MAIN_MODEL`, `AI_ROUTER_MODEL`, `OPENAI_BASE_URL` (Azure OpenAI or local proxy), `API_BASE_URL` (OAuth callbacks + Gmail webhook audience fallback), `CRM_API_KEY`/`HORIZON_BASE_URL`, `HORIZON_WEBHOOK_SECRET`, `HORIZON_DEFAULT_USER_ID`, `GMAIL_WEBHOOK_AUDIENCE`, `INTEGRATION_SUCCESS_REDIRECT`
+Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CLIENT_ID/SECRET`, `NOTION_CLIENT_ID/SECRET`, `SLACK_CLIENT_ID/SECRET` for OAuth integrations, `AI_MAIN_MODEL`, `AI_ROUTER_MODEL`, `OPENAI_BASE_URL` (Azure OpenAI or local proxy), `API_BASE_URL` (OAuth callbacks + Gmail webhook audience fallback), `CRM_API_KEY`/`HORIZON_BASE_URL`, `HORIZON_WEBHOOK_SECRET`, `HORIZON_DEFAULT_USER_ID`, `GMAIL_WEBHOOK_AUDIENCE`, `INTEGRATION_SUCCESS_REDIRECT`
 
 ## Architecture Notes
 
@@ -146,28 +148,33 @@ Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CL
 ### Background Workers
 - **Drip campaign worker** (`dripWorker.ts`): runs on `setInterval` (every 60 seconds); uses advisory locking (`lockedAt` column) with 5-minute stale lock timeout
 - **AI Insight Worker** (`insightWorker.ts`): runs daily via `setInterval` (first run after 60s); generates insight cards per user using heuristics + OpenAI framing
-- Both workers start after `app.listen()` callback in `index.ts`
+- **Slack Digest Worker** (`slackDigestWorker.ts`): checks hourly, sends daily pipeline summary to configured Slack channel (configurable send hour per user)
+- **Notion Pull Worker** (`notionPullWorker.ts`): runs every 5 minutes; polls Notion databases for changes and pulls them into CRM (last-write-wins conflict resolution)
+- **Horizon Sync Worker** (`horizonSyncWorker.ts`): runs every 15 minutes; auto-syncs Horizon users → leads and contacts → contacts; posts Slack notification on new records
+- All workers start after `app.listen()` callback in `index.ts`
 
 ### Startup Sequence
 1. Express app listens on `PORT`
 2. `seedDefaults()` -- seeds default data
 3. `seedAgentRegistry()` -- upserts AI agent definitions
 4. `verifyModelAvailability()` -- checks OpenAI model access (async, non-blocking)
-5. `startDripWorker()` + `startInsightWorker()` -- starts background workers
+5. `startDripWorker()` + `startInsightWorker()` + `startSlackDigestWorker()` + `startNotionPullWorker()` + `startHorizonSyncWorker()` -- starts background workers
 
 ### Integrations
 - Integration registry pattern in `artifacts/api-server/src/lib/integrations/registry.ts`
 - Calendar: Google Calendar (`calendar/google.ts`), Outlook Calendar (`calendar/outlook.ts`)
 - Email: Gmail (`email/gmail.ts`), Outlook (`email/outlook.ts`)
-- Notes: Notion (`notes/notion.ts`)
-- Horizon CRM (`horizonSync.ts`, `horizonWebhook.ts`) -- pull sync via `POST /api/horizon/sync` and inbound webhooks at `POST /api/webhooks/horizon/*`; uses `CRM_API_KEY`/`HORIZON_BASE_URL`
+- Notes: Notion (`notes/notion.ts`) -- one-way sync (CRM → Notion) + two-way pull worker (`notionPullWorker.ts`, 5-min interval) + full export (`notionExport.ts`)
+- Messaging: Slack (`messaging/slack.ts`) -- CRM event notifications (`slackNotify.ts`), daily pipeline digest worker (`slackDigestWorker.ts`)
+- Horizon CRM (`horizonSync.ts`, `horizonWebhook.ts`) -- pull sync via `POST /api/horizon/sync`, auto-sync worker (`horizonSyncWorker.ts`, 15-min interval), inbound webhooks at `POST /api/webhooks/horizon/*`; uses `CRM_API_KEY`/`HORIZON_BASE_URL`
 
 ### State Management (Mobile)
 - **Server state**: TanStack React Query v5
 - **Auth state**: React Context (AuthProvider in `lib/auth.tsx`)
 - **Theme state**: React Context (ThemeProvider in `lib/theme.tsx`), light/dark mode persisted
-- **Secure storage**: expo-secure-store for credentials
-- **API client**: Custom fetch wrapper in `lib/api.ts` with JWT injection
+- **Secure storage**: `lib/secureStorage.ts` -- platform-aware (localStorage on web, expo-secure-store on native)
+- **API client**: Custom fetch wrapper in `lib/api.ts` with JWT injection + `credentials: 'include'` for cookie auth on web
+- **Cross-platform utilities**: `lib/alert.ts` (window.confirm on web, Alert.alert on native), `lib/filePicker.ts` (hidden input on web, expo-document-picker/image-picker on native)
 
 ## CI/CD
 
@@ -207,4 +214,13 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 
 ### Remaining
 - Gmail webhook: PubSub signature verification requires `GMAIL_WEBHOOK_AUDIENCE` or `API_BASE_URL` env var; without either, webhook returns 401 (fails closed, not insecure)
-- Delete operations missing `userId` in WHERE clause (relies on pre-check only -- cascade deletes in sequences, junction table deletes in files)
+
+### Fixed (March 2026 PWA update)
+- Sequence cascade deletes now wrapped in transaction for atomicity (defense-in-depth)
+- Legacy `/mobile-auth/logout` route removed (no longer referenced)
+- Web auth: `secureStorage.ts` created (was gitignored and missing), `credentials: 'include'` added to all fetch calls
+- PWA: manifest, service worker, custom HTML document with Apple meta tags, icons
+- Unified server: Express serves both API and PWA static build (single-service architecture)
+- Cross-platform: Alert.alert → showAlert, file pickers, FormData web compatibility
+- Expo Router origin fixed from `replit.com` to `fiesta.startupanthology.com`
+- API URLs use relative paths on web production (same-origin)
