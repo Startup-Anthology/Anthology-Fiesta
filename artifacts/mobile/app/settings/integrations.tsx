@@ -59,7 +59,7 @@ function IntegrationRow({ config, status, onConnect, onDisconnect, isDisconnecti
         {config.iconSet === "material" ? (
           <MaterialCommunityIcons name={config.icon as any} size={20} color={config.color} />
         ) : config.iconSet === "text" ? (
-          <Text style={{ fontSize: 16, fontFamily: "SpaceGrotesk_700Bold", color: config.color }}>{config.icon}</Text>
+          <Text style={{ fontSize: 16, fontFamily: "HankenGrotesk_700Bold", color: config.color }}>{config.icon}</Text>
         ) : (
           <Feather name={config.icon as any} size={18} color={config.color} />
         )}
@@ -294,17 +294,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  title: { fontSize: 20, fontFamily: "SpaceGrotesk_700Bold" },
+  title: { fontSize: 20, fontFamily: "HankenGrotesk_700Bold" },
   subtitle: {
     fontSize: 13,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     marginBottom: Layout.sectionSpacing,
     lineHeight: 19,
   },
   section: { marginBottom: Layout.sectionSpacing },
   sectionTitle: {
     fontSize: 11,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
     textTransform: "uppercase",
     letterSpacing: 0.8,
     marginBottom: 10,
@@ -325,27 +325,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   rowInfo: { flex: 1 },
-  rowLabel: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold" },
+  rowLabel: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold" },
   statusRow: { flexDirection: "row", alignItems: "center", gap: 5, marginTop: 2 },
   dot: { width: 6, height: 6, borderRadius: 3 },
-  statusText: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular" },
+  statusText: { fontSize: 12, fontFamily: "HankenGrotesk_400Regular" },
   connectBtn: {
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 7,
   },
-  connectText: { fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold" },
+  connectText: { fontSize: 13, fontFamily: "HankenGrotesk_600SemiBold" },
   disconnectBtn: {
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1,
   },
-  disconnectText: { fontSize: 12, fontFamily: "SpaceGrotesk_500Medium" },
+  disconnectText: { fontSize: 12, fontFamily: "HankenGrotesk_500Medium" },
   syncStats: {
     borderRadius: Layout.cardRadius,
     padding: Layout.cardPadding,
     marginTop: -Layout.cardGap + 2,
   },
-  syncStatsText: { fontSize: 11, fontFamily: "SpaceGrotesk_400Regular", lineHeight: 16 },
+  syncStatsText: { fontSize: 11, fontFamily: "HankenGrotesk_400Regular", lineHeight: 16 },
 });

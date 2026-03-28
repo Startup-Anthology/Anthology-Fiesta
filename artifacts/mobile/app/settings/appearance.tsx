@@ -62,7 +62,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: "center",
     marginBottom: Layout.sectionSpacing,
   },
-  title: { fontSize: 20, fontFamily: "SpaceGrotesk_700Bold", color: colors.text },
+  title: { fontSize: 20, fontFamily: "HankenGrotesk_700Bold", color: colors.text },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -72,5 +72,5 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     padding: Layout.cardPadding,
   },
   rowLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
-  rowLabel: { fontSize: 15, fontFamily: "SpaceGrotesk_500Medium", color: colors.text },
+  rowLabel: { fontSize: 15, fontFamily: "HankenGrotesk_500Medium", color: colors.text },
 });

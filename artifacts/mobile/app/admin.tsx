@@ -507,7 +507,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: colors.text,
-    fontFamily: "SpaceGrotesk_700Bold",
+    fontFamily: "HankenGrotesk_700Bold",
   },
   tabBar: {
     flexDirection: "row",
@@ -527,7 +527,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.textSecondary,
   },
   tabTextActive: {
@@ -549,7 +549,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: colors.text,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
   },
   userCard: {
     flexDirection: "row",
@@ -569,12 +569,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: colors.text,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
   },
   userEmail: {
     fontSize: 13,
     color: colors.textSecondary,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     marginTop: 2,
   },
   badgeRow: {
@@ -589,7 +589,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   badgeText: {
     fontSize: 11,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: "#fff",
   },
   userActions: {
@@ -617,7 +617,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: colors.text,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
   },
   exportButtons: {
     flexDirection: "row",
@@ -634,7 +634,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   exportButtonText: {
     fontSize: 14,
     color: colors.accent,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
   },
   importTypeRow: {
     flexDirection: "row",
@@ -655,7 +655,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   importTypeText: {
     fontSize: 14,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.textSecondary,
   },
   importTypeTextActive: {
@@ -664,7 +664,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   importHint: {
     fontSize: 13,
     color: colors.textSecondary,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
   },
   jsonInput: {
     backgroundColor: colors.surface,
@@ -674,7 +674,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     padding: 12,
     fontSize: 13,
     color: colors.text,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     minHeight: 160,
   },
   importButton: {
@@ -687,7 +687,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#fff",
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
   },
   filePickerButton: {
     flexDirection: "row",
@@ -704,12 +704,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   filePickerText: {
     fontSize: 14,
     color: colors.accent,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
   },
   filePickerHint: {
     fontSize: 13,
     color: colors.textSecondary,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     textAlign: "center",
   },
 });

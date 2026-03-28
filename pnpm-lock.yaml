@@ -200,7 +200,16 @@ importers:
       '@babel/core':
         specifier: ^7.25.2
         version: 7.29.0
-      '@expo-google-fonts/space-grotesk':
+      '@expo-google-fonts/hanken-grotesk':
+        specifier: ^0.4.3
+        version: 0.4.3
+      '@expo-google-fonts/lato':
+        specifier: ^0.4.1
+        version: 0.4.1
+      '@expo-google-fonts/league-spartan':
+        specifier: ^0.4.2
+        version: 0.4.2
+      '@expo-google-fonts/roboto-mono':
         specifier: ^0.4.1
         version: 0.4.1
       '@expo/cli':
@@ -1504,8 +1513,17 @@ packages:
     resolution: {integrity: sha512-iH1B076HoAshH1mLpHMgwdGeTs0CYwL0SPMkGuSebZrwBp16v415e9NZXg2jtrqPVQjf6IANe2Vtlr5KswtcZQ==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
-  '@expo-google-fonts/space-grotesk@0.4.1':
-    resolution: {integrity: sha512-ZVQYw4Ok/pgcSJiufP8oRZE3AVxS9xtmKEUfsurbHkHNdMc/GA1gDXP9G4Cr7KL4KqSc0haexR2TuMigotCn4Q==}
+  '@expo-google-fonts/hanken-grotesk@0.4.3':
+    resolution: {integrity: sha512-TZn/Ux+nCxEjG/zAenCFbEhOAPxSXN3lo2YU2jHcPsNBPFeicm8feQStL81igJuAwJLCn62VvEOdTtmVEBDl0g==}
+
+  '@expo-google-fonts/lato@0.4.1':
+    resolution: {integrity: sha512-U2g1sOBFSNgmxhh/Ywgyi7Hx6T3UielX2nmZuP55wqndrIEyNX3HeUQIhhQDe2vZ+nvZI0Z2vTcVjmOn/BM9ow==}
+
+  '@expo-google-fonts/league-spartan@0.4.2':
+    resolution: {integrity: sha512-ab+9zpXBOz09ymJIKTxlun7d3G7twGNg9Yo7mBC3vGxH047wz1uMevTmbqGk9/RF76wJvgzwA+MOGtEtqsxwZw==}
+
+  '@expo-google-fonts/roboto-mono@0.4.1':
+    resolution: {integrity: sha512-vVTGi93KBS/ypBvZaM6wxhgV2CWOiZjow6X7F6wMBPdtR1WasLELGrtiptgCTPipPkR5o5xpl2+3teTV1ffJGg==}
 
   '@expo/cli@54.0.23':
     resolution: {integrity: sha512-km0h72SFfQCmVycH/JtPFTVy69w6Lx1cHNDmfLfQqgKFYeeHTjx7LVDP4POHCtNxFP2UeRazrygJhlh4zz498g==}
@@ -8872,7 +8890,13 @@ snapshots:
       '@eslint/core': 1.1.1
       levn: 0.4.1
 
-  '@expo-google-fonts/space-grotesk@0.4.1': {}
+  '@expo-google-fonts/hanken-grotesk@0.4.3': {}
+
+  '@expo-google-fonts/lato@0.4.1': {}
+
+  '@expo-google-fonts/league-spartan@0.4.2': {}
+
+  '@expo-google-fonts/roboto-mono@0.4.1': {}
 
   '@expo/cli@54.0.23(expo-router@6.0.23)(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))':
     dependencies:

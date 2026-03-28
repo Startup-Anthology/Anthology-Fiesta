@@ -81,7 +81,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontFamily: "SpaceGrotesk_700Bold",
+    fontFamily: "HankenGrotesk_700Bold",
     color: colors.text,
     marginBottom: 16,
   },
@@ -94,14 +94,14 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: 12,
     marginBottom: 12,
   },
-  optionText: { fontSize: 14, fontFamily: "SpaceGrotesk_500Medium", color: colors.text },
+  optionText: { fontSize: 14, fontFamily: "HankenGrotesk_500Medium", color: colors.text },
   urlRow: { flexDirection: "row", gap: 8, alignItems: "flex-start" },
   input: {
     backgroundColor: colors.surface,
     borderRadius: 10,
     padding: 12,
     fontSize: 14,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     color: colors.text,
     marginBottom: 12,
   },
@@ -111,7 +111,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     backgroundColor: colors.info,
     borderRadius: 10,
   },
-  urlBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", color: "#fff" },
+  urlBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", color: "#fff" },
   cancelBtn: {
     flex: 1,
     paddingVertical: 12,
@@ -122,7 +122,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   cancelText: {
     fontSize: 14,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.textSecondary,
   },
 });

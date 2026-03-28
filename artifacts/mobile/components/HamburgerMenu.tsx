@@ -116,6 +116,6 @@ const styles = StyleSheet.create({
   },
   menuLabel: {
     fontSize: 15,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
   },
 });

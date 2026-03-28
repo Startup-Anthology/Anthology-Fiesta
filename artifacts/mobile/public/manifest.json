@@ -4,8 +4,8 @@
   "description": "Mobile CRM for solo founders — manage leads, contacts, follow-ups, email outreach, and AI coaching in one focused app.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#f5f8fc",
+  "theme_color": "#C4A57B",
   "orientation": "portrait",
   "icons": [
     {

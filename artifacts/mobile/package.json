@@ -15,7 +15,10 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@expo-google-fonts/space-grotesk": "^0.4.1",
+    "@expo-google-fonts/hanken-grotesk": "^0.4.3",
+    "@expo-google-fonts/lato": "^0.4.1",
+    "@expo-google-fonts/league-spartan": "^0.4.2",
+    "@expo-google-fonts/roboto-mono": "^0.4.1",
     "@expo/cli": "54.0.23",
     "@expo/ngrok": "^4.1.0",
     "@expo/vector-icons": "^15.0.3",

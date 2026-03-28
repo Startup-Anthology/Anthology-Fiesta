@@ -150,7 +150,7 @@ export default function InboxScreen() {
           >
             <Feather name={TAB_ICONS[t] as any} size={13} color={tab === t ? colors.text : colors.textTertiary} />
             <Text style={[styles.segmentText, { color: tab === t ? colors.text : colors.textTertiary },
-              tab === t && { fontFamily: "SpaceGrotesk_600SemiBold" }]}>
+              tab === t && { fontFamily: "HankenGrotesk_600SemiBold" }]}>
               {TAB_LABELS[t]}
             </Text>
           </Pressable>
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Layout.screenPadding,
     paddingVertical: 14,
   },
-  title: { fontSize: 24, fontFamily: "SpaceGrotesk_700Bold" },
+  title: { fontSize: 24, fontFamily: "Lato_700Bold" },
   newBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
-  newBtnText: { fontSize: 13, fontFamily: "SpaceGrotesk_600SemiBold" },
+  newBtnText: { fontSize: 13, fontFamily: "HankenGrotesk_600SemiBold" },
   segmented: {
     flexDirection: "row",
     marginHorizontal: Layout.screenPadding,
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 8,
   },
-  segmentText: { fontSize: 12, fontFamily: "SpaceGrotesk_500Medium" },
+  segmentText: { fontSize: 12, fontFamily: "HankenGrotesk_500Medium" },
   listContent: { paddingHorizontal: Layout.screenPadding, paddingBottom: 100 },
   card: {
     flexDirection: "row",
@@ -226,6 +226,7 @@ const styles = StyleSheet.create({
     padding: Layout.cardPadding,
     marginBottom: Layout.cardGap,
     gap: 12,
+    ...Layout.shadow.sm,
   },
   cardIcon: {
     width: 36,
@@ -236,9 +237,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardBody: { flex: 1 },
-  cardTitle: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold" },
-  cardMeta: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular", marginTop: 2 },
+  cardTitle: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold" },
+  cardMeta: { fontSize: 12, fontFamily: "HankenGrotesk_400Regular", marginTop: 2 },
   pressed: { opacity: 0.7 },
   empty: { alignItems: "center", paddingTop: 80, gap: 12 },
-  emptyText: { fontSize: 15, fontFamily: "SpaceGrotesk_400Regular" },
+  emptyText: { fontSize: 15, fontFamily: "HankenGrotesk_400Regular" },
 });

@@ -308,14 +308,14 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     color: colors.primary,
-    fontFamily: "SpaceGrotesk_700Bold",
+    fontFamily: "HankenGrotesk_700Bold",
     textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
     color: colors.textSecondary,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     textAlign: "center",
     marginBottom: 32,
   },
@@ -342,12 +342,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: colors.text,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
   },
   optionDesc: {
     fontSize: 13,
     color: colors.textSecondary,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     marginTop: 2,
   },
   setupContainer: {
@@ -357,7 +357,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   setupLabel: {
     fontSize: 15,
     color: colors.text,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     textAlign: "center",
   },
   qrContainer: {
@@ -370,7 +370,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   manualEntryLabel: {
     fontSize: 13,
     color: colors.textSecondary,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     textAlign: "center",
   },
   secretBox: {
@@ -383,7 +383,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   secretText: {
     fontSize: 14,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.accent,
     textAlign: "center",
     letterSpacing: 1,
@@ -396,7 +396,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: 12,
     fontSize: 24,
     color: colors.text,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
     backgroundColor: colors.surface,
     letterSpacing: 8,
   },
@@ -413,12 +413,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 17,
     fontWeight: "600",
     color: "#FFFFFF",
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
   },
   backText: {
     fontSize: 14,
     color: colors.accent,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     textAlign: "center",
   },
   logoutButton: {
@@ -432,6 +432,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   logoutText: {
     fontSize: 15,
     color: colors.error,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
   },
 });

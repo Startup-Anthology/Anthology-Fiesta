@@ -1,14 +1,14 @@
 const layout = {
   // Existing tokens (unchanged — screens depend on these)
   screenPadding: 24,
-  cardRadius: 14,
+  cardRadius: 12,
   cardPadding: 16,
   sectionSpacing: 28,
   cardGap: 10,
   fabElevation: 6,
-  inputRadius: 12,
-  chipRadius: 20,
-  badgeRadius: 8,
+  inputRadius: 6,
+  chipRadius: 9999,
+  badgeRadius: 3,
 
   // Spacing scale
   spacing: {
@@ -26,8 +26,8 @@ const layout = {
     sm: {
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.06,
-      shadowRadius: 2,
+      shadowOpacity: 0.05,
+      shadowRadius: 3,
       elevation: 1,
     },
     md: {

@@ -207,13 +207,13 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     color: colors.primary,
-    fontFamily: "SpaceGrotesk_700Bold",
+    fontFamily: "HankenGrotesk_700Bold",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
     color: colors.textSecondary,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     textAlign: "center",
   },
   form: {
@@ -243,12 +243,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   modeButtonText: {
     fontSize: 14,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.textSecondary,
   },
   modeButtonTextActive: {
     color: colors.text,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
   },
   input: {
     width: "100%",
@@ -258,7 +258,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     paddingVertical: 14,
     fontSize: 15,
     color: colors.text,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.border,
@@ -266,7 +266,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   errorText: {
     color: colors.error,
     fontSize: 13,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     marginBottom: 12,
     textAlign: "center",
   },
@@ -284,12 +284,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 17,
     fontWeight: "600",
     color: "#FFFFFF",
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
   },
   footerText: {
     marginTop: 16,
     fontSize: 13,
     color: colors.textTertiary,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
   },
 });

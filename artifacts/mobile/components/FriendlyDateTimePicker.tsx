@@ -146,7 +146,7 @@ export default function FriendlyDateTimePicker({ value, onChange, label }: Frien
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
   label: {
     fontSize: 12,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
     color: colors.textSecondary,
     textTransform: "uppercase",
     marginBottom: 6,
@@ -164,7 +164,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   displayText: {
     flex: 1,
     fontSize: 15,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.text,
   },
   pickerContainer: {
@@ -177,7 +177,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   pickerSection: {},
   pickerLabel: {
     fontSize: 11,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
     color: colors.textTertiary,
     textTransform: "uppercase",
     marginBottom: 6,
@@ -198,7 +198,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   chipText: {
     fontSize: 13,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.text,
   },
   chipTextActive: {
@@ -214,7 +214,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   chipSmallText: {
     fontSize: 13,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.text,
   },
   timeSectionRow: {

@@ -67,7 +67,7 @@ export default function TriggersScreen() {
             <View key={t.id} style={styles.triggerCard}>
               <View style={styles.triggerInfo}>
                 <Text style={styles.triggerText}>
-                  When lead → <Text style={{ fontFamily: "SpaceGrotesk_600SemiBold" }}>{t.triggerStatus}</Text>
+                  When lead → <Text style={{ fontFamily: "HankenGrotesk_600SemiBold" }}>{t.triggerStatus}</Text>
                 </Text>
                 <Text style={styles.triggerAction}>
                   {t.actionType === "enroll_sequence"
@@ -169,8 +169,8 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  title: { fontSize: 20, fontFamily: "SpaceGrotesk_700Bold", color: colors.text },
-  subtitle: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular", color: colors.textTertiary, marginBottom: Layout.sectionSpacing },
+  title: { fontSize: 20, fontFamily: "HankenGrotesk_700Bold", color: colors.text },
+  subtitle: { fontSize: 13, fontFamily: "HankenGrotesk_400Regular", color: colors.textTertiary, marginBottom: Layout.sectionSpacing },
   section: { marginBottom: Layout.sectionSpacing },
   triggerCard: {
     flexDirection: "row",
@@ -181,26 +181,26 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: Layout.cardGap,
   },
   triggerInfo: { flex: 1 },
-  triggerText: { fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", color: colors.text },
-  triggerAction: { fontSize: 12, fontFamily: "SpaceGrotesk_400Regular", color: colors.textSecondary, marginTop: 2 },
+  triggerText: { fontSize: 14, fontFamily: "HankenGrotesk_400Regular", color: colors.text },
+  triggerAction: { fontSize: 12, fontFamily: "HankenGrotesk_400Regular", color: colors.textSecondary, marginTop: 2 },
   addCard: { backgroundColor: colors.surface2, borderRadius: Layout.cardRadius, padding: Layout.cardPadding },
-  addCardTitle: { fontSize: 15, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.text, marginBottom: 16 },
-  label: { fontSize: 12, fontFamily: "SpaceGrotesk_600SemiBold", color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase" },
+  addCardTitle: { fontSize: 15, fontFamily: "HankenGrotesk_600SemiBold", color: colors.text, marginBottom: 16 },
+  label: { fontSize: 12, fontFamily: "HankenGrotesk_600SemiBold", color: colors.textSecondary, marginBottom: 8, textTransform: "uppercase" },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16, borderWidth: 1 },
-  chipText: { fontSize: 12, fontFamily: "SpaceGrotesk_500Medium", textTransform: "capitalize" },
+  chipText: { fontSize: 12, fontFamily: "HankenGrotesk_500Medium", textTransform: "capitalize" },
   seqOption: { paddingHorizontal: 14, paddingVertical: 12, borderRadius: Layout.cardRadius, marginBottom: 8 },
-  seqOptionText: { fontSize: 14, fontFamily: "SpaceGrotesk_500Medium" },
+  seqOptionText: { fontSize: 14, fontFamily: "HankenGrotesk_500Medium" },
   numInput: {
     backgroundColor: colors.surface,
     borderRadius: Layout.inputRadius,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     color: colors.text,
     width: 100,
   },
   addBtn: { borderRadius: Layout.inputRadius, paddingVertical: 12, alignItems: "center", marginTop: 18 },
-  addBtnText: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold" },
+  addBtnText: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold" },
 });

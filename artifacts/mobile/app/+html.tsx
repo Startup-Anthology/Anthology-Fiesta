@@ -25,7 +25,7 @@ export default function Root({ children }: PropsWithChildren) {
         <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
 
         {/* Theme color */}
-        <meta name="theme-color" content="#000000" />
+        <meta name="theme-color" content="#C4A57B" />
 
         <ScrollViewStyleReset />
 

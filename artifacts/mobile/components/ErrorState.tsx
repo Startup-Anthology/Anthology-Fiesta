@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 15,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     textAlign: "center",
   },
   retryBtn: {
@@ -55,6 +55,6 @@ const styles = StyleSheet.create({
   },
   retryText: {
     fontSize: 14,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
   },
 });

@@ -10,7 +10,7 @@ Mobile-first CRM for solo founders. Full-stack monorepo, runs locally on macOS.
 
 - **Backend**: Express 5, TypeScript 5.9, Drizzle ORM 0.45, PostgreSQL 16
 - **Frontend**: Expo SDK 54 (React Native 0.81), React 19, React Query v5, Expo Router 6 (file-based routing)
-- **Design System**: Shadcn/UI + Radix UI + Tailwind CSS v4 (mockup-sandbox only; mobile uses React Native StyleSheet)
+- **Design System**: Shadcn/UI + Radix UI + Tailwind CSS v4 (mockup-sandbox only; mobile uses React Native StyleSheet). Mobile brand: Startup Anthology gold (#BB935B), slate-blue palette, Hanken Grotesk (body) / Lato (page titles) / League Spartan (section headings) / Roboto Mono (code)
 - **AI**: OpenAI direct (`OPENAI_API_KEY`), configurable models via `AI_MAIN_MODEL`/`AI_ROUTER_MODEL` (defaults: gpt-4o/gpt-4o-mini), 3-agent architecture (Coach aka "Forecaster Pro"/Cleo/Miles)
 - **Auth**: Email/password with session-based auth (random SIDs, DB-backed sessions via `bcryptjs` + PostgreSQL `sessions` table), 2FA (TOTP via `otpauth` + email) for admin
 - **Integrations**: "Bring Your Own" per-user OAuth -- Gmail, Outlook, Google Calendar, Outlook Calendar, Notion, Slack. Tokens encrypted at rest (AES-256-GCM). Storage: S3-compatible (Cloudflare R2, AWS S3, MinIO)
@@ -224,3 +224,11 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - Cross-platform: Alert.alert → showAlert, file pickers, FormData web compatibility
 - Expo Router origin fixed from `replit.com` to `fiesta.startupanthology.com`
 - API URLs use relative paths on web production (same-origin)
+
+### Fixed (March 2026 brand guide update)
+- Typography: SpaceGrotesk replaced with Hanken Grotesk (body), Lato (page titles), League Spartan (section headings), Roboto Mono (code)
+- Color palette: slate-blue light/dark theme (background #f5f8fc / #0b0f1a, text #0f172a / #f5f8fc, border #dde3ed / #1f2937)
+- Layout radii aligned to brand guide: cardRadius 12, inputRadius 6, badgeRadius 3, chips fully rounded
+- PWA theme-color updated to brand amber #C4A57B
+- Card shadows applied to dashboard, pipeline, inbox, contacts
+- Tab bar hardcoded colors replaced with theme tokens

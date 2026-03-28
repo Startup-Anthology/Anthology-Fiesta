@@ -87,7 +87,7 @@ export default function AiInsightCards() {
 
 const styles = StyleSheet.create({
   container: { marginBottom: Layout.sectionSpacing },
-  sectionTitle: { fontSize: 18, fontFamily: "SpaceGrotesk_600SemiBold", marginBottom: 14 },
+  sectionTitle: { fontSize: 18, fontFamily: "HankenGrotesk_600SemiBold", marginBottom: 14 },
   card: {
     borderRadius: Layout.cardRadius,
     padding: Layout.cardPadding,
@@ -96,10 +96,10 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8, gap: 8 },
   agentBadge: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
   agentDot: { width: 6, height: 6, borderRadius: 3 },
-  agentLabel: { fontSize: 11, fontFamily: "SpaceGrotesk_600SemiBold" },
+  agentLabel: { fontSize: 11, fontFamily: "HankenGrotesk_600SemiBold" },
   severityDot: { width: 8, height: 8, borderRadius: 4 },
   dismissBtn: { marginLeft: "auto", padding: 4 },
-  cardTitle: { fontSize: 14, fontFamily: "SpaceGrotesk_600SemiBold", marginBottom: 4 },
-  cardDesc: { fontSize: 13, fontFamily: "SpaceGrotesk_400Regular", lineHeight: 18 },
+  cardTitle: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", marginBottom: 4 },
+  cardDesc: { fontSize: 13, fontFamily: "HankenGrotesk_400Regular", lineHeight: 18 },
   pressed: { opacity: 0.7 },
 });

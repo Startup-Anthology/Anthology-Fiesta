@@ -1,9 +1,19 @@
 import {
-  SpaceGrotesk_400Regular,
-  SpaceGrotesk_500Medium,
-  SpaceGrotesk_600SemiBold,
-  SpaceGrotesk_700Bold,
-} from "@expo-google-fonts/space-grotesk";
+  HankenGrotesk_400Regular,
+  HankenGrotesk_500Medium,
+  HankenGrotesk_600SemiBold,
+  HankenGrotesk_700Bold,
+} from "@expo-google-fonts/hanken-grotesk";
+import { Lato_400Regular, Lato_700Bold } from "@expo-google-fonts/lato";
+import {
+  LeagueSpartan_500Medium,
+  LeagueSpartan_600SemiBold,
+  LeagueSpartan_700Bold,
+} from "@expo-google-fonts/league-spartan";
+import {
+  RobotoMono_400Regular,
+  RobotoMono_500Medium,
+} from "@expo-google-fonts/roboto-mono";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -69,10 +79,17 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    SpaceGrotesk_400Regular,
-    SpaceGrotesk_500Medium,
-    SpaceGrotesk_600SemiBold,
-    SpaceGrotesk_700Bold,
+    HankenGrotesk_400Regular,
+    HankenGrotesk_500Medium,
+    HankenGrotesk_600SemiBold,
+    HankenGrotesk_700Bold,
+    Lato_400Regular,
+    Lato_700Bold,
+    LeagueSpartan_500Medium,
+    LeagueSpartan_600SemiBold,
+    LeagueSpartan_700Bold,
+    RobotoMono_400Regular,
+    RobotoMono_500Medium,
   });
 
   useEffect(() => {

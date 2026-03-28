@@ -31,7 +31,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
     color: colors.text,
   },
   link: {
@@ -40,7 +40,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   linkText: {
     fontSize: 14,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.info,
   },
 });

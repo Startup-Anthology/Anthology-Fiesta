@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f5f8fc"
     },
     "ios": {
       "supportsTablet": false,
@@ -26,8 +26,8 @@
       "name": "Fiesta CRM",
       "shortName": "Fiesta",
       "description": "Fiesta is a mobile CRM built for solo founders — manage your leads, contacts, follow-ups, email outreach, and AI coaching in one focused app, without the enterprise bloat.",
-      "themeColor": "#000000",
-      "backgroundColor": "#ffffff"
+      "themeColor": "#C4A57B",
+      "backgroundColor": "#f5f8fc"
     },
     "plugins": [
       [

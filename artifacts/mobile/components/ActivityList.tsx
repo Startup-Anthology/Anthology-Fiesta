@@ -89,31 +89,31 @@ export default function ActivityList({
 }
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
-  empty: { fontSize: 14, fontFamily: "SpaceGrotesk_400Regular", color: colors.textTertiary },
+  empty: { fontSize: 14, fontFamily: "HankenGrotesk_400Regular", color: colors.textTertiary },
   item: { flexDirection: "row", gap: 10, marginBottom: 14, alignItems: "center" },
   dot: { width: 8, height: 8, borderRadius: 4, marginTop: 0 },
   content: { flex: 1 },
   type: {
     fontSize: 13,
-    fontFamily: "SpaceGrotesk_600SemiBold",
+    fontFamily: "HankenGrotesk_600SemiBold",
     color: colors.text,
     textTransform: "capitalize",
   },
   note: {
     fontSize: 13,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     color: colors.textSecondary,
     marginTop: 2,
   },
   date: {
     fontSize: 12,
-    fontFamily: "SpaceGrotesk_400Regular",
+    fontFamily: "HankenGrotesk_400Regular",
     color: colors.textTertiary,
     marginTop: 2,
   },
   gmailLink: {
     fontSize: 12,
-    fontFamily: "SpaceGrotesk_500Medium",
+    fontFamily: "HankenGrotesk_500Medium",
     color: colors.info,
     marginTop: 2,
   },
