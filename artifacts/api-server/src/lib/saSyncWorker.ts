@@ -20,7 +20,18 @@ async function upsertSetting(key: string, value: string, userId: string) {
 
 async function getTargetUserId(): Promise<string | null> {
   const configured = process.env.SA_DEFAULT_USER_ID;
-  if (configured) return configured;
+  if (configured) {
+    const [user] = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(eq(usersTable.id, configured))
+      .limit(1);
+    if (!user) {
+      console.error(`SA_DEFAULT_USER_ID "${configured}" not found in users table`);
+      return null;
+    }
+    return user.id;
+  }
 
   const [first] = await db
     .select({ id: usersTable.id })

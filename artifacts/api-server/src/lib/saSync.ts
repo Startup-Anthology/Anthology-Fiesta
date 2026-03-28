@@ -48,7 +48,15 @@ export async function fetchSAContacts(since?: string): Promise<SASubmission[]> {
     const text = await res.text().catch(() => "");
     if (res.status === 401) throw new Error("SA API authentication failed (401)");
     if (res.status === 429) throw new Error("SA API rate limited (429). Try again later.");
-    throw new Error(`SA contacts API error ${res.status}: ${text || "Unknown error"}`);
+    const contentType = res.headers.get("content-type") ?? "";
+    if (res.status === 403 && (contentType.includes("text/html") || text.includes("Just a moment"))) {
+      throw new Error(
+        "SA API blocked by Cloudflare bot protection (403). " +
+        "Add a WAF bypass rule in the Cloudflare dashboard for startupanthology.com: " +
+        "skip managed challenges when path matches /api/crm/* or when X-CRM-API-KEY header is present."
+      );
+    }
+    throw new Error(`SA contacts API error ${res.status}: ${text.slice(0, 200) || "Unknown error"}`);
   }
   return res.json() as Promise<SASubmission[]>;
 }
