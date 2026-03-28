@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "pnpm run lint && EXPO_PUBLIC_API_URL=http://localhost:8080 pnpm exec expo start",
     "dev:fast": "EXPO_PUBLIC_API_URL=http://localhost:8080 pnpm exec expo start",
-    "build": "node scripts/build.js",
+    "build": "expo export --platform web --output-dir dist/web",
     "serve": "node server/serve.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint .",
