@@ -22,6 +22,7 @@ export default function Root({ children }: PropsWithChildren) {
           content="black-translucent"
         />
         <meta name="apple-mobile-web-app-title" content="Fiesta CRM" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/pwa-icon-192.png" />
         <link rel="apple-touch-icon" href="/pwa-icon-192.png" />
 
         {/* Theme color */}
