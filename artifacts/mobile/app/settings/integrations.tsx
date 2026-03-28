@@ -170,8 +170,8 @@ export default function IntegrationsScreen() {
         await WebBrowser.openBrowserAsync(data.url);
         qc.invalidateQueries({ queryKey: ["integrations"] });
       }
-    } catch {
-      showAlert("Error", "Failed to start connection. Please try again.");
+    } catch (err: any) {
+      showAlert("Error", err?.message || "Failed to start connection. Please try again.");
     }
   };
   const groupedProviders = PROVIDERS.reduce((acc, p) => {
