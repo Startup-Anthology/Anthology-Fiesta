@@ -90,6 +90,9 @@ export default function RootLayout() {
     LeagueSpartan_700Bold,
     RobotoMono_400Regular,
     RobotoMono_500Medium,
+    // Vector icon fonts — must be explicitly registered for Expo Web
+    Feather: require("@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ttf"),
+    MaterialCommunityIcons: require("@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf"),
   });
 
   useEffect(() => {
