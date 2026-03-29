@@ -27,7 +27,7 @@ export default function AppearanceScreen() {
       contentContainerStyle={styles.content}
     >
       <View style={styles.topBar}>
-        <Pressable onPress={() => router.back()} hitSlop={10} accessibilityRole="button" accessibilityLabel="Back">
+        <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace("/settings")} hitSlop={10} accessibilityRole="button" accessibilityLabel="Back">
           <Feather name="arrow-left" size={22} color={colors.text} />
         </Pressable>
         <Text style={styles.title}>Appearance</Text>

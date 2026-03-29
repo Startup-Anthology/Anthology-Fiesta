@@ -87,7 +87,7 @@ export default function GeneralScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.topBar}>
-        <Pressable onPress={() => router.back()} hitSlop={10} accessibilityRole="button" accessibilityLabel="Back">
+        <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace("/settings")} hitSlop={10} accessibilityRole="button" accessibilityLabel="Back">
           <Feather name="arrow-left" size={22} color={colors.text} />
         </Pressable>
         <Text style={styles.title}>General</Text>

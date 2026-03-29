@@ -162,7 +162,7 @@ export default function SettingsScreen() {
       stickySectionHeadersEnabled={false}
       ListHeaderComponent={
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()} hitSlop={10} accessibilityRole="button" accessibilityLabel="Back">
+          <Pressable onPress={() => router.canGoBack() ? router.back() : router.replace("/(tabs)")} hitSlop={10} accessibilityRole="button" accessibilityLabel="Back">
             <Feather name="arrow-left" size={22} color={colors.text} />
           </Pressable>
           <View style={styles.userInfo}>
