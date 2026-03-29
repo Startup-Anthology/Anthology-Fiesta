@@ -151,7 +151,7 @@ Optional: `S3_*` vars for file storage, `GOOGLE_CLIENT_ID/SECRET`, `MICROSOFT_CL
 - **Slack Digest Worker** (`slackDigestWorker.ts`): checks hourly, sends daily pipeline summary to configured Slack channel (configurable send hour per user)
 - **Notion Pull Worker** (`notionPullWorker.ts`): runs every 5 minutes; polls Notion databases for changes and pulls them into CRM (last-write-wins conflict resolution)
 - **Horizon Sync Worker** (`horizonSyncWorker.ts`): runs every 15 minutes; auto-syncs Horizon users → leads and contacts → contacts; posts Slack notification on new records
-- **SA Sync Worker** (`saSyncWorker.ts`): runs every 15 minutes (first run after 90s, staggered from Horizon's 60s); polls `SA_BASE_URL/api/crm/contacts`, upserts into leads + contacts, saves `sa_last_sync_at` etc. to `app_settings`. Only activates when both `SA_CRM_API_KEY` and `SA_BASE_URL` are set. **Note:** Cloudflare bot protection on `startupanthology.com` blocks server-to-server requests — a WAF bypass rule is required for pull sync to work. Inbound webhook (`POST /api/webhooks/sa/contact`) works regardless and is the primary real-time path.
+- **SA Sync Worker** (`saSyncWorker.ts`): runs every 15 minutes (first run after 90s, staggered from Horizon's 60s); polls `SA_BASE_URL/api/crm/contacts`, upserts into leads + contacts, saves `sa_last_sync_at` etc. to `app_settings`. Only activates when both `SA_CRM_API_KEY` and `SA_BASE_URL` are set. **Note:** Cloudflare bot protection on `startupanthology.com` blocks server-to-server requests — a WAF bypass rule is required for pull sync to work. Inbound webhook (`POST /api/webhooks/sa/contact`) works regardless and is the primary real-time path. `isSAConfigured()` returns true when either pull sync vars OR `SA_WEBHOOK_SECRET` is set (webhook-only is a valid configured state).
 - All workers start after `app.listen()` callback in `index.ts`
 
 ### Startup Sequence
@@ -234,6 +234,12 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - PWA theme-color updated to brand amber #C4A57B
 - Card shadows applied to dashboard, pipeline, inbox, contacts
 - Tab bar hardcoded colors replaced with theme tokens
+
+### Fixed (March 2026 integrations update)
+- Google OAuth configured: `fiesta-crm` project in Google Cloud (Gmail API + Google Calendar API enabled); test user `jeremy@startupanthology.com`; credentials in Render as `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`
+- SA webhook wired end-to-end: marketing site (`horizon-marketing`) fires `FIESTA_WEBHOOK_URL` on contact form submit; Fiesta receives at `POST /api/webhooks/sa/contact`; `SA_BASE_URL` removed from Render (Cloudflare blocks pull sync; webhook is the active path)
+- `isSAConfigured()` fixed: now returns true when `SA_WEBHOOK_SECRET` is set, not only when pull-sync vars present
+- Integrations screen back button: falls back to `router.replace("/settings")` when `router.canGoBack()` is false (e.g. after OAuth callback redirect)
 
 ### Fixed (March 2026 web parity update)
 - Web PWA now renders in a centered 430px column with colored margins on desktop (matches native phone width); implemented via `WebShell` wrapper in `app/_layout.tsx`
