@@ -33,7 +33,9 @@ function getSAConfig() {
 }
 
 export function isSAConfigured(): boolean {
-  return !!(process.env.SA_CRM_API_KEY && process.env.SA_BASE_URL);
+  const pullSyncReady = !!(process.env.SA_CRM_API_KEY && process.env.SA_BASE_URL);
+  const webhookReady = !!process.env.SA_WEBHOOK_SECRET;
+  return pullSyncReady || webhookReady;
 }
 
 export async function fetchSAContacts(since?: string): Promise<SASubmission[]> {
