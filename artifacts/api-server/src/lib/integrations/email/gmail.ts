@@ -35,29 +35,47 @@ export class GmailProvider implements EmailProvider {
     subject: string,
     body: string,
     attachments?: EmailAttachment[],
+    htmlBody?: string,
   ): Promise<SendEmailResult> {
     const gmail = this.getClient();
     const safeTo = sanitizeHeader(to);
     const safeSubject = sanitizeHeader(subject);
 
     let raw: string;
+    const hasAttachments = attachments && attachments.length > 0;
 
-    if (attachments && attachments.length > 0) {
-      const boundary = generateBoundary();
-      let mimeMessage = `To: ${safeTo}\r\nSubject: ${safeSubject}\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${boundary}"\r\n\r\n`;
-      mimeMessage += `--${boundary}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${body}\r\n`;
+    if (hasAttachments) {
+      const mixedBoundary = generateBoundary();
+      let mime = `To: ${safeTo}\r\nSubject: ${safeSubject}\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${mixedBoundary}"\r\n\r\n`;
 
-      for (const att of attachments) {
+      if (htmlBody) {
+        const altBoundary = generateBoundary();
+        mime += `--${mixedBoundary}\r\nContent-Type: multipart/alternative; boundary="${altBoundary}"\r\n\r\n`;
+        mime += `--${altBoundary}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${body}\r\n`;
+        mime += `--${altBoundary}\r\nContent-Type: text/html; charset=utf-8\r\n\r\n${htmlBody}\r\n`;
+        mime += `--${altBoundary}--\r\n`;
+      } else {
+        mime += `--${mixedBoundary}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${body}\r\n`;
+      }
+
+      for (const att of attachments!) {
         const b64 = att.content.toString("base64");
         const safeName = sanitizeFilename(att.filename);
         const safeType = sanitizeMimeType(att.mimeType);
-        mimeMessage += `--${boundary}\r\nContent-Type: ${safeType}; name="${safeName}"\r\nContent-Disposition: attachment; filename="${safeName}"\r\nContent-Transfer-Encoding: base64\r\n\r\n${b64}\r\n`;
+        mime += `--${mixedBoundary}\r\nContent-Type: ${safeType}; name="${safeName}"\r\nContent-Disposition: attachment; filename="${safeName}"\r\nContent-Transfer-Encoding: base64\r\n\r\n${b64}\r\n`;
       }
-      mimeMessage += `--${boundary}--`;
-      raw = Buffer.from(mimeMessage).toString("base64url");
+      mime += `--${mixedBoundary}--`;
+      raw = Buffer.from(mime).toString("base64url");
+    } else if (htmlBody) {
+      const altBoundary = generateBoundary();
+      let mime = `To: ${safeTo}\r\nSubject: ${safeSubject}\r\nMIME-Version: 1.0\r\nContent-Type: multipart/alternative; boundary="${altBoundary}"\r\n\r\n`;
+      mime += `--${altBoundary}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${body}\r\n`;
+      mime += `--${altBoundary}\r\nContent-Type: text/html; charset=utf-8\r\n\r\n${htmlBody}\r\n`;
+      mime += `--${altBoundary}--`;
+      raw = Buffer.from(mime).toString("base64url");
     } else {
       raw = Buffer.from(
-        `To: ${safeTo}\r\nSubject: ${safeSubject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${body}`
+        `To: ${safeTo}\r\nSubject: ${safeSubject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${body}`,
       ).toString("base64url");
     }
 

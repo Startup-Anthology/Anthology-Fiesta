@@ -33,10 +33,13 @@ export class OutlookEmailProvider implements EmailProvider {
     subject: string,
     body: string,
     attachments?: EmailAttachment[],
+    htmlBody?: string,
   ): Promise<SendEmailResult> {
     const message: Record<string, unknown> = {
       subject,
-      body: { contentType: "Text", content: body },
+      body: htmlBody
+        ? { contentType: "HTML", content: htmlBody }
+        : { contentType: "Text", content: body },
       toRecipients: [{ emailAddress: { address: to } }],
     };
 
@@ -49,8 +52,7 @@ export class OutlookEmailProvider implements EmailProvider {
       }));
     }
 
-    const res = await this.graphRequest("/me/sendMail", "POST", { message });
-    // Graph sendMail returns 202 with no body; we generate a placeholder ID
+    await this.graphRequest("/me/sendMail", "POST", { message });
     const messageId = `outlook_${Date.now()}`;
     return { messageId, threadId: messageId, link: "https://outlook.live.com/mail" };
   }

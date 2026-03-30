@@ -23,7 +23,8 @@ export interface EmailProvider {
     to: string,
     subject: string,
     body: string,
-    attachments?: EmailAttachment[]
+    attachments?: EmailAttachment[],
+    htmlBody?: string,
   ): Promise<SendEmailResult>;
   getHistory(startHistoryId: string): Promise<any>;
   getMessage(messageId: string): Promise<any>;
