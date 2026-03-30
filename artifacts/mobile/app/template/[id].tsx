@@ -122,7 +122,7 @@ export default function TemplateDetailScreen() {
       <View style={styles.mergeTagInfo}>
         <Feather name="info" size={14} color={colors.textTertiary} />
         <Text style={styles.mergeTagText}>
-          {"Tags you can use: {{first_name}}, {{company_name}}, {{founder_name}}, {{my_linkedin}}, {{company_linkedin}}, {{calendar_link}}, {{custom_link_1}}, {{custom_link_2}}, {{custom_link_3}}\n\nClickable links: [Link text](url) or paste a bare https:// URL"}
+          {"Tags you can use: {{first_name}}, {{company_name}}, {{founder_name}}, {{my_linkedin}}, {{company_linkedin}}, {{calendar_link}}, {{custom_link_1}}, {{custom_link_2}}, {{custom_link_3}}\n\nClickable links: [Link text](url) or paste a bare http(s):// URL"}
         </Text>
       </View>
       <View style={{ height: 40 }} />
