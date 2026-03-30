@@ -11,11 +11,12 @@ export async function sendGmailEmail(
   body: string,
   attachments?: import("./integrations/types").EmailAttachment[],
   userId?: string,
+  htmlBody?: string,
 ): Promise<import("./integrations/types").SendEmailResult> {
   if (!userId) throw new Error("userId required for sendGmailEmail");
   const provider = await getEmailProvider(userId);
   if (!provider) throw new Error("No email provider connected");
-  return provider.sendEmail(to, subject, body, attachments);
+  return provider.sendEmail(to, subject, body, attachments, htmlBody);
 }
 
 export async function getGmailHistory(startHistoryId: string, userId?: string): Promise<any> {
