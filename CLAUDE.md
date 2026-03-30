@@ -246,6 +246,12 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - `renderTemplateBody(text): { html, text }` in `lib/emailRenderer.ts` — call after merge tag substitution; pass `html` as 6th arg to `sendGmailEmail`; store `text` (plain) in activity log
 - Link syntax hint added to template editor and compose screen
 
+### Fixed (March 2026 expandable insights update)
+- AI insight cards on the dashboard are now tap-to-expand: tapping a card reveals full title + description (previously truncated at 2 lines each); tapping again collapses it
+- Only one card expands at a time; dismiss (X) button still works independently
+- When expanded, cards with a linked lead or contact show a "View Lead" / "View Contact" link at the bottom-right that navigates to the entity detail screen
+- Change is in `artifacts/mobile/components/AiInsightCards.tsx` only (no new screens or API changes)
+
 ### Fixed (March 2026 web parity update)
 - Web PWA now renders in a centered 430px column with colored margins on desktop (matches native phone width); implemented via `WebShell` wrapper in `app/_layout.tsx`
 - Shadow tokens (`constants/layout.ts`) now include explicit `boxShadow` CSS strings via `Platform.select` for forward compatibility with react-native-web (deprecated `shadow*` → `boxShadow` auto-translation)

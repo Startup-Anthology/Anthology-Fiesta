@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { type ThemeColors } from "@/constants/colors";
 import Layout from "@/constants/layout";
@@ -11,6 +11,7 @@ import { useTheme } from "@/lib/theme";
 export default function AiInsightCards() {
   const { colors } = useTheme();
   const qc = useQueryClient();
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const { data: insights = [] } = useQuery({
     queryKey: ["aiInsights"],
@@ -37,6 +38,8 @@ export default function AiInsightCards() {
           : insight.severity === "medium" ? colors.warning
           : colors.textTertiary;
 
+        const isExpanded = expandedId === insight.id;
+
         return (
           <Pressable
             key={insight.id}
@@ -45,13 +48,7 @@ export default function AiInsightCards() {
               { backgroundColor: colors.surface },
               pressed && styles.pressed,
             ]}
-            onPress={() => {
-              if (insight.leadId) {
-                router.push({ pathname: "/lead/[id]", params: { id: String(insight.leadId) } });
-              } else if (insight.contactId) {
-                router.push({ pathname: "/contact/[id]", params: { id: String(insight.contactId) } });
-              }
-            }}
+            onPress={() => setExpandedId(prev => prev === insight.id ? null : insight.id)}
           >
             <View style={styles.cardHeader}>
               <View style={[styles.agentBadge, { backgroundColor: agentColor + "15" }]}>
@@ -72,12 +69,37 @@ export default function AiInsightCards() {
                 <Feather name="x" size={14} color={colors.textTertiary} />
               </Pressable>
             </View>
-            <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={2}>
+            <Text
+              style={[styles.cardTitle, { color: colors.text }]}
+              numberOfLines={isExpanded ? undefined : 2}
+            >
               {insight.title}
             </Text>
-            <Text style={[styles.cardDesc, { color: colors.textSecondary }]} numberOfLines={2}>
+            <Text
+              style={[styles.cardDesc, { color: colors.textSecondary }]}
+              numberOfLines={isExpanded ? undefined : 2}
+            >
               {insight.description}
             </Text>
+            {isExpanded && (insight.leadId || insight.contactId) && (
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  if (insight.leadId) {
+                    router.push({ pathname: "/lead/[id]", params: { id: String(insight.leadId) } });
+                  } else if (insight.contactId) {
+                    router.push({ pathname: "/contact/[id]", params: { id: String(insight.contactId) } });
+                  }
+                }}
+                style={styles.viewLink}
+                hitSlop={8}
+              >
+                <Text style={[styles.viewLinkText, { color: colors.accent }]}>
+                  {insight.leadId ? "View Lead" : "View Contact"}
+                </Text>
+                <Feather name="arrow-right" size={13} color={colors.accent} />
+              </Pressable>
+            )}
           </Pressable>
         );
       })}
@@ -101,5 +123,7 @@ const styles = StyleSheet.create({
   dismissBtn: { marginLeft: "auto", padding: 4 },
   cardTitle: { fontSize: 14, fontFamily: "HankenGrotesk_600SemiBold", marginBottom: 4 },
   cardDesc: { fontSize: 13, fontFamily: "HankenGrotesk_400Regular", lineHeight: 18 },
+  viewLink: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 10, alignSelf: "flex-end" },
+  viewLinkText: { fontSize: 13, fontFamily: "HankenGrotesk_600SemiBold" },
   pressed: { opacity: 0.92 },
 });
