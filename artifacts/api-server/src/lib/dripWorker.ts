@@ -12,6 +12,7 @@ import {
 import { eq, and, lte, isNull, sql } from "drizzle-orm";
 import { sendGmailEmail } from "./gmail";
 import { fireAndForgetActivitySync } from "./notionSync";
+import { renderTemplateBody } from "./emailRenderer";
 
 let isProcessing = false;
 const LOCK_TIMEOUT_MS = 5 * 60 * 1000;
@@ -208,9 +209,10 @@ async function processEnrollments() {
           founderName,
           userSettings
         );
-        const body = replaceMergeTags(template.body, recipient, founderName, userSettings);
+        const rawBody = replaceMergeTags(template.body, recipient, founderName, userSettings);
+        const { html: htmlBody, text: body } = renderTemplateBody(rawBody);
 
-        await sendGmailEmail(recipient.email, subject, body, undefined, ownerId);
+        await sendGmailEmail(recipient.email, subject, body, undefined, ownerId, htmlBody);
 
         const nextStepIndex = enrollment.currentStep + 1;
 
