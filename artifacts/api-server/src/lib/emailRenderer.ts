@@ -30,9 +30,14 @@ export function renderTemplateBody(text: string): { html: string; text: string }
   //   - URLs already in href="..." attributes (preceded by ")
   //   - URLs that are the visible text of a processed <a> tag (preceded by >)
   //   - URLs in src='...' style attributes (preceded by ')
+  // Trailing sentence punctuation (.,!;:?)\]) is stripped so that
+  // "Visit https://example.com." doesn't include the period in the href.
   html = html.replace(
     /(?<![="'>])https?:\/\/[^\s<"']+/g,
-    (url) => `<a href="${url}">${url}</a>`,
+    (url) => {
+      const clean = url.replace(/[.,!;:?)\]]+$/, "");
+      return `<a href="${clean}">${clean}</a>`;
+    },
   );
 
   // Step 4: Newlines → <br>
