@@ -7,6 +7,7 @@ import { createCalendarEvent } from "../lib/calendar";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { inArray, eq, and } from "drizzle-orm";
 import { validate, sendEmailSchema } from "../lib/validation";
+import { renderTemplateBody } from "../lib/emailRenderer";
 
 const router = Router();
 const objectStorageService = new ObjectStorageService();
@@ -14,7 +15,8 @@ const objectStorageService = new ObjectStorageService();
 router.post("/email/send", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
-    const { to, subject, body, leadId, contactId, addToCalendar, attachmentFileIds } = validate(sendEmailSchema, req.body);
+    const { to, subject, body: rawBody, leadId, contactId, addToCalendar, attachmentFileIds } = validate(sendEmailSchema, req.body);
+    const { html: htmlBody, text: body } = renderTemplateBody(rawBody);
 
     const attachments: EmailAttachment[] = [];
     if (attachmentFileIds && attachmentFileIds.length > 0) {
@@ -36,7 +38,7 @@ router.post("/email/send", async (req: Request, res: Response, next: NextFunctio
 
     let sendResult;
     try {
-      sendResult = await sendGmailEmail(to, subject, body, attachments, userId);
+      sendResult = await sendGmailEmail(to, subject, body, attachments, userId, htmlBody);
     } catch (gmailErr: any) {
       const msg = gmailErr.message || "";
       if (msg.includes("No email provider") || msg.includes("not connected") || msg.includes("userId required")) {

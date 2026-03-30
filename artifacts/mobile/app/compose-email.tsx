@@ -196,6 +196,12 @@ export default function ComposeEmailScreen() {
           multiline
           textAlignVertical="top"
         />
+        <View style={styles.linkHint}>
+          <Feather name="info" size={14} color={colors.textTertiary} />
+          <Text style={styles.linkHintText}>
+            {"Clickable links: [Link text](url) or paste a bare http(s):// URL"}
+          </Text>
+        </View>
       </KeyboardAwareScrollViewCompat>
     </KeyboardAvoidingView>
   );
@@ -225,4 +231,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   attachedChip: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: colors.info + "15", paddingHorizontal: 10, paddingVertical: 6, borderRadius: Layout.badgeRadius },
   attachedName: { fontSize: 12, fontFamily: "HankenGrotesk_500Medium", color: colors.info, maxWidth: 120 },
   bodyInput: { fontSize: 16, fontFamily: "HankenGrotesk_400Regular", color: colors.text, minHeight: 200, paddingTop: 18, lineHeight: 24 },
+  linkHint: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: colors.surfaceSecondary, borderRadius: Layout.cardRadius, padding: Layout.cardPadding, marginTop: 12 },
+  linkHintText: { fontSize: 12, fontFamily: "HankenGrotesk_400Regular", color: colors.textTertiary, flex: 1 },
 });

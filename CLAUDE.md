@@ -216,7 +216,6 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 
 ### Remaining
 - Gmail webhook: PubSub signature verification requires `GMAIL_WEBHOOK_AUDIENCE` or `API_BASE_URL` env var; without either, webhook returns 401 (fails closed, not insecure)
-- HTML email rendering (`renderTemplateBody` in `lib/emailRenderer.ts`) is applied to drip campaigns and broadcasts only. The manual compose screen (`POST /api/email/send`) sends plain text — markdown link syntax typed there will appear as literal text to recipients. Intentional scope gap; extend to compose route if needed.
 
 ### Fixed (March 2026 PWA update)
 - Sequence cascade deletes now wrapped in transaction for atomicity (defense-in-depth)
