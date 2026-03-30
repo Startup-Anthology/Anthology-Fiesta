@@ -1,0 +1,35 @@
+# Dependabot version updates configuration
+# Note: Security alerts for packages managed by pnpm overrides (pnpm-workspace.yaml)
+# are false positives — Dependabot does not understand pnpm overrides. Those alerts
+# should be dismissed manually on the GitHub Security tab. `pnpm audit` is the
+# authoritative vulnerability scanner for this repo.
+
+version: 2
+updates:
+  # npm ecosystem (covers pnpm)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    # Packages managed by pnpm overrides in pnpm-workspace.yaml — suppress
+    # version update PRs since they're centrally pinned.
+    ignore:
+      - dependency-name: "path-to-regexp"
+      - dependency-name: "fast-xml-parser"
+      - dependency-name: "node-forge"
+      - dependency-name: "flatted"
+      - dependency-name: "picomatch"
+      - dependency-name: "yaml"
+      - dependency-name: "brace-expansion"
+      - dependency-name: "esbuild"
+      - dependency-name: "@esbuild-kit/esm-loader"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
