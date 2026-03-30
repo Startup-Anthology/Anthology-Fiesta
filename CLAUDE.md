@@ -246,6 +246,11 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - `renderTemplateBody(text): { html, text }` in `lib/emailRenderer.ts` — call after merge tag substitution; pass `html` as 6th arg to `sendGmailEmail`; store `text` (plain) in activity log
 - Link syntax hint added to template editor and compose screen
 
+### Fixed (March 2026 Dependabot config)
+- Added `.github/dependabot.yml`: weekly version update PRs for npm + GitHub Actions ecosystems
+- `ignore` rules suppress version update PRs for packages managed by pnpm overrides (`path-to-regexp`, `fast-xml-parser`, `node-forge`, `flatted`, `picomatch`, `yaml`, `brace-expansion`, `esbuild`)
+- The 17 GitHub Dependabot security alerts are **false positives** — Dependabot does not understand pnpm `overrides`. `pnpm audit` returns zero vulnerabilities (all packages resolve to patched versions). Alerts must be dismissed manually on the GitHub Security tab.
+
 ### Fixed (March 2026 expandable insights update)
 - AI insight cards on the dashboard are now tap-to-expand: tapping a card reveals full title + description (previously truncated at 2 lines each); tapping again collapses it
 - Only one card expands at a time; dismiss (X) button still works independently
