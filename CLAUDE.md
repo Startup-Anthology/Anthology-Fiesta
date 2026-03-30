@@ -241,6 +241,11 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - `isSAConfigured()` fixed: now returns true when `SA_WEBHOOK_SECRET` is set, not only when pull-sync vars present
 - Integrations screen back button: falls back to `router.replace("/settings")` when `router.canGoBack()` is false (e.g. after OAuth callback redirect)
 
+### Fixed (March 2026 HTML email update)
+- All outgoing emails (drip, broadcast, manual compose) now send `multipart/alternative` with clickable links: bare `https://` URLs auto-link; `[text](url)` markdown renders as anchor tags
+- `renderTemplateBody(text): { html, text }` in `lib/emailRenderer.ts` — call after merge tag substitution; pass `html` as 6th arg to `sendGmailEmail`; store `text` (plain) in activity log
+- Link syntax hint added to template editor and compose screen
+
 ### Fixed (March 2026 web parity update)
 - Web PWA now renders in a centered 430px column with colored margins on desktop (matches native phone width); implemented via `WebShell` wrapper in `app/_layout.tsx`
 - Shadow tokens (`constants/layout.ts`) now include explicit `boxShadow` CSS strings via `Platform.select` for forward compatibility with react-native-web (deprecated `shadow*` → `boxShadow` auto-translation)
