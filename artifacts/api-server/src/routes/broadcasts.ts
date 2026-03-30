@@ -6,6 +6,7 @@ import { sendGmailEmail } from "../lib/gmail";
 import { fireAndForgetActivitySync } from "../lib/notionSync";
 import { logAudit } from "../lib/audit";
 import { validate, createBroadcastSchema } from "../lib/validation";
+import { renderTemplateBody } from "../lib/emailRenderer";
 
 const router = Router();
 
@@ -122,7 +123,9 @@ router.post("/broadcasts", async (req: Request, res: Response, next: NextFunctio
           .replace(/\{\{custom_link_2\}\}/g, userSettings.quick_link_custom2_url || "")
           .replace(/\{\{custom_link_3\}\}/g, userSettings.quick_link_custom3_url || "");
 
-        await sendGmailEmail(recipient.email, emailSubject, emailBody, undefined, userId);
+        const { html: htmlEmailBody, text: plainEmailBody } = renderTemplateBody(emailBody);
+
+        await sendGmailEmail(recipient.email, emailSubject, plainEmailBody, undefined, userId, htmlEmailBody);
         sentCount++;
 
         const [activity] = await db.insert(activitiesTable).values({
@@ -131,7 +134,7 @@ router.post("/broadcasts", async (req: Request, res: Response, next: NextFunctio
           type: "email",
           direction: "sent",
           subject: emailSubject,
-          body: emailBody,
+          body: plainEmailBody,
           userId,
         }).returning();
 
