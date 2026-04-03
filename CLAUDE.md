@@ -264,3 +264,15 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - All inline FAB/picker shadows consolidated into `Layout.shadow.*` tokens (comms, contacts, calendar, funnel, LoginScreen, HamburgerMenu)
 - Pipeline Kanban column width moved from static `Dimensions.get("window")` at module scope to reactive `useWindowDimensions()` inside component, capped at 430px
 - Service worker cache bumped to `fiesta-v3` to bust stale cached assets on deploy
+
+### Fixed (April 2026 global search update)
+- Global search modal screen (`app/search.tsx`) — search leads and contacts by name or email; accessed via search icon in Pipeline header (`app/(tabs)/funnel.tsx`)
+- Snapshot pattern: list locked on first keystroke to prevent mid-search mutations; released on input clear; late-load case handled via `useEffect([isLoading])`
+- Both queries (`["leads"]`, `["contacts"]`) must succeed before results show — no partial results on one-fetch failure
+- Registered as modal route in `app/_layout.tsx`; navigates to `lead/[id]` or `contact/[id]` on row tap
+- 30 pre-existing lint warnings fixed across 13 files as part of this work
+
+### Fixed (April 2026 backup workflow update)
+- Scheduled database backup CI (`/.github/workflows/backup.yml`) was failing: `DATABASE_URL` secret was not set (secrets must be added manually in repo Settings → Secrets → Actions), and `postgresql-client` apt package installs PG16 which `pg_dump` rejects against a Neon PG17 server
+- Fixed by installing `postgresql-client-17` explicitly and adding a Verify secrets step for a clear error message when `DATABASE_URL` is missing
+- Removed redundant `PGPASSWORD`/`DB_PASSWORD` secret — Neon connection URL embeds credentials
