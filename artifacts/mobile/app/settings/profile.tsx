@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { showAlert } from "@/lib/alert";
 import * as Haptics from "expo-haptics";
 import * as SecureStore from "expo-secure-store";
@@ -25,7 +25,6 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const qc = useQueryClient();
   const { user, refreshUser } = useAuth();
   const topPad = Platform.OS === "web" ? 67 : insets.top + 16;
   const [firstName, setFirstName] = useState("");

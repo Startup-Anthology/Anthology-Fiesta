@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   ActivityIndicator,
@@ -29,7 +29,6 @@ type ViewState = "chat" | "history";
 export default function AIChatScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
-  const qc = useQueryClient();
   const [viewState, setViewState] = useState<ViewState>("chat");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");

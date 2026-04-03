@@ -1,7 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo, useEffect, useState } from "react";
 import {
-  Alert,
   Linking,
   Modal,
   Pressable,

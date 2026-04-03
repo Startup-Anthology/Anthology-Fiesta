@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Platform,
   Pressable,
-  ScrollView as RNScrollView,
   StyleSheet,
   Text,
   View,

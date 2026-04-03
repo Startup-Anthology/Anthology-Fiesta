@@ -7,10 +7,8 @@ import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
-  Modal,
   Platform,
   Pressable,
-  ScrollView as RNScrollView,
   StyleSheet,
   Text,
   TextInput,

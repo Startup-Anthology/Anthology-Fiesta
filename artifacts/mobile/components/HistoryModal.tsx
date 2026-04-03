@@ -2,7 +2,6 @@ import { Feather } from "@expo/vector-icons";
 import React, { useMemo, useCallback } from "react";
 import { showAlert } from "@/lib/alert";
 import {
-  ActivityIndicator,
   Modal,
   Pressable,
   ScrollView,

@@ -7,7 +7,6 @@ import React, { useMemo, useState, useEffect } from "react";
 import {
   Platform,
   Pressable,
-  ScrollView as RNScrollView,
   StyleSheet,
   Text,
   TextInput,

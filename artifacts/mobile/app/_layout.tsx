@@ -14,6 +14,22 @@ import {
   RobotoMono_400Regular,
   RobotoMono_500Medium,
 } from "@expo-google-fonts/roboto-mono";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useFonts } from "expo-font";
+import React, { useEffect } from "react";
+import { Platform, StyleSheet, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AuthProvider, useAuth } from "@/lib/auth";
+import { LoginScreen } from "@/components/LoginScreen";
+import { OfflineBanner } from "@/components/OfflineBanner";
+import { TwoFactorScreen } from "@/components/TwoFactorScreen";
+import { ThemeProvider, useTheme } from "@/lib/theme";
 
 // On web, font assets in pnpm's node_modules are not reliably copied by
 // expo export. Use static public URLs instead so fonts are always available.
@@ -32,22 +48,6 @@ const webFonts: Record<string, string> = {
   feather: "/fonts/Feather.ttf",
   "material-community": "/fonts/MaterialCommunityIcons.ttf",
 };
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useFonts } from "expo-font";
-import React, { useEffect } from "react";
-import { Platform, StyleSheet, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { AuthProvider, useAuth } from "@/lib/auth";
-import { LoginScreen } from "@/components/LoginScreen";
-import { OfflineBanner } from "@/components/OfflineBanner";
-import { TwoFactorScreen } from "@/components/TwoFactorScreen";
-import { ThemeProvider, useTheme } from "@/lib/theme";
 
 SplashScreen.preventAutoHideAsync();
 

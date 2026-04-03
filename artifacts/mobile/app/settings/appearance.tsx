@@ -4,12 +4,12 @@ import React, { useMemo } from "react";
 import {
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
   View,
 } from "react-native";
-import { ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { type ThemeColors } from "@/constants/colors";
 import Layout from "@/constants/layout";

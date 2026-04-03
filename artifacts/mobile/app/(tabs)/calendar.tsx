@@ -7,7 +7,6 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import { HamburgerMenu } from "@/components/HamburgerMenu";
 import {
   ActivityIndicator,
-  FlatList,
   Modal,
   Platform,
   Pressable,
@@ -94,7 +93,7 @@ export default function CalendarScreen() {
       hasSynced.current = true;
       api.syncCalendar().then(() => refetch()).catch(() => {});
     }
-  }, []);
+  }, [refetch]);
   const handleRefresh = async () => {
     try { await api.syncCalendar(); } catch {}
     refetch();
