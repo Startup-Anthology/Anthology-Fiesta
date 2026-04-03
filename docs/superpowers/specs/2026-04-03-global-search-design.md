@@ -53,3 +53,16 @@ Tapping a row navigates to `/lead/[id]` or `/contact/[id]` depending on the resu
 | `artifacts/mobile/app/_layout.tsx` | Add `<Stack.Screen name="search" options={{ presentation: "modal" }} />` |
 
 No API, schema, or codegen changes required.
+
+## Edge Cases
+
+| Scenario | Behaviour |
+|----------|-----------|
+| `name` or `email` is `null`/`undefined` on a record | Optional chaining (`r.name?.toLowerCase().includes(q)`) short-circuits to `undefined` (falsy); record is excluded from results. No crash. |
+| Query is all whitespace | `query.trim()` produces `""` → treated as empty query → empty-state prompt shown, no list rendered. |
+| Both `useQuery` hooks fail | Show a distinct error state ("Couldn't load results — pull to retry") instead of silently showing empty results. Distinguishes a failed fetch from a genuine no-match. |
+| One fetch fails, the other succeeds | Resolved dataset's results are shown. No error state. The failed dataset silently contributes zero results. |
+| Search screen opened before Pipeline tab visited | `useQuery` hooks have no `enabled` guard on the search screen — they always fire. Fresh fetches run on mount; partial results appear as each resolves. |
+| Keyboard overlaps results list | `FlatList` uses `keyboardShouldPersistTaps="handled"` so tapping a result row works without first dismissing the keyboard. |
+| Name is long enough to overflow | Name rendered with `numberOfLines={1}` (truncated with ellipsis), same as email. |
+| Android hardware Back button | Modal is on the root Stack; Android back naturally pops it — no special handling needed. |
