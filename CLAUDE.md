@@ -189,9 +189,13 @@ GitHub Actions workflows in `.github/workflows/`:
 - **pr-checks.yml**: Auto-labels PRs by changed files, adds size labels (XS/S/M/L/XL), comments on large PRs
 - **labeler.yml**: Label rules -- `api`, `mobile`, `database`, `ci`, `dependencies`, `config`, `documentation`
 
+- **backup.yml**: Scheduled daily at 02:00 UTC; also `workflow_dispatch`. Installs `postgresql-client-17` via PGDG apt repo, runs `pg_dump` via `/usr/lib/postgresql/17/bin/pg_dump`, uploads artifact with 30-day retention. Requires `DATABASE_URL` secret (Neon connection string) in repo Settings → Secrets → Actions.
+
 CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 
 **No test suite exists** -- only linting and type-checking in CI.
+
+**Branch protection:** `master` ruleset (`protect-master`) — blocks deletions and force pushes; requires `api-server` and `mobile` status checks to pass.
 
 ## Conventions
 
