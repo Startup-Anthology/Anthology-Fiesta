@@ -256,6 +256,15 @@ export default function FunnelScreen() {
           >
             <Feather name={viewMode === "kanban" ? "list" : "columns"} size={20} color={colors.primary} />
           </Pressable>
+          <Pressable
+            onPress={() => router.push("/search")}
+            style={[styles.viewToggle, { backgroundColor: colors.surfaceSecondary }]}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Search leads and contacts"
+          >
+            <Feather name="search" size={20} color={colors.primary} />
+          </Pressable>
           <HamburgerMenu />
         </View>
       </View>
