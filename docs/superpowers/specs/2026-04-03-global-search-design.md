@@ -40,8 +40,8 @@ Tapping a row navigates to `/lead/[id]` or `/contact/[id]` depending on the resu
 1. Modal opens → `autoFocus` fires keyboard → both `useQuery` hooks activate (or return from cache immediately).
 2. Both default to `[]` until resolved. `useMemo` filters over whatever is currently available — each dataset contributes results as it resolves independently.
 3. User types → filter recomputes synchronously from cached arrays.
-4. If one fetch hangs, the other's results are still visible. No global loading gate.
-5. If both fetches fail, the result area stays empty (no explicit combined error state — each query's error is silently swallowed since the empty state is already shown).
+4. If either fetch errors (`isError`), show the error state immediately — no partial results displayed.
+5. A slow/hanging fetch shows the inline `ActivityIndicator` below whatever results are available until it resolves or errors.
 6. Tapping a result calls `router.push("/lead/[id]")` or `router.push("/contact/[id]")`. This pushes the detail screen on top of the modal in the root Stack — the modal stays in the back-stack so pressing Back from the detail screen returns to search.
 
 ## Files Changed
@@ -60,8 +60,7 @@ No API, schema, or codegen changes required.
 |----------|-----------|
 | `name` or `email` is `null`/`undefined` on a record | Optional chaining (`r.name?.toLowerCase().includes(q)`) short-circuits to `undefined` (falsy); record is excluded from results. No crash. |
 | Query is all whitespace | `query.trim()` produces `""` → treated as empty query → empty-state prompt shown, no list rendered. |
-| Both `useQuery` hooks fail | Show a distinct error state ("Couldn't load results — pull to retry") instead of silently showing empty results. Distinguishes a failed fetch from a genuine no-match. |
-| One fetch fails, the other succeeds | Resolved dataset's results are shown. No error state. The failed dataset silently contributes zero results. |
+| Either or both `useQuery` hooks fail | Show the error state ("Couldn't load results — pull down to retry"). Partial results are not displayed — a silent half-answer is worse than an honest failure because the user can't tell whether "no results" means no match or a broken fetch. |
 | Search screen opened before Pipeline tab visited | `useQuery` hooks have no `enabled` guard on the search screen — they always fire. Fresh fetches run on mount; partial results appear as each resolves. |
 | Keyboard overlaps results list | `FlatList` uses `keyboardShouldPersistTaps="handled"` so tapping a result row works without first dismissing the keyboard. |
 | Name is long enough to overflow | Name rendered with `numberOfLines={1}` (truncated with ellipsis), same as email. |
