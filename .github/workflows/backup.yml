@@ -39,7 +39,7 @@ jobs:
         run: |
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
           FILENAME="fiesta_backup_${TIMESTAMP}.sql"
-          pg_dump "$DATABASE_URL" \
+          /usr/lib/postgresql/17/bin/pg_dump "$DATABASE_URL" \
             --no-password \
             --format=custom \
             --compress=9 \
