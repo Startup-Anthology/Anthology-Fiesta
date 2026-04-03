@@ -11,7 +11,7 @@ Add a global search screen that lets the user quickly find a lead or contact by 
 
 - **New route**: `app/search.tsx` — presented as a modal (`presentation: "modal"` in Expo Router)
 - **Entry point**: Search icon (`feather: search`) added to the Pipeline screen header (`artifacts/mobile/app/(tabs)/funnel.tsx`). Calls `router.push("/search")`.
-- **Data**: `useQuery(["leads"])` + `useQuery(["contacts"])` — same React Query cache keys used by the Pipeline tab. No new API endpoints required.
+- **Data**: `useQuery(["leads"], { refetchOnMount: false })` + `useQuery(["contacts"], { refetchOnMount: false })` — same cache keys as the Pipeline tab, but the search screen never triggers a refetch. It reads whatever is in cache; if the cache is cold it fetches once. The Pipeline tab owns the refetch lifecycle. No new API endpoints required.
 - **Filtering**: `useMemo` over `[...leads, ...contacts]`, case-insensitive match on `name` and `email`. Recomputes on every keystroke.
 
 ## UI
@@ -22,7 +22,7 @@ Add a global search screen that lets the user quickly find a lead or contact by 
 - **Result list**: `FlatList` of matched records below the input.
 - **Empty query**: Show a centered prompt — search icon + "Search by name or email". No list rendered.
 - **No results**: Centered — shrug icon + `No results for "[query]"`.
-- **Loading indicator**: Small `ActivityIndicator` shown only when either query has `isLoading: true` (no cache yet — cold open). Background refetches (`isFetching && !isLoading`) resolve silently; the stale results update in place with no indicator. Does not hide or block results.
+- **Loading indicator**: Small `ActivityIndicator` shown only when either query has `isLoading: true` (cold open — no cache at all). With `refetchOnMount: false`, no background refetch fires after initial load, so the list never mutates under the user's hands.
 
 ### Result row
 
@@ -41,7 +41,7 @@ Tapping a row navigates to `/lead/[id]` or `/contact/[id]` depending on the resu
 2. Both default to `[]` until resolved. `useMemo` filters over whatever is currently available — each dataset contributes results as it resolves independently.
 3. User types → filter recomputes synchronously from cached arrays.
 4. If either fetch errors (`isError`), show the error state immediately — no partial results displayed.
-5. Background refetches (`isFetching && !isLoading`) update results silently when they complete — no indicator shown. The `ActivityIndicator` only appears during a cold open (`isLoading: true`).
+5. `refetchOnMount: false` means no background refetch fires — the list is stable for the lifetime of the modal. `ActivityIndicator` only appears on cold open (`isLoading: true`, no cache).
 6. Tapping a result calls `router.push("/lead/[id]")` or `router.push("/contact/[id]")`. This pushes the detail screen on top of the modal in the root Stack — the modal stays in the back-stack so pressing Back from the detail screen returns to search.
 
 ## Files Changed
