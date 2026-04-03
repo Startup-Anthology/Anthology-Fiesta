@@ -6,6 +6,9 @@ tmp
 
 # brainstorming mockups
 .superpowers/
+
+# git worktrees
+.worktrees/
 out-tsc
 *.tsbuildinfo
 .expo
