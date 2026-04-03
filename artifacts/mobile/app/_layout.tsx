@@ -99,6 +99,7 @@ function RootLayoutNav() {
         <Stack.Screen name="sequence/[id]" options={{ presentation: "modal" }} />
         <Stack.Screen name="broadcast/[id]" />
         <Stack.Screen name="broadcast/new" options={{ presentation: "modal" }} />
+        <Stack.Screen name="search" options={{ presentation: "modal" }} />
         <Stack.Screen name="comms" />
         <Stack.Screen name="files" />
         <Stack.Screen name="settings" />
