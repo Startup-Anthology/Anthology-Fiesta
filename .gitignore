@@ -3,6 +3,9 @@
 # compiled output
 dist
 tmp
+
+# brainstorming mockups
+.superpowers/
 out-tsc
 *.tsbuildinfo
 .expo
