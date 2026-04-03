@@ -11,8 +11,8 @@ Add a global search screen that lets the user quickly find a lead or contact by 
 
 - **New route**: `app/search.tsx` — presented as a modal (`presentation: "modal"` in Expo Router)
 - **Entry point**: Search icon (`feather: search`) added to the Pipeline screen header (`artifacts/mobile/app/(tabs)/funnel.tsx`). Calls `router.push("/search")`.
-- **Data**: `useQuery(["leads"], { refetchOnMount: false, refetchOnWindowFocus: false })` + same for contacts — same cache keys as the Pipeline tab, but the search screen is a pure cache reader. It never triggers a refetch: not on mount, not when the app refocuses after the user navigates to a detail screen or backgrounds the app. If the cache is cold it fetches once on mount. The Pipeline tab owns the refetch lifecycle. No new API endpoints required.
-- **Filtering**: `useMemo` over `[...leads, ...contacts]`, case-insensitive match on `name` and `email`. Recomputes on every keystroke.
+- **Data**: `useQuery(["leads"])` + `useQuery(["contacts"])` with default React Query options — staleness and refetch behaviour are unchanged. Once both queries have data (`!leadsLoading && !contactsLoading`), the results are captured into a `snapshotRef` (a `useRef` set exactly once). All filtering runs against this snapshot for the modal's lifetime. React Query may refetch in the background but snapshot never updates — list is stable. The next time the modal opens, a fresh snapshot is taken from whatever React Query has at that point. No new API endpoints required.
+- **Filtering**: `useMemo` over `snapshotRef.current`, case-insensitive match on `name` and `email`. Recomputes on every keystroke against the immutable snapshot.
 
 ## UI
 
@@ -22,7 +22,7 @@ Add a global search screen that lets the user quickly find a lead or contact by 
 - **Result list**: `FlatList` of matched records below the input.
 - **Empty query**: Show a centered prompt — search icon + "Search by name or email". No list rendered.
 - **No results**: Centered — shrug icon + `No results for "[query]"`.
-- **Loading indicator**: Small `ActivityIndicator` shown only when either query has `isLoading: true` (cold open — no cache at all). With `refetchOnMount: false`, no background refetch fires after initial load, so the list never mutates under the user's hands.
+- **Loading indicator**: Small `ActivityIndicator` shown while either query has `isLoading: true` (snapshot not yet set). Disappears once both queries resolve and the snapshot locks in.
 
 ### Result row
 
@@ -37,11 +37,12 @@ Tapping a row navigates to `/lead/[id]` or `/contact/[id]` depending on the resu
 
 ## Data Flow
 
-1. Modal opens → `autoFocus` fires keyboard → both `useQuery` hooks activate (or return from cache immediately).
-2. Both default to `[]` until resolved. `useMemo` filters over whatever is currently available — each dataset contributes results as it resolves independently.
-3. User types → filter recomputes synchronously from cached arrays.
-4. If either fetch errors (`isError`), show the error state immediately — no partial results displayed.
-5. `refetchOnMount: false, refetchOnWindowFocus: false` means no refetch fires for the lifetime of the modal — not on mount, not when the app regains focus after navigating to a detail screen or backgrounding. The list is stable. `ActivityIndicator` only appears on cold open (`isLoading: true`, no cache).
+1. Modal opens → `autoFocus` fires keyboard → both `useQuery` hooks activate (cache hit or fresh fetch).
+2. While either query has `isLoading: true` (no cache), show `ActivityIndicator`. Both default to `[]`.
+3. Once both queries have data (`!leadsLoading && !contactsLoading`), `snapshotRef` is set once to `[...leads, ...contacts]`. It never updates again for this modal session.
+4. User types → `useMemo` filters `snapshotRef.current` synchronously. React Query may refetch in the background but the snapshot is immutable — the list cannot mutate mid-search.
+5. If either fetch errors before the snapshot is set, show the error state. If an error occurs after the snapshot is set (background refetch fails), it is silently ignored — the snapshot remains valid.
+6. Next modal open takes a fresh snapshot, so stale data never persists across sessions.
 6. Tapping a result calls `router.push("/lead/[id]")` or `router.push("/contact/[id]")`. This pushes the detail screen on top of the modal in the root Stack — the modal stays in the back-stack so pressing Back from the detail screen returns to search.
 
 ## Files Changed
