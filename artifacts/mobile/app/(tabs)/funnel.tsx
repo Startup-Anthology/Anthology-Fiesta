@@ -256,17 +256,19 @@ export default function FunnelScreen() {
           >
             <Feather name={viewMode === "kanban" ? "list" : "columns"} size={20} color={colors.primary} />
           </Pressable>
-          <Pressable
-            onPress={() => router.push("/search")}
-            style={[styles.viewToggle, { backgroundColor: colors.surfaceSecondary }]}
-            hitSlop={8}
-            accessibilityRole="button"
-            accessibilityLabel="Search leads and contacts"
-          >
-            <Feather name="search" size={20} color={colors.primary} />
-          </Pressable>
           <HamburgerMenu />
         </View>
+      </View>
+      <View style={styles.searchRow}>
+        <Pressable
+          onPress={() => router.push("/search")}
+          style={[styles.searchButton, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}
+          accessibilityRole="button"
+          accessibilityLabel="Search leads and contacts"
+        >
+          <Feather name="search" size={18} color={colors.primary} />
+          <Text style={[styles.searchButtonText, { color: colors.textSecondary }]}>Search leads and contacts</Text>
+        </Pressable>
       </View>
       {params.filter === "week" && (
         <View style={[styles.filterBanner, { backgroundColor: colors.info + "15" }]}>
@@ -545,6 +547,18 @@ const styles = StyleSheet.create({
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: Layout.screenPadding, paddingVertical: 14 },
   title: { fontSize: 24, fontFamily: "Lato_700Bold" },
   headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
+  searchRow: { paddingHorizontal: Layout.screenPadding, paddingBottom: 8 },
+  searchButton: {
+    minHeight: 48,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderRadius: Layout.inputRadius,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  searchButtonText: { fontSize: 14, fontFamily: "HankenGrotesk_500Medium" },
   syncBtn: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
   syncBtnText: { fontSize: 12, fontFamily: "HankenGrotesk_600SemiBold" },
   filterBanner: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: Layout.screenPadding, paddingVertical: 8, marginBottom: 4 },
