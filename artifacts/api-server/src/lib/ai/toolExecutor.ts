@@ -12,6 +12,13 @@ import {
 import { eq, and, lte, sql, desc } from "drizzle-orm";
 
 type ToolArgs = Record<string, string | number | boolean | undefined>;
+type ActivityType = "email" | "linkedin" | "note" | "call" | "meeting" | "status_change" | "ai_insight" | "other";
+
+function asActivityType(value: unknown): ActivityType | null {
+  const raw = String(value);
+  const allowed: ActivityType[] = ["email", "linkedin", "note", "call", "meeting", "status_change", "ai_insight", "other"];
+  return allowed.includes(raw as ActivityType) ? (raw as ActivityType) : null;
+}
 
 export async function executeToolCall(
   toolName: string,
@@ -90,7 +97,8 @@ async function queryActivities(args: ToolArgs, userId: string): Promise<string> 
   const conditions = [eq(activitiesTable.userId, userId)];
   if (args.contactId) conditions.push(eq(activitiesTable.contactId, Number(args.contactId)));
   if (args.leadId) conditions.push(eq(activitiesTable.leadId, Number(args.leadId)));
-  if (args.type) conditions.push(eq(activitiesTable.type, String(args.type)));
+  const activityType = args.type ? asActivityType(args.type) : null;
+  if (activityType) conditions.push(eq(activitiesTable.type, activityType));
 
   const activities = await db.select().from(activitiesTable)
     .where(and(...conditions))

@@ -5,6 +5,7 @@ import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState, useEffect } from "react";
 import {
+  ActivityIndicator,
   Platform,
   Pressable,
   StyleSheet,
@@ -81,6 +82,7 @@ export default function SequenceDetailScreen() {
     onError: (err: Error) => showAlert("Delete failed", err.message),
   });
   const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const isSavePending = createMut.isPending || updateMut.isPending;
   return (
     <KeyboardAwareScrollViewCompat style={[styles.container, { paddingTop: topPad }]} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.topBar}>
@@ -88,8 +90,12 @@ export default function SequenceDetailScreen() {
           <Text style={styles.cancelText}>Back</Text>
         </Pressable>
         <Text style={styles.title}>{isNew ? "New Sequence" : "Sequence"}</Text>
-        <Pressable onPress={() => { if (isNew) { createMut.mutate(); } else { updateMut.mutate(); } }} disabled={!name}>
-          <Text style={[styles.saveText, !name && { opacity: 0.4 }]}>Save</Text>
+        <Pressable onPress={() => { if (isNew) { createMut.mutate(); } else { updateMut.mutate(); } }} disabled={!name || isSavePending}>
+          {isSavePending ? (
+            <ActivityIndicator size="small" color={colors.info} />
+          ) : (
+            <Text style={[styles.saveText, (!name || isSavePending) && { opacity: 0.4 }]}>Save</Text>
+          )}
         </Pressable>
       </View>
       {!isNew && (

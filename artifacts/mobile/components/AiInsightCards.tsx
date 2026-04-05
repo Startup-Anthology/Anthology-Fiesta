@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Layout from "@/constants/layout";
+import { showAlert } from "@/lib/alert";
 import { api } from "@/lib/api";
 import { useTheme } from "@/lib/theme";
 
@@ -21,6 +22,7 @@ export default function AiInsightCards() {
   const dismissMut = useMutation({
     mutationFn: (id: number) => api.dismissAiInsight(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["aiInsights"] }),
+    onError: () => showAlert("Error", "Could not dismiss. Please try again."),
   });
 
   if (insights.length === 0) return null;

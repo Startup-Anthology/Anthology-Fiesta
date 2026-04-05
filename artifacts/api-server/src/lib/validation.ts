@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createLeadSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   source: z.string().optional(),
   status: z.string().optional(),
   notes: z.string().nullish(),
@@ -14,7 +14,7 @@ export const createLeadSchema = z.object({
 
 export const updateLeadSchema = z.object({
   name: z.string().min(1).optional(),
-  email: z.string().email().optional(),
+  email: z.string().trim().toLowerCase().email().optional(),
   source: z.string().optional(),
   status: z.string().optional(),
   notes: z.string().nullish(),
@@ -32,7 +32,7 @@ export const createContactSchema = z.object({
   priority: z.string().optional(),
   linkedinUrl: z.string().nullish(),
   profilePictureUrl: z.string().nullish(),
-  email: z.string().email().nullish(),
+  email: z.string().trim().toLowerCase().email().nullish(),
   phone: z.string().nullish(),
   notes: z.string().nullish(),
   lastContactedAt: z.coerce.date().nullish(),
@@ -48,7 +48,7 @@ export const updateContactSchema = z.object({
   priority: z.string().optional(),
   linkedinUrl: z.string().nullish(),
   profilePictureUrl: z.string().nullish(),
-  email: z.string().email().nullish(),
+  email: z.string().trim().toLowerCase().email().nullish(),
   phone: z.string().nullish(),
   notes: z.string().nullish(),
   lastContactedAt: z.coerce.date().nullish(),
@@ -96,7 +96,7 @@ export const createTriggerSchema = z.object({
 export const createActivitySchema = z.object({
   leadId: z.number().int().positive().nullish(),
   contactId: z.number().int().positive().nullish(),
-  type: z.string().min(1),
+  type: z.enum(["email", "linkedin", "note", "call", "meeting", "status_change", "ai_insight", "other"]),
   direction: z.string().nullish(),
   subject: z.string().nullish(),
   body: z.string().nullish(),
@@ -107,7 +107,7 @@ export const createActivitySchema = z.object({
 });
 
 export const updateActivitySchema = z.object({
-  type: z.string().min(1).optional(),
+  type: z.enum(["email", "linkedin", "note", "call", "meeting", "status_change", "ai_insight", "other"]).optional(),
   direction: z.string().nullish(),
   subject: z.string().nullish(),
   body: z.string().nullish(),
@@ -119,7 +119,7 @@ export const updateCalendarEventSchema = z.object({
   description: z.string().nullish(),
   startTime: z.string().min(1).optional(),
   endTime: z.string().min(1).optional(),
-  eventType: z.string().optional(),
+  eventType: z.enum(["follow-up", "meeting", "call", "reminder", "email", "other"]).optional(),
 });
 
 export const sendEmailSchema = z.object({
@@ -149,7 +149,7 @@ export const createCalendarEventSchema = z.object({
   endTime: z.string().min(1),
   leadId: z.number().int().positive().nullish(),
   contactId: z.number().int().positive().nullish(),
-  eventType: z.string().optional(),
+  eventType: z.enum(["follow-up", "meeting", "call", "reminder", "email", "other"]).optional(),
 });
 
 export const updateStatusSchema = z.object({
@@ -158,7 +158,7 @@ export const updateStatusSchema = z.object({
 
 export const horizonLeadSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   status: z.string().optional(),
   notes: z.string().nullish(),
   linkedinUrl: z.string().nullish(),
@@ -168,7 +168,7 @@ export const horizonLeadSchema = z.object({
 
 export const horizonContactSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   phone: z.string().nullish(),
   company: z.string().nullish(),
   message: z.string().nullish(),
@@ -177,7 +177,7 @@ export const horizonContactSchema = z.object({
 
 export const saContactSchema = z.object({
   name: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().trim().toLowerCase().email(),
   message: z.string().min(1),
   topic: z.enum(["demo_request", "pricing_question", "contractor_construction", "partnership", "support", "feedback", "other"]),
   company: z.string().nullish(),

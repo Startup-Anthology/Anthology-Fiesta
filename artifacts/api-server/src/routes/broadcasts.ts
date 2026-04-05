@@ -97,6 +97,7 @@ router.post("/broadcasts", async (req: Request, res: Response, next: NextFunctio
     logAudit("broadcast", broadcast.id, "create", userId, null, broadcast as Record<string, unknown>);
 
     let sentCount = 0;
+    let failedCount = 0;
     for (const recipient of recipients) {
       try {
         let emailSubject = template?.subject || subject;
@@ -141,11 +142,17 @@ router.post("/broadcasts", async (req: Request, res: Response, next: NextFunctio
         fireAndForgetActivitySync(activity);
       } catch (sendErr) {
         console.error(`Failed to send to ${recipient.email}:`, sendErr);
+        failedCount++;
       }
     }
 
+    const finalStatus =
+      sentCount === 0 ? "failed"
+        : failedCount > 0 ? "partial"
+          : "sent";
+
     const [updatedBroadcast] = await db.update(broadcastsTable).set({
-      status: "sent",
+      status: finalStatus,
       sentAt: new Date(),
       recipientCount: sentCount,
     }).where(eq(broadcastsTable.id, broadcast.id)).returning();

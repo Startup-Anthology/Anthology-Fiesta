@@ -9,6 +9,7 @@ import type OpenAI from "openai";
 
 const MAIN_MODEL = process.env.AI_MAIN_MODEL || "gpt-4o";
 const ROUTER_MODEL = process.env.AI_ROUTER_MODEL || "gpt-4o-mini";
+const AI_STREAM_TIMEOUT_MS = 30_000;
 
 type ChatCompletionMessage = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 
@@ -213,25 +214,38 @@ export async function handleForecasterProDirect(
     { role: "user", content: userMessage },
   ];
 
-  const stream = await openai.chat.completions.create({
+  const controller = new AbortController();
+  const streamTimeout = setTimeout(() => controller.abort(), AI_STREAM_TIMEOUT_MS);
+
+  const stream = await (openai.chat.completions.create as any)({
     model: MAIN_MODEL,
     max_completion_tokens: 8192,
     messages: chatMessages,
     stream: true,
     stream_options: { include_usage: true },
-  });
+  }, { signal: controller.signal });
 
   let fullResponse = "";
   let totalTokens: number | null = null;
-  for await (const chunk of stream) {
-    const content = chunk.choices[0]?.delta?.content;
-    if (content) {
-      fullResponse += content;
-      res.write(`data: ${JSON.stringify({ content })}\n\n`);
+  try {
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        fullResponse += content;
+        res.write(`data: ${JSON.stringify({ content })}\n\n`);
+      }
+      if (chunk.usage) {
+        totalTokens = chunk.usage.total_tokens;
+      }
     }
-    if (chunk.usage) {
-      totalTokens = chunk.usage.total_tokens;
+  } catch (err) {
+    if ((err as { name?: string }).name === "AbortError") {
+      res.write(`data: ${JSON.stringify({ error: "AI request timed out. Please try again." })}\n\n`);
+      return { response: fullResponse, tokens: totalTokens };
     }
+    throw err;
+  } finally {
+    clearTimeout(streamTimeout);
   }
 
   return { response: fullResponse, tokens: totalTokens };

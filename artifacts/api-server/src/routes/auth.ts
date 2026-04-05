@@ -135,7 +135,9 @@ router.post("/auth/register", registerRateLimit, async (req: Request, res: Respo
 });
 
 router.post("/auth/login", loginRateLimit, async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const rawEmail = req.body.email;
+  const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : rawEmail;
+  const { password } = req.body;
 
   if (!email || !password) {
     res.status(400).json({ error: "Email and password are required" });
@@ -149,6 +151,10 @@ router.post("/auth/login", loginRateLimit, async (req: Request, res: Response) =
       .where(eq(usersTable.email, email));
 
     if (!user) {
+      res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+    if (!user.isActive) {
       res.status(401).json({ error: "Invalid email or password" });
       return;
     }

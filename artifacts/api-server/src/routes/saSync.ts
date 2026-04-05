@@ -55,6 +55,10 @@ router.get("/sa/status", async (req: Request, res: Response) => {
 
 router.post("/sa/sync", async (req: Request, res: Response) => {
   try {
+    if (!process.env.SA_CRM_API_KEY || !process.env.SA_BASE_URL) {
+      res.status(400).json({ error: "Pull sync not configured; this environment is running in webhook-only mode." });
+      return;
+    }
     const userId = req.user!.id;
     const summary = await runSASync(userId);
 

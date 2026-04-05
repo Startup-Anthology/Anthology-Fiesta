@@ -6,8 +6,17 @@ import { startSlackDigestWorker } from "./lib/slackDigestWorker";
 import { startNotionPullWorker } from "./lib/notionPullWorker";
 import { startHorizonSyncWorker } from "./lib/horizonSyncWorker";
 import { startSASyncWorker } from "./lib/saSyncWorker";
+import { startSessionCleanupWorker } from "./lib/sessionCleanupWorker";
 import { seedAgentRegistry } from "./lib/ai/agentDefinitions";
 import { verifyModelAvailability } from "./lib/ai/orchestrator";
+
+function startWorkerSafely(name: string, start: () => void) {
+  try {
+    start();
+  } catch (err) {
+    console.error(`[worker] Failed to start ${name}:`, err);
+  }
+}
 
 const rawPort = process.env["PORT"];
 
@@ -52,10 +61,15 @@ app.listen(port, async () => {
     }
   });
 
-  startDripWorker();
-  startInsightWorker();
-  startSlackDigestWorker();
-  startNotionPullWorker();
-  startHorizonSyncWorker();
-  startSASyncWorker();
+  if (!process.env.GMAIL_WEBHOOK_AUDIENCE && !process.env.API_BASE_URL) {
+    console.warn("Gmail webhook: GMAIL_WEBHOOK_AUDIENCE/API_BASE_URL not set; webhook token verification will fail with 401.");
+  }
+
+  startWorkerSafely("drip", startDripWorker);
+  startWorkerSafely("insight", startInsightWorker);
+  startWorkerSafely("slackDigest", startSlackDigestWorker);
+  startWorkerSafely("notionPull", startNotionPullWorker);
+  startWorkerSafely("horizonSync", startHorizonSyncWorker);
+  startWorkerSafely("saSync", startSASyncWorker);
+  startWorkerSafely("sessionCleanup", startSessionCleanupWorker);
 });

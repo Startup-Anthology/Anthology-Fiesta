@@ -1,15 +1,43 @@
 import crypto from "crypto";
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, userIntegrationsTable, integrationTokensTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { db, userIntegrationsTable, integrationTokensTable, oauthStatesTable } from "@workspace/db";
+import { eq, and, lt } from "drizzle-orm";
 import { requireAuth } from "../middlewares/requireAuth";
 import { OAUTH_CONFIGS, buildAuthorizationUrl, exchangeCodeForTokens, upsertIntegration } from "../lib/integrations/oauth";
 
 const router: IRouter = Router();
 export const integrationsPublicRouter: IRouter = Router();
 
-// In-memory state store for CSRF protection (production: use Redis or DB)
-const pendingStates = new Map<string, { userId: string; provider: string; expiresAt: number }>();
+async function purgeExpiredOAuthStates(): Promise<void> {
+  await db.delete(oauthStatesTable).where(lt(oauthStatesTable.expiresAt, new Date()));
+}
+
+async function storeOAuthState(state: string, userId: string, provider: string, expiresAt: Date): Promise<void> {
+  await db.insert(oauthStatesTable).values({ state, userId, provider, expiresAt });
+}
+
+async function consumeOAuthState(state: string): Promise<{ userId: string; provider: string } | null> {
+  const [pending] = await db
+    .select({
+      state: oauthStatesTable.state,
+      userId: oauthStatesTable.userId,
+      provider: oauthStatesTable.provider,
+      expiresAt: oauthStatesTable.expiresAt,
+    })
+    .from(oauthStatesTable)
+    .where(eq(oauthStatesTable.state, state))
+    .limit(1);
+
+  if (!pending || pending.expiresAt < new Date()) {
+    if (pending) {
+      await db.delete(oauthStatesTable).where(eq(oauthStatesTable.state, state));
+    }
+    return null;
+  }
+
+  await db.delete(oauthStatesTable).where(eq(oauthStatesTable.state, state));
+  return { userId: pending.userId, provider: pending.provider };
+}
 
 function getRedirectBase(req: Request): string {
   if (process.env.API_BASE_URL) return process.env.API_BASE_URL;
@@ -67,11 +95,8 @@ router.post("/integrations/:provider/connect", requireAuth, async (req: Request,
   }
 
   const state = crypto.randomBytes(16).toString("hex");
-  pendingStates.set(state, {
-    userId,
-    provider,
-    expiresAt: Date.now() + 10 * 60 * 1000, // 10 min
-  });
+  await purgeExpiredOAuthStates();
+  await storeOAuthState(state, userId, provider, new Date(Date.now() + 10 * 60 * 1000));
 
   const authUrl = buildAuthorizationUrl(provider, config, state);
   res.json({ url: authUrl });
@@ -91,12 +116,11 @@ integrationsPublicRouter.get("/integrations/:provider/callback", async (req: Req
     return;
   }
 
-  const pending = pendingStates.get(state);
-  if (!pending || pending.expiresAt < Date.now() || pending.provider !== provider) {
+  const pending = await consumeOAuthState(state);
+  if (!pending || pending.provider !== provider) {
     res.status(400).json({ error: "Invalid or expired state" });
     return;
   }
-  pendingStates.delete(state);
 
   const { userId } = pending;
   const redirectBase = getRedirectBase(req);

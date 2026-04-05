@@ -17,6 +17,8 @@ function generateBoundary(): string {
   return "boundary_" + Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
+const MAX_GMAIL_RAW_ATTACHMENT_BYTES = 18 * 1024 * 1024;
+
 export class GmailProvider implements EmailProvider {
   private accessToken: string;
 
@@ -45,6 +47,10 @@ export class GmailProvider implements EmailProvider {
     const hasAttachments = attachments && attachments.length > 0;
 
     if (hasAttachments) {
+      const totalAttachmentBytes = attachments!.reduce((sum, att) => sum + att.content.length, 0);
+      if (totalAttachmentBytes > MAX_GMAIL_RAW_ATTACHMENT_BYTES) {
+        throw new Error("Attachments are too large. Keep combined attachment size under 18 MB.");
+      }
       const mixedBoundary = generateBoundary();
       let mime = `To: ${safeTo}\r\nSubject: ${safeSubject}\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="${mixedBoundary}"\r\n\r\n`;
 

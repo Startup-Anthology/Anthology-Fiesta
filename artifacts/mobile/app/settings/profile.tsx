@@ -45,8 +45,12 @@ export default function ProfileScreen() {
       if (result?.token) {
         await SecureStore.setItemAsync("auth_session_token", result.token);
       }
-      await refreshUser();
-      showAlert("Saved", "Profile updated.");
+      try {
+        await refreshUser();
+        showAlert("Saved", "Profile updated.");
+      } catch {
+        showAlert("Saved with warning", "Profile was saved, but we couldn't refresh your account details.");
+      }
     },
     onError: (err: Error) => showAlert("Error", err.message),
   });

@@ -41,6 +41,11 @@ async function request(path: string, options?: RequestInit) {
       credentials: "include",
       signal: controller.signal,
     });
+  } catch (err: unknown) {
+    if ((err as { name?: string }).name === "AbortError") {
+      throw new Error("Request timed out. Please try again.");
+    }
+    throw err;
   } finally {
     clearTimeout(timeout);
   }

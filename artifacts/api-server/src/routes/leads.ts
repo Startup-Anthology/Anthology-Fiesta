@@ -2,6 +2,7 @@ import { Router, type Request, type Response, type NextFunction } from "express"
 import { db } from "@workspace/db";
 import { leadsTable, triggerRulesTable, dripEnrollmentsTable, activitiesTable } from "@workspace/db";
 import { eq, sql, and } from "drizzle-orm";
+import { z } from "zod";
 import { fireAndForgetLeadSync, fireAndForgetActivitySync } from "../lib/notionSync";
 import { fireAndForgetSlackNotify } from "../lib/slackNotify";
 import { logAudit } from "../lib/audit";
@@ -14,7 +15,15 @@ const router = Router();
 router.get("/leads", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.id;
-    const { status, isBeta } = req.query;
+    const parsedQuery = z.object({
+      status: z.string().optional(),
+      isBeta: z.enum(["true", "false"]).optional(),
+    }).safeParse(req.query);
+    if (!parsedQuery.success) {
+      res.status(400).json({ error: "Invalid query parameters" });
+      return;
+    }
+    const { status, isBeta } = parsedQuery.data;
     const conditions = [eq(leadsTable.userId, userId)];
     if (status) conditions.push(eq(leadsTable.status, status as string));
     if (isBeta === "true") conditions.push(eq(leadsTable.isBeta, true));

@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
+import { ErrorState } from "@/components/ErrorState";
 import { type ThemeColors } from "@/constants/colors";
 import { useTheme } from "@/lib/theme";
 import Layout from "@/constants/layout";
@@ -48,11 +49,20 @@ export default function BroadcastNewScreen() {
       ? selectedLeadStatuses.includes(value)
       : selectedContactTypes.includes(value);
   };
-  const { data: templates = [] } = useQuery({
+  const {
+    data: templates = [],
+    isError: templatesError,
+    refetch: refetchTemplates,
+  } = useQuery({
     queryKey: ["templates"],
     queryFn: () => api.getTemplates(),
   });
-  const { data: preview, isLoading: previewLoading } = useQuery({
+  const {
+    data: preview,
+    isLoading: previewLoading,
+    isError: previewError,
+    refetch: refetchPreview,
+  } = useQuery({
     queryKey: ["broadcastPreview", selectedLeadStatuses, selectedContactTypes],
     queryFn: () => api.previewBroadcastRecipients(selectedLeadStatuses, selectedContactTypes),
     enabled: hasSelection && step >= 2,
@@ -125,13 +135,24 @@ export default function BroadcastNewScreen() {
       {step === 1 && (
         <View>
           <Text style={styles.stepTitle}>Pick a template</Text>
-          {templates.map((t: any) => (
-            <Pressable key={t.id} style={[styles.templateCard, templateId === t.id && styles.templateCardActive]} onPress={() => setTemplateId(t.id)}>
-              <Text style={[styles.templateName, templateId === t.id && { color: colors.onPrimary }]}>{t.name}</Text>
-              <Text style={[styles.templateSubject, templateId === t.id && { color: "rgba(255,255,255,0.8)" }]}>{t.subject}</Text>
-            </Pressable>
-          ))}
-          {templates.length === 0 && <Text style={styles.noTemplates}>Create a template first. You'll need one to send.</Text>}
+          {templatesError ? (
+            <ErrorState
+              message="Couldn't load templates."
+              onRetry={() => {
+                refetchTemplates();
+              }}
+            />
+          ) : (
+            <>
+              {templates.map((t: any) => (
+                <Pressable key={t.id} style={[styles.templateCard, templateId === t.id && styles.templateCardActive]} onPress={() => setTemplateId(t.id)}>
+                  <Text style={[styles.templateName, templateId === t.id && { color: colors.onPrimary }]}>{t.name}</Text>
+                  <Text style={[styles.templateSubject, templateId === t.id && { color: "rgba(255,255,255,0.8)" }]}>{t.subject}</Text>
+                </Pressable>
+              ))}
+              {templates.length === 0 && <Text style={styles.noTemplates}>Create a template first. You'll need one to send.</Text>}
+            </>
+          )}
           <Pressable
             style={[styles.nextBtn, !templateId && { opacity: 0.4 }]}
             onPress={() => templateId && setStep(2)}
@@ -150,6 +171,13 @@ export default function BroadcastNewScreen() {
           </View>
           {previewLoading ? (
             <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 20 }} />
+          ) : previewError ? (
+            <ErrorState
+              message="Couldn't load recipients."
+              onRetry={() => {
+                refetchPreview();
+              }}
+            />
           ) : (
             <>
               <Text style={styles.recipientCount}>{preview?.count || 0} recipients</Text>

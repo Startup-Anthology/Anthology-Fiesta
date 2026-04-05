@@ -76,7 +76,7 @@ export default function HistoryModal({
       <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
         <View style={styles.header}>
           <Text style={styles.title}>Change History</Text>
-          <Pressable onPress={handleClose}>
+          <Pressable onPress={handleClose} accessibilityRole="button" accessibilityLabel="Close modal">
             <Feather name="x" size={24} color={colors.text} />
           </Pressable>
         </View>

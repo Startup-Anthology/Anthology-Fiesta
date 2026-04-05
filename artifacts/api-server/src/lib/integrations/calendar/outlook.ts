@@ -28,12 +28,24 @@ export class OutlookCalendarProvider implements CalendarProvider {
     return res.json();
   }
 
+  private validateTimeRange(startTime: string, endTime: string) {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new Error("Invalid event time format");
+    }
+    if (start >= end) {
+      throw new Error("Event start time must be before end time");
+    }
+  }
+
   async createEvent(params: {
     title: string;
     description?: string;
     startTime: string;
     endTime: string;
   }): Promise<string | null> {
+    this.validateTimeRange(params.startTime, params.endTime);
     const data = await this.graphRequest("/me/events", "POST", {
       subject: params.title,
       body: { contentType: "Text", content: params.description || "" },
@@ -47,6 +59,9 @@ export class OutlookCalendarProvider implements CalendarProvider {
     eventId: string,
     params: { title?: string; description?: string; startTime?: string; endTime?: string },
   ): Promise<void> {
+    if (params.startTime && params.endTime) {
+      this.validateTimeRange(params.startTime, params.endTime);
+    }
     const body: Record<string, unknown> = {};
     if (params.title !== undefined) body.subject = params.title;
     if (params.description !== undefined) body.body = { contentType: "Text", content: params.description };

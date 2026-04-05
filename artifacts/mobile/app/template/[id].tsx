@@ -19,6 +19,17 @@ import { useTheme } from "@/lib/theme";
 import Layout from "@/constants/layout";
 import { api } from "@/lib/api";
 const AUDIENCES = ["general", "horizon_lead", "investor", "partner", "advisor"];
+const ALLOWED_MERGE_TAGS = new Set([
+  "first_name",
+  "company_name",
+  "founder_name",
+  "my_linkedin",
+  "company_linkedin",
+  "calendar_link",
+  "custom_link_1",
+  "custom_link_2",
+  "custom_link_3",
+]);
 export default function TemplateDetailScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -68,8 +79,17 @@ export default function TemplateDetailScreen() {
   });
   const save = () => {
     if (!name || !subject || !body) return;
+    const matches = body.match(/\{\{\s*([^}]+?)\s*\}\}/g) || [];
+    const invalidTags = matches
+      .map((tag) => tag.replace(/[{}]/g, "").trim())
+      .filter((tag) => !ALLOWED_MERGE_TAGS.has(tag));
+    if (invalidTags.length > 0) {
+      showAlert("Invalid merge tags", `Unsupported tags: ${Array.from(new Set(invalidTags)).join(", ")}`);
+      return;
+    }
     if (isNew) { createMut.mutate(); } else { updateMut.mutate(); }
   };
+  const isSavePending = createMut.isPending || updateMut.isPending;
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   return (
     <KeyboardAwareScrollViewCompat style={[styles.container, { paddingTop: topPad }]} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -78,8 +98,10 @@ export default function TemplateDetailScreen() {
           <Text style={styles.cancelText}>Cancel</Text>
         </Pressable>
         <Text style={styles.title}>{isNew ? "New Template" : "Edit Template"}</Text>
-        <Pressable onPress={save} disabled={!name || !subject || !body}>
-          <Text style={[styles.saveText, (!name || !subject || !body) && { opacity: 0.4 }]}>Save</Text>
+        <Pressable onPress={save} disabled={!name || !subject || !body || isSavePending}>
+          <Text style={[styles.saveText, (!name || !subject || !body || isSavePending) && { opacity: 0.4 }]}>
+            {isSavePending ? "Saving..." : "Save"}
+          </Text>
         </Pressable>
       </View>
       {!isNew && (

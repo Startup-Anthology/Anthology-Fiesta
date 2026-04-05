@@ -155,7 +155,8 @@ export default function ContactDetailScreen() {
     updateMut.mutate({ notes: editNotes });
     if (editNotes && editNotes !== oldNotes) {
       api.createActivity({ contactId, type: "note", note: editNotes })
-        .then(() => qc.invalidateQueries({ queryKey: ["activities", "contact", id] }));
+        .then(() => qc.invalidateQueries({ queryKey: ["activities", "contact", id] }))
+        .catch((err: Error) => showAlert("Activity log failed", err.message));
     }
     setEditing(false);
   }, [contact, editNotes, contactId, id, qc, updateMut]);
@@ -228,6 +229,7 @@ export default function ContactDetailScreen() {
 
   const relColor = REL_COLORS[contact.relationshipType] || colors.primary;
   const hasProfilePic = !!contact.profilePictureUrl;
+  const displayName = contact.name?.trim() || "Unnamed Contact";
 
   return (
     <KeyboardAwareScrollViewCompat style={[styles.container, { paddingTop: topPad }]} contentContainerStyle={styles.content}>
@@ -259,7 +261,7 @@ export default function ContactDetailScreen() {
             <Feather name="camera" size={12} color="#fff" />
           </View>
         </Pressable>
-        <Text style={styles.name}>{contact.name}</Text>
+        <Text style={styles.name}>{displayName}</Text>
         {contact.title && <Text style={styles.subtitle}>{contact.title}{contact.company ? ` at ${contact.company}` : ""}</Text>}
         <View style={styles.badgeRow}>
           <View style={[styles.relBadge, { backgroundColor: relColor + "15" }]}>
@@ -280,7 +282,7 @@ export default function ContactDetailScreen() {
           </Pressable>
         )}
         {contact.email && (
-          <Pressable style={styles.actionBtn} onPress={() => router.push({ pathname: "/compose-email", params: { to: contact.email, name: contact.name, contactId: String(contact.id) } })}>
+          <Pressable style={styles.actionBtn} onPress={() => router.push({ pathname: "/compose-email", params: { to: contact.email, name: displayName, contactId: String(contact.id) } })}>
             <Feather name="send" size={18} color={colors.info} />
             <Text style={styles.actionText}>Email</Text>
           </Pressable>

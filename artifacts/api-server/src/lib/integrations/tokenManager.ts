@@ -55,13 +55,19 @@ export async function getTokens(integrationId: number): Promise<TokenSet | null>
 
   if (!row) return null;
 
-  return {
-    accessToken: decryptToken(row.accessToken),
-    refreshToken: row.refreshToken ? decryptToken(row.refreshToken) : undefined,
-    expiresAt: row.expiresAt ?? undefined,
-    tokenType: row.tokenType ?? undefined,
-    scopes: row.scopes ?? undefined,
-  };
+  try {
+    return {
+      accessToken: decryptToken(row.accessToken),
+      refreshToken: row.refreshToken ? decryptToken(row.refreshToken) : undefined,
+      expiresAt: row.expiresAt ?? undefined,
+      tokenType: row.tokenType ?? undefined,
+      scopes: row.scopes ?? undefined,
+    };
+  } catch (err) {
+    console.error("Failed to decrypt integration tokens:", err);
+    await markIntegrationError(integrationId);
+    return null;
+  }
 }
 
 export async function storeTokens(integrationId: number, tokens: TokenSet): Promise<void> {
@@ -99,6 +105,13 @@ export async function markIntegrationError(integrationId: number): Promise<void>
   await db
     .update(userIntegrationsTable)
     .set({ status: "error" })
+    .where(eq(userIntegrationsTable.id, integrationId));
+}
+
+export async function markIntegrationSuccess(integrationId: number): Promise<void> {
+  await db
+    .update(userIntegrationsTable)
+    .set({ status: "active" })
     .where(eq(userIntegrationsTable.id, integrationId));
 }
 

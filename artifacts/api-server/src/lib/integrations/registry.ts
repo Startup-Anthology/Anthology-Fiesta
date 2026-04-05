@@ -1,11 +1,13 @@
 import type { EmailProvider, CalendarProvider, NotesProvider, MessagingProvider } from "./types";
-import { getIntegration, getTokens, isTokenExpiringSoon, markIntegrationError } from "./tokenManager";
+import { getIntegration, getTokens, isTokenExpiringSoon, markIntegrationError, markIntegrationSuccess } from "./tokenManager";
 import { OAUTH_CONFIGS, refreshAccessToken } from "./oauth";
 import { storeTokens } from "./tokenManager";
 
 function getRedirectBase(): string {
   return process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 8080}`;
 }
+
+const inFlightRefreshes = new Map<string, Promise<string | null>>();
 
 async function getFreshTokens(userId: string, provider: string): Promise<string | null> {
   const integration = await getIntegration(userId, provider);
@@ -15,10 +17,18 @@ async function getFreshTokens(userId: string, provider: string): Promise<string 
   if (!tokens) return null;
 
   if (isTokenExpiringSoon(tokens.expiresAt) && tokens.refreshToken) {
+    const refreshKey = `${userId}:${provider}`;
+    const refreshToken = tokens.refreshToken;
+    const existingRefresh = inFlightRefreshes.get(refreshKey);
+    if (existingRefresh) {
+      return existingRefresh;
+    }
+
+    const refreshPromise = (async () => {
     try {
       const config = OAUTH_CONFIGS[provider]?.(getRedirectBase());
       if (!config) return tokens.accessToken;
-      const refreshed = await refreshAccessToken(config, tokens.refreshToken);
+      const refreshed = await refreshAccessToken(config, refreshToken);
       await storeTokens(integration.id, {
         accessToken: refreshed.access_token,
         refreshToken: refreshed.refresh_token ?? tokens.refreshToken,
@@ -28,12 +38,18 @@ async function getFreshTokens(userId: string, provider: string): Promise<string 
         tokenType: tokens.tokenType,
         scopes: tokens.scopes,
       });
+      await markIntegrationSuccess(integration.id);
       return refreshed.access_token;
     } catch (err) {
       console.error(`Token refresh failed for ${provider}:`, err);
       await markIntegrationError(integration.id);
       return null;
+    } finally {
+      inFlightRefreshes.delete(refreshKey);
     }
+    })();
+    inFlightRefreshes.set(refreshKey, refreshPromise);
+    return refreshPromise;
   }
 
   return tokens.accessToken;

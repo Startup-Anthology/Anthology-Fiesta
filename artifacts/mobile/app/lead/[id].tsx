@@ -151,7 +151,8 @@ export default function LeadDetailScreen() {
     updateMut.mutate({ notes: editNotes });
     if (editNotes && editNotes !== oldNotes) {
       api.createActivity({ leadId, type: "note", note: editNotes })
-        .then(() => qc.invalidateQueries({ queryKey: ["activities", "lead", id] }));
+        .then(() => qc.invalidateQueries({ queryKey: ["activities", "lead", id] }))
+        .catch((err: Error) => showAlert("Activity log failed", err.message));
     }
     setEditing(false);
   }, [lead, editNotes, leadId, id, qc, updateMut]);
@@ -218,6 +219,7 @@ export default function LeadDetailScreen() {
   }
 
   const hasProfilePic = !!lead.profilePictureUrl;
+  const displayName = lead.name?.trim() || "Unnamed Lead";
 
   return (
     <KeyboardAwareScrollViewCompat style={[styles.container, { paddingTop: topPad }]} contentContainerStyle={styles.content}>
@@ -249,7 +251,7 @@ export default function LeadDetailScreen() {
             <Feather name="camera" size={12} color="#fff" />
           </View>
         </Pressable>
-        <Text style={styles.name}>{lead.name}</Text>
+        <Text style={styles.name}>{displayName}</Text>
         <Text style={styles.email}>{lead.email}</Text>
         <View style={styles.badgeRow}>
           <View style={[styles.statusBadge, { backgroundColor: (STATUS_COLORS[lead.status] || colors.textSecondary) + "20" }]}>
@@ -338,7 +340,7 @@ export default function LeadDetailScreen() {
           <Feather name="mail" size={18} color={colors.primary} />
           <Text style={styles.actionText}>Email</Text>
         </Pressable>
-        <Pressable style={styles.actionBtn} onPress={() => router.push({ pathname: "/compose-email", params: { to: lead.email, name: lead.name, leadId: String(lead.id) } })}>
+        <Pressable style={styles.actionBtn} onPress={() => router.push({ pathname: "/compose-email", params: { to: lead.email, name: displayName, leadId: String(lead.id) } })}>
           <Feather name="send" size={18} color={colors.info} />
           <Text style={styles.actionText}>Compose</Text>
         </Pressable>

@@ -96,6 +96,12 @@ function extractNotionRichText(properties: any, key: string): string | null {
   return null;
 }
 
+function normalizeActivityType(rawType: string): "email" | "linkedin" | "note" | "call" | "meeting" | "status_change" | "ai_insight" | "other" {
+  const value = rawType.trim().toLowerCase().replace(/\s+/g, "_");
+  const allowed = new Set(["email", "linkedin", "note", "call", "meeting", "status_change", "ai_insight", "other"]);
+  return allowed.has(value) ? (value as "email" | "linkedin" | "note" | "call" | "meeting" | "status_change" | "ai_insight" | "other") : "other";
+}
+
 async function pullLeadsFromNotion(userId: string, databaseId: string, accessToken: string, lastSync: string | null) {
   const pages = await queryNotionDatabase(accessToken, databaseId, lastSync);
 
@@ -210,7 +216,8 @@ async function pullActivitiesFromNotion(userId: string, databaseId: string, acce
     try {
       const notionPageId = page.id;
       const props = page.properties;
-      const type = extractNotionTitle(props, "Type");
+      const rawType = extractNotionTitle(props, "Type");
+      const type = rawType ? normalizeActivityType(rawType) : "";
       if (!type) continue;
 
       const direction = extractNotionSelect(props, "Direction");

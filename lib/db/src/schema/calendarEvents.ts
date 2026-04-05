@@ -1,16 +1,25 @@
-import { index, uniqueIndex, pgTable, serial, integer, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, uniqueIndex, pgTable, pgEnum, serial, integer, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
 import { leadsTable } from "./leads";
 import { contactsTable } from "./contacts";
 
+export const calendarEventTypeEnum = pgEnum("calendar_event_type", [
+  "follow-up",
+  "meeting",
+  "call",
+  "reminder",
+  "email",
+  "other",
+]);
+
 export const calendarEventsTable = pgTable("calendar_events", {
   id: serial("id").primaryKey(),
   googleEventId: text("google_event_id"),
   leadId: integer("lead_id").references(() => leadsTable.id, { onDelete: "set null" }),
   contactId: integer("contact_id").references(() => contactsTable.id, { onDelete: "set null" }),
-  eventType: text("event_type").notNull().default("other"),
+  eventType: calendarEventTypeEnum("event_type").notNull().default("other"),
   title: text("title").notNull(),
   description: text("description"),
   startTime: timestamp("start_time", { withTimezone: true }).notNull(),

@@ -229,7 +229,7 @@ router.patch("/ai/insights/:id/dismiss", async (req: Request, res: Response, nex
 
     await db.update(aiInsightsTable)
       .set({ status: "dismissed", dismissedAt: new Date() })
-      .where(eq(aiInsightsTable.id, insightId));
+      .where(and(eq(aiInsightsTable.id, insightId), eq(aiInsightsTable.userId, userId)));
 
     res.json({ success: true });
   } catch (err) {

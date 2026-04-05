@@ -9,6 +9,13 @@ export class SlackProvider implements MessagingProvider {
     this.accessToken = accessToken;
   }
 
+  private areValidBlocks(blocks: unknown[]): boolean {
+    return blocks.every((block) => {
+      if (!block || typeof block !== "object") return false;
+      return typeof (block as { type?: unknown }).type === "string";
+    });
+  }
+
   private async slackRequest(method: string, body?: Record<string, unknown>): Promise<any> {
     const res = await fetch(`${SLACK_API}/${method}`, {
       method: "POST",
@@ -36,7 +43,12 @@ export class SlackProvider implements MessagingProvider {
 
   async sendMessage(channelId: string, text: string, blocks?: unknown[]): Promise<string | null> {
     const body: Record<string, unknown> = { channel: channelId, text };
-    if (blocks) body.blocks = blocks;
+    if (blocks) {
+      if (!this.areValidBlocks(blocks)) {
+        throw new Error("Invalid Slack blocks payload");
+      }
+      body.blocks = blocks;
+    }
     const data = await this.slackRequest("chat.postMessage", body);
     return data?.ts ?? null;
   }

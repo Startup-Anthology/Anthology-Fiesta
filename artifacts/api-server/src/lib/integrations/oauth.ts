@@ -11,6 +11,22 @@ interface OAuthConfig {
   redirectUri: string;
 }
 
+const OAUTH_TIMEOUT_MS = 10_000;
+
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs = OAUTH_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export const OAUTH_CONFIGS: Record<string, (redirectBase: string) => OAuthConfig | null> = {
   gmail: (redirectBase) => {
     const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -143,7 +159,7 @@ export async function exchangeCodeForTokens(
     client_secret: config.clientSecret,
   });
 
-  const res = await fetch(config.tokenUrl, {
+  const res = await fetchWithTimeout(config.tokenUrl, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString(),
@@ -178,7 +194,7 @@ export async function refreshAccessToken(
     client_secret: config.clientSecret,
   });
 
-  const res = await fetch(config.tokenUrl, {
+  const res = await fetchWithTimeout(config.tokenUrl, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString(),
