@@ -280,3 +280,13 @@ CI uses Node 24, pnpm 10.26.1, `--frozen-lockfile`, with pnpm store caching.
 - Scheduled database backup CI (`/.github/workflows/backup.yml`) was failing: `DATABASE_URL` secret was not set (secrets must be added manually in repo Settings → Secrets → Actions), and `postgresql-client` apt package installs PG16 which `pg_dump` rejects against a Neon PG17 server
 - Fixed by installing `postgresql-client-17` explicitly and adding a Verify secrets step for a clear error message when `DATABASE_URL` is missing
 - Removed redundant `PGPASSWORD`/`DB_PASSWORD` secret — Neon connection URL embeds credentials
+
+## Pending Setup Tasks
+
+### Notion Integration (TODO)
+- Create a **public** Notion integration at [notion.so/my-integrations](https://www.notion.so/my-integrations)
+- Set OAuth redirect URI to: `https://anthology-fiesta.onrender.com/api/integrations/notion/callback`
+- Add `NOTION_CLIENT_ID` and `NOTION_CLIENT_SECRET` as environment variables on Render
+- After Render redeploys, connect Notion from the Fiesta integrations screen
+- Then configure database IDs in Fiesta settings: `notion_leads_db`, `notion_contacts_db`, `notion_activities_db`
+- Notion Leads database properties must use exact casing: `Name`, `Email`, `Status`, `Source`, `Is Beta`, `Notes`, `Files`, `Activity`
