@@ -30,29 +30,46 @@ export class NotionProvider implements NotesProvider {
     return res.json();
   }
 
+  private buildLeadProperties(lead: any): Record<string, unknown> {
+    const props: Record<string, unknown> = {
+      Name: { title: [{ text: { content: lead.name } }] },
+      Email: { email: lead.email },
+      Status: { select: { name: lead.status } },
+      Source: { select: { name: lead.source } },
+      "Is Beta": { checkbox: lead.isBeta },
+    };
+
+    if (lead.notes) {
+      props.Notes = { rich_text: [{ text: { content: lead.notes.slice(0, 2000) } }] };
+    }
+
+    if (lead._activitySummary) {
+      props.Activity = { rich_text: [{ text: { content: lead._activitySummary.slice(0, 2000) } }] };
+    }
+
+    if (lead._fileUrls?.length) {
+      props.Files = {
+        files: lead._fileUrls.map((f: { name: string; url: string }) => ({
+          type: "external",
+          name: f.name,
+          external: { url: f.url },
+        })),
+      };
+    }
+
+    return props;
+  }
+
   async syncLead(lead: any, databaseId: string): Promise<string | null> {
     try {
+      const properties = this.buildLeadProperties(lead);
       if (lead.notionPageId) {
-        await this.notionRequest(`/pages/${lead.notionPageId}`, "PATCH", {
-          properties: {
-            Name: { title: [{ text: { content: lead.name } }] },
-            Email: { email: lead.email },
-            Status: { select: { name: lead.status } },
-            Source: { select: { name: lead.source } },
-            "Is Beta": { checkbox: lead.isBeta },
-          },
-        });
+        await this.notionRequest(`/pages/${lead.notionPageId}`, "PATCH", { properties });
         return lead.notionPageId;
       } else {
         const res = await this.notionRequest("/pages", "POST", {
           parent: { database_id: databaseId },
-          properties: {
-            Name: { title: [{ text: { content: lead.name } }] },
-            Email: { email: lead.email },
-            Status: { select: { name: lead.status } },
-            Source: { select: { name: lead.source } },
-            "Is Beta": { checkbox: lead.isBeta },
-          },
+          properties,
         });
         return res?.id || null;
       }
