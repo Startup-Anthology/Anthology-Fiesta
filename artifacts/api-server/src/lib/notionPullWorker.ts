@@ -110,6 +110,7 @@ async function pullLeadsFromNotion(userId: string, databaseId: string, accessTok
       const status = extractNotionSelect(props, "Status") || "new";
       const source = extractNotionSelect(props, "Source") || "notion";
       const isBeta = extractNotionCheckbox(props, "Is Beta");
+      const notes = extractNotionRichText(props, "Notes");
 
       // Find existing record by notionPageId
       const [existing] = await db
@@ -123,7 +124,7 @@ async function pullLeadsFromNotion(userId: string, databaseId: string, accessTok
         const crmUpdated = existing.updatedAt ? new Date(existing.updatedAt) : new Date(0);
         if (notionEdited > crmUpdated) {
           await db.update(leadsTable)
-            .set({ name, email: email ?? undefined, status, source, isBeta, updatedAt: new Date() })
+            .set({ name, email: email ?? undefined, status, source, isBeta, notes, updatedAt: new Date() })
             .where(and(eq(leadsTable.id, existing.id), eq(leadsTable.userId, userId)));
         }
       } else if (email) {
@@ -135,11 +136,11 @@ async function pullLeadsFromNotion(userId: string, databaseId: string, accessTok
 
         if (byEmail) {
           await db.update(leadsTable)
-            .set({ notionPageId, name, status, source, isBeta, updatedAt: new Date() })
+            .set({ notionPageId, name, status, source, isBeta, notes, updatedAt: new Date() })
             .where(and(eq(leadsTable.id, byEmail.id), eq(leadsTable.userId, userId)));
         } else {
           await db.insert(leadsTable).values({
-            name, email, status, source, isBeta, notionPageId, userId,
+            name, email, status, source, isBeta, notes, notionPageId, userId,
           });
         }
       }
