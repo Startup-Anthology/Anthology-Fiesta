@@ -287,6 +287,64 @@ export interface ErrorEnvelope {
   error: string;
 }
 
+export interface HorizonLeadPayload {
+  /** @minLength 1 */
+  name: string;
+  email: string;
+  status?: string;
+  /** @nullable */
+  notes?: string | null;
+  /** @nullable */
+  linkedinUrl?: string | null;
+  /** @nullable */
+  profilePictureUrl?: string | null;
+  isBeta?: boolean;
+}
+
+export type HorizonLeadResponseAction =
+  (typeof HorizonLeadResponseAction)[keyof typeof HorizonLeadResponseAction];
+
+export const HorizonLeadResponseAction = {
+  created: "created",
+  updated: "updated",
+} as const;
+
+export type HorizonLeadResponseLead = { [key: string]: unknown };
+
+export interface HorizonLeadResponse {
+  action: HorizonLeadResponseAction;
+  lead: HorizonLeadResponseLead;
+}
+
+export interface HorizonContactPayload {
+  /** @minLength 1 */
+  name: string;
+  email: string;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  company?: string | null;
+  /** @nullable */
+  message?: string | null;
+  /** @nullable */
+  notes?: string | null;
+}
+
+export type HorizonContactResponseAction =
+  (typeof HorizonContactResponseAction)[keyof typeof HorizonContactResponseAction];
+
+export const HorizonContactResponseAction = {
+  created: "created",
+  updated: "updated",
+} as const;
+
+export type HorizonContactResponseContact = { [key: string]: unknown };
+
+export interface HorizonContactResponse {
+  action: HorizonContactResponseAction;
+  contact: HorizonContactResponseContact;
+}
+
 /**
  * Opaque session token — `Bearer <sid>`.
  */
@@ -299,6 +357,18 @@ export type GetLeadsParams = {
 
 export type UpdateLeadStatusBody = {
   status: string;
+};
+
+export type ConvertLeadBody = {
+  company?: string | null;
+  phone?: string | null;
+  relationshipType?: string;
+  priority?: string;
+};
+
+export type ConvertLead200 = {
+  lead: Lead;
+  contact: Contact;
 };
 
 export type GetContactsParams = {

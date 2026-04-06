@@ -161,6 +161,52 @@ export const UpdateLeadStatusResponse = zod.object({
 });
 
 /**
+ * @summary Convert lead to contact
+ */
+export const ConvertLeadParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ConvertLeadBody = zod.object({
+  company: zod.string().nullish(),
+  phone: zod.string().nullish(),
+  relationshipType: zod.string().optional(),
+  priority: zod.string().optional(),
+});
+
+export const ConvertLeadResponse = zod.object({
+  lead: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    email: zod.string(),
+    source: zod.string(),
+    status: zod.string(),
+    notes: zod.string().nullish(),
+    isBeta: zod.boolean(),
+    notionPageId: zod.string().nullish(),
+    createdAt: zod.date(),
+    updatedAt: zod.date(),
+  }),
+  contact: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    company: zod.string().nullish(),
+    title: zod.string().nullish(),
+    relationshipType: zod.string(),
+    priority: zod.string(),
+    linkedinUrl: zod.string().nullish(),
+    email: zod.string().nullish(),
+    phone: zod.string().nullish(),
+    notes: zod.string().nullish(),
+    lastContactedAt: zod.date().nullish(),
+    nextFollowUpAt: zod.date().nullish(),
+    notionPageId: zod.string().nullish(),
+    createdAt: zod.date(),
+    updatedAt: zod.date(),
+  }),
+});
+
+/**
  * @summary List all contacts
  */
 export const GetContactsQueryParams = zod.object({
@@ -758,4 +804,49 @@ export const LogoutMobileSessionHeader = zod.object({
 
 export const LogoutMobileSessionResponse = zod.object({
   success: zod.boolean(),
+});
+
+/**
+ * Creates or updates a lead from Horizon. Secured with x-api-key header.
+ * @summary Receive a lead from Horizon
+ */
+export const HorizonLeadWebhookHeader = zod.object({
+  "x-api-key": zod.string(),
+});
+
+export const HorizonLeadWebhookBody = zod.object({
+  name: zod.string().min(1),
+  email: zod.string().email(),
+  status: zod.string().optional(),
+  notes: zod.string().nullish(),
+  linkedinUrl: zod.string().nullish(),
+  profilePictureUrl: zod.string().nullish(),
+  isBeta: zod.boolean().optional(),
+});
+
+export const HorizonLeadWebhookResponse = zod.object({
+  action: zod.enum(["created", "updated"]),
+  lead: zod.object({}).passthrough(),
+});
+
+/**
+ * Creates or updates a contact from Horizon. Secured with x-api-key header.
+ * @summary Receive a contact form submission from Horizon
+ */
+export const HorizonContactWebhookHeader = zod.object({
+  "x-api-key": zod.string(),
+});
+
+export const HorizonContactWebhookBody = zod.object({
+  name: zod.string().min(1),
+  email: zod.string().email(),
+  phone: zod.string().nullish(),
+  company: zod.string().nullish(),
+  message: zod.string().nullish(),
+  notes: zod.string().nullish(),
+});
+
+export const HorizonContactWebhookResponse = zod.object({
+  action: zod.enum(["created", "updated"]),
+  contact: zod.object({}).passthrough(),
 });
