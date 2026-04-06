@@ -204,3 +204,10 @@ export function validate<T>(schema: z.ZodType<T>, data: unknown): T {
   }
   return result.data;
 }
+
+export const convertLeadSchema = z.object({
+  company: z.string().nullish(),
+  phone: z.string().nullish(),
+  relationshipType: z.string().optional(),
+  priority: z.string().optional(),
+});
