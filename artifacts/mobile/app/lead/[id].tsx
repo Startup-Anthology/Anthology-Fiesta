@@ -96,6 +96,16 @@ export default function LeadDetailScreen() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["leads"] }); router.back(); },
     onError: (err: Error) => showAlert("Delete failed", err.message),
   });
+  const convertMut = useMutation({
+    mutationFn: () => api.convertLead(leadId),
+    onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["contacts"] });
+      invalidateLead();
+    },
+    onError: (err: Error) => showAlert("Convert failed", err.message),
+  });
   const enrollMut = useMutation({
     mutationFn: (seqId: number) => api.enrollInSequence(seqId, { leadId }),
     onSuccess: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),
@@ -212,6 +222,13 @@ export default function LeadDetailScreen() {
       { text: "Delete", style: "destructive", onPress: () => deleteMut.mutate() },
     ]);
   }, [deleteMut]);
+
+  const handleConvert = useCallback(() => {
+    showAlert("Convert to Contact?", "This will create a contact from this lead and mark it as converted.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Convert", onPress: () => convertMut.mutate() },
+    ]);
+  }, [convertMut]);
 
   if (isLoading || !lead) {
     return <View style={[styles.center, { paddingTop: topPad }]}><ActivityIndicator size="large" color={colors.primary} /></View>;
@@ -346,6 +363,12 @@ export default function LeadDetailScreen() {
           <Feather name="linkedin" size={18} color="#0A66C2" />
           <Text style={styles.actionText}>Log LI</Text>
         </Pressable>
+        {lead.status !== "converted" && (
+          <Pressable style={styles.actionBtn} onPress={handleConvert} disabled={convertMut.isPending}>
+            <Feather name="user-check" size={18} color={colors.success} />
+            <Text style={styles.actionText}>{convertMut.isPending ? "..." : "Convert"}</Text>
+          </Pressable>
+        )}
       </View>
 
       {sequences.length > 0 && (

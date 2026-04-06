@@ -199,6 +199,8 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
+  convertLead: (id: number, data?: { company?: string | null; phone?: string | null; relationshipType?: string; priority?: string }) =>
+    request(`/leads/${id}/convert`, { method: "POST", body: JSON.stringify(data ?? {}) }),
 
   getContacts: (params?: { relationshipType?: string; priority?: string }) => {
     const sp = new URLSearchParams();

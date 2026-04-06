@@ -1,13 +1,13 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
 import { db } from "@workspace/db";
-import { leadsTable, triggerRulesTable, dripEnrollmentsTable, activitiesTable } from "@workspace/db";
+import { leadsTable, triggerRulesTable, dripEnrollmentsTable, activitiesTable, contactsTable } from "@workspace/db";
 import { eq, sql, and } from "drizzle-orm";
-import { fireAndForgetLeadSync, fireAndForgetActivitySync } from "../lib/notionSync";
+import { fireAndForgetLeadSync, fireAndForgetActivitySync, fireAndForgetContactSync } from "../lib/notionSync";
 import { fireAndForgetSlackNotify } from "../lib/slackNotify";
 import { logAudit } from "../lib/audit";
 import { parseIntParam } from "../lib/errors";
 import { findOwned } from "../lib/crud";
-import { validate, createLeadSchema, updateLeadSchema, updateStatusSchema } from "../lib/validation";
+import { validate, createLeadSchema, updateLeadSchema, updateStatusSchema, convertLeadSchema } from "../lib/validation";
 
 const router = Router();
 
@@ -113,6 +113,61 @@ router.patch("/leads/:id/status", async (req: Request, res: Response, next: Next
     }
 
     res.json(lead);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/leads/:id/convert", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user!.id;
+    const leadId = parseIntParam(req.params.id);
+    const body = validate(convertLeadSchema, req.body);
+
+    const lead = await findOwned(leadsTable, leadId, userId);
+
+    if ((lead.status as string) === "converted") {
+      res.status(409).json({ error: "Lead already converted" });
+      return;
+    }
+
+    const [existingContact] = await db
+      .select()
+      .from(contactsTable)
+      .where(and(eq(contactsTable.email, lead.email as string), eq(contactsTable.userId, userId)))
+      .limit(1);
+
+    if (existingContact) {
+      res.status(409).json({ error: "Contact already exists for this email" });
+      return;
+    }
+
+    const [contact] = await db
+      .insert(contactsTable)
+      .values({
+        name: lead.name as string,
+        email: lead.email as string,
+        notes: (lead.notes as string | null) ?? null,
+        userId,
+        relationshipType: body.relationshipType ?? "customer",
+        priority: body.priority ?? "medium",
+        company: body.company ?? null,
+        phone: body.phone ?? null,
+      })
+      .returning();
+
+    const [updatedLead] = await db
+      .update(leadsTable)
+      .set({ status: "converted", updatedAt: new Date() })
+      .where(and(eq(leadsTable.id, leadId), eq(leadsTable.userId, userId)))
+      .returning();
+
+    logAudit("lead", leadId, "update", userId, lead as Record<string, unknown>, updatedLead as Record<string, unknown>);
+    logAudit("contact", contact.id, "create", userId, null, contact as Record<string, unknown>);
+    fireAndForgetContactSync(contact);
+    fireAndForgetLeadSync(updatedLead);
+
+    res.json({ lead: updatedLead, contact });
   } catch (err) {
     next(err);
   }

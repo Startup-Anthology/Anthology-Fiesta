@@ -1,7 +1,7 @@
 import { db } from "@workspace/db";
-import { leadsTable, contactsTable, usersTable } from "@workspace/db";
+import { leadsTable, usersTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
-import { fireAndForgetLeadSync, fireAndForgetContactSync } from "./notionSync";
+import { fireAndForgetLeadSync } from "./notionSync";
 import { logAudit } from "./audit";
 
 interface SASubmission {
@@ -20,7 +20,6 @@ interface SASubmission {
 
 interface SyncSummary {
   leads: { created: number; updated: number; errors: string[] };
-  contacts: { created: number; updated: number; errors: string[] };
 }
 
 function getSAConfig() {
@@ -63,42 +62,42 @@ export async function fetchSAContacts(since?: string): Promise<SASubmission[]> {
   return res.json() as Promise<SASubmission[]>;
 }
 
-async function getDefaultUserId(): Promise<string | null> {
+async function getDefaultUserId(): Promise<string> {
   const configured = process.env.SA_DEFAULT_USER_ID;
-  if (configured) {
-    const [user] = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(eq(usersTable.id, configured))
-      .limit(1);
-    return user?.id ?? null;
+  if (!configured) {
+    throw new Error(
+      "SA_DEFAULT_USER_ID is not configured. Set this env var to the UUID of the Fiesta user who owns SA inbound leads."
+    );
   }
-  const [first] = await db
+  const [user] = await db
     .select({ id: usersTable.id })
     .from(usersTable)
-    .where(eq(usersTable.isActive, true))
+    .where(eq(usersTable.id, configured))
     .limit(1);
-  return first?.id ?? null;
+  if (!user) {
+    throw new Error(`SA_DEFAULT_USER_ID user not found: ${configured}`);
+  }
+  return user.id;
 }
 
-function topicLabel(topic: string): string {
+export function topicLabel(topic: string): string {
   return topic.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function buildLeadNotes(sub: SASubmission): string {
+export function buildLeadNotes(sub: SASubmission, existingNotes?: string | null): string {
   const parts: string[] = [`[Topic: ${topicLabel(sub.topic)}]`];
   if (sub.company) parts.push(`Company: ${sub.company}`);
   if (sub.phone) parts.push(`Phone: ${sub.phone}`);
   if (sub.leadScore != null) parts.push(`Lead Score: ${sub.leadScore}/100`);
   parts.push("", sub.message);
-  return parts.join("\n");
+  const newNotes = parts.join("\n");
+  if (existingNotes) {
+    return `${newNotes}\n\n---\n\n${existingNotes}`;
+  }
+  return newNotes;
 }
 
-function buildContactNotes(sub: SASubmission): string {
-  return [`[Topic: ${topicLabel(sub.topic)}]`, "", sub.message].join("\n");
-}
-
-function mapTopicToStatus(topic: string): string {
+export function mapTopicToStatus(topic: string): string {
   if (topic === "demo_request" || topic === "partnership") return "qualified";
   return "new";
 }
@@ -108,7 +107,6 @@ export async function upsertSALeads(
   assignToUserId?: string,
 ): Promise<{ created: number; updated: number; errors: string[] }> {
   const userId = assignToUserId || await getDefaultUserId();
-  if (!userId) throw new Error("No active user found to assign leads");
 
   let created = 0;
   let updated = 0;
@@ -121,13 +119,13 @@ export async function upsertSALeads(
         continue;
       }
 
-      const notes = buildLeadNotes(sub);
-
       const [existing] = await db
         .select()
         .from(leadsTable)
         .where(and(eq(leadsTable.email, sub.email), eq(leadsTable.userId, userId)))
         .limit(1);
+
+      const notes = buildLeadNotes(sub, existing?.notes);
 
       if (existing) {
         const [updatedLead] = await db
@@ -162,81 +160,8 @@ export async function upsertSALeads(
   return { created, updated, errors };
 }
 
-export async function upsertSAContacts(
-  submissions: SASubmission[],
-  assignToUserId?: string,
-): Promise<{ created: number; updated: number; errors: string[] }> {
-  const userId = assignToUserId || await getDefaultUserId();
-  if (!userId) throw new Error("No active user found to assign contacts");
-
-  let created = 0;
-  let updated = 0;
-  const errors: string[] = [];
-
-  for (const sub of submissions) {
-    try {
-      if (!sub.email) {
-        errors.push(`Skipped submission ${sub.id}: no email`);
-        continue;
-      }
-
-      const notes = buildContactNotes(sub);
-      const priority = (sub.priority === "urgent" ? "high" : sub.priority) || "medium";
-
-      const [existing] = await db
-        .select()
-        .from(contactsTable)
-        .where(and(eq(contactsTable.email, sub.email), eq(contactsTable.userId, userId)))
-        .limit(1);
-
-      if (existing) {
-        const [updatedContact] = await db
-          .update(contactsTable)
-          .set({
-            name: sub.name,
-            ...(sub.company && { company: sub.company }),
-            ...(sub.phone && { phone: sub.phone }),
-            notes,
-            updatedAt: new Date(),
-          })
-          .where(and(eq(contactsTable.id, existing.id), eq(contactsTable.userId, userId)))
-          .returning();
-        logAudit("contact", existing.id, "update", userId, existing as Record<string, unknown>, updatedContact as Record<string, unknown>);
-        fireAndForgetContactSync(updatedContact);
-        updated++;
-      } else {
-        const [contact] = await db
-          .insert(contactsTable)
-          .values({
-            name: sub.name,
-            email: sub.email,
-            company: sub.company || null,
-            phone: sub.phone || null,
-            notes,
-            relationshipType: "prospect",
-            priority,
-            userId,
-          })
-          .returning();
-        logAudit("contact", contact.id, "create", userId, null, contact as Record<string, unknown>);
-        fireAndForgetContactSync(contact);
-        created++;
-      }
-    } catch (err: any) {
-      errors.push(`Submission ${sub.email || sub.id}: ${err.message}`);
-    }
-  }
-
-  return { created, updated, errors };
-}
-
 export async function runSASync(assignToUserId?: string, since?: string): Promise<SyncSummary> {
   const submissions = await fetchSAContacts(since);
-
-  const [leadsResult, contactsResult] = await Promise.all([
-    upsertSALeads(submissions, assignToUserId),
-    upsertSAContacts(submissions, assignToUserId),
-  ]);
-
-  return { leads: leadsResult, contacts: contactsResult };
+  const leads = await upsertSALeads(submissions, assignToUserId);
+  return { leads };
 }

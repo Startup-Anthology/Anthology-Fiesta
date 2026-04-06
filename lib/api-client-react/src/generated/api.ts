@@ -22,6 +22,8 @@ import type {
   Broadcast,
   CalendarEvent,
   Contact,
+  ConvertLead200,
+  ConvertLeadBody,
   CreateActivity,
   CreateBroadcast,
   CreateCalendarEvent,
@@ -48,6 +50,10 @@ import type {
   GetSettings200,
   GetTemplatesParams,
   HealthStatus,
+  HorizonContactPayload,
+  HorizonContactResponse,
+  HorizonLeadPayload,
+  HorizonLeadResponse,
   Lead,
   LogoutSuccess,
   PreviewBroadcast200,
@@ -735,6 +741,93 @@ export const useUpdateLeadStatus = <
   TContext
 > => {
   return useMutation(getUpdateLeadStatusMutationOptions(options));
+};
+
+/**
+ * @summary Convert lead to contact
+ */
+export const getConvertLeadUrl = (id: number) => {
+  return `/api/leads/${id}/convert`;
+};
+
+export const convertLead = async (
+  id: number,
+  convertLeadBody?: ConvertLeadBody,
+  options?: RequestInit,
+): Promise<ConvertLead200> => {
+  return customFetch<ConvertLead200>(getConvertLeadUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(convertLeadBody),
+  });
+};
+
+export const getConvertLeadMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof convertLead>>,
+    TError,
+    { id: number; data: BodyType<ConvertLeadBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof convertLead>>,
+  TError,
+  { id: number; data: BodyType<ConvertLeadBody> },
+  TContext
+> => {
+  const mutationKey = ["convertLead"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof convertLead>>,
+    { id: number; data: BodyType<ConvertLeadBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return convertLead(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ConvertLeadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof convertLead>>
+>;
+export type ConvertLeadMutationBody = BodyType<ConvertLeadBody>;
+export type ConvertLeadMutationError = ErrorType<void>;
+
+/**
+ * @summary Convert lead to contact
+ */
+export const useConvertLead = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof convertLead>>,
+    TError,
+    { id: number; data: BodyType<ConvertLeadBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof convertLead>>,
+  TError,
+  { id: number; data: BodyType<ConvertLeadBody> },
+  TContext
+> => {
+  return useMutation(getConvertLeadMutationOptions(options));
 };
 
 /**
@@ -3898,4 +3991,178 @@ export const useLogoutMobileSession = <
   TContext
 > => {
   return useMutation(getLogoutMobileSessionMutationOptions(options));
+};
+
+/**
+ * Creates or updates a lead from Horizon. Secured with x-api-key header.
+ * @summary Receive a lead from Horizon
+ */
+export const getHorizonLeadWebhookUrl = () => {
+  return `/api/webhooks/horizon/lead`;
+};
+
+export const horizonLeadWebhook = async (
+  horizonLeadPayload: HorizonLeadPayload,
+  options?: RequestInit,
+): Promise<HorizonLeadResponse> => {
+  return customFetch<HorizonLeadResponse>(getHorizonLeadWebhookUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(horizonLeadPayload),
+  });
+};
+
+export const getHorizonLeadWebhookMutationOptions = <
+  TError = ErrorType<ErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof horizonLeadWebhook>>,
+    TError,
+    { data: BodyType<HorizonLeadPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof horizonLeadWebhook>>,
+  TError,
+  { data: BodyType<HorizonLeadPayload> },
+  TContext
+> => {
+  const mutationKey = ["horizonLeadWebhook"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof horizonLeadWebhook>>,
+    { data: BodyType<HorizonLeadPayload> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return horizonLeadWebhook(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type HorizonLeadWebhookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof horizonLeadWebhook>>
+>;
+export type HorizonLeadWebhookMutationBody = BodyType<HorizonLeadPayload>;
+export type HorizonLeadWebhookMutationError = ErrorType<ErrorEnvelope>;
+
+/**
+ * @summary Receive a lead from Horizon
+ */
+export const useHorizonLeadWebhook = <
+  TError = ErrorType<ErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof horizonLeadWebhook>>,
+    TError,
+    { data: BodyType<HorizonLeadPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof horizonLeadWebhook>>,
+  TError,
+  { data: BodyType<HorizonLeadPayload> },
+  TContext
+> => {
+  return useMutation(getHorizonLeadWebhookMutationOptions(options));
+};
+
+/**
+ * Creates or updates a contact from Horizon. Secured with x-api-key header.
+ * @summary Receive a contact form submission from Horizon
+ */
+export const getHorizonContactWebhookUrl = () => {
+  return `/api/webhooks/horizon/contact`;
+};
+
+export const horizonContactWebhook = async (
+  horizonContactPayload: HorizonContactPayload,
+  options?: RequestInit,
+): Promise<HorizonContactResponse> => {
+  return customFetch<HorizonContactResponse>(getHorizonContactWebhookUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(horizonContactPayload),
+  });
+};
+
+export const getHorizonContactWebhookMutationOptions = <
+  TError = ErrorType<ErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof horizonContactWebhook>>,
+    TError,
+    { data: BodyType<HorizonContactPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof horizonContactWebhook>>,
+  TError,
+  { data: BodyType<HorizonContactPayload> },
+  TContext
+> => {
+  const mutationKey = ["horizonContactWebhook"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof horizonContactWebhook>>,
+    { data: BodyType<HorizonContactPayload> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return horizonContactWebhook(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type HorizonContactWebhookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof horizonContactWebhook>>
+>;
+export type HorizonContactWebhookMutationBody = BodyType<HorizonContactPayload>;
+export type HorizonContactWebhookMutationError = ErrorType<ErrorEnvelope>;
+
+/**
+ * @summary Receive a contact form submission from Horizon
+ */
+export const useHorizonContactWebhook = <
+  TError = ErrorType<ErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof horizonContactWebhook>>,
+    TError,
+    { data: BodyType<HorizonContactPayload> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof horizonContactWebhook>>,
+  TError,
+  { data: BodyType<HorizonContactPayload> },
+  TContext
+> => {
+  return useMutation(getHorizonContactWebhookMutationOptions(options));
 };
