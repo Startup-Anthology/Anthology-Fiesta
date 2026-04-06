@@ -63,20 +63,15 @@ async function runAutoSync() {
     await upsertSetting("sa_last_sync_at", now, userId);
     await upsertSetting("sa_last_sync_leads_created", String(summary.leads.created), userId);
     await upsertSetting("sa_last_sync_leads_updated", String(summary.leads.updated), userId);
-    await upsertSetting("sa_last_sync_contacts_created", String(summary.contacts.created), userId);
-    await upsertSetting("sa_last_sync_contacts_updated", String(summary.contacts.updated), userId);
 
-    const totalNew = summary.leads.created + summary.contacts.created;
-    if (totalNew > 0) {
+    if (summary.leads.created > 0) {
       fireAndForgetSlackNotify(userId, "sa_sync", {
         leadsCreated: summary.leads.created,
         leadsUpdated: summary.leads.updated,
-        contactsCreated: summary.contacts.created,
-        contactsUpdated: summary.contacts.updated,
       });
     }
 
-    console.log(`SA auto-sync: ${summary.leads.created} new leads, ${summary.contacts.created} new contacts`);
+    console.log(`SA auto-sync: ${summary.leads.created} new leads, ${summary.leads.updated} updated leads`);
   } catch (err) {
     console.error("SA auto-sync error:", err);
   }

@@ -193,9 +193,9 @@ export default function FunnelScreen() {
     }
   };
   const weekAgo = useMemo(() => new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), []);
-  const filteredLeads = params.filter === "week"
+  const filteredLeads = (params.filter === "week"
     ? leads.filter((l: any) => new Date(l.createdAt) >= weekAgo)
-    : leads;
+    : leads).filter((l: any) => l.status !== "converted");
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   if (isLoading) {
     return (
